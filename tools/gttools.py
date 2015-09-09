@@ -70,92 +70,20 @@ class GtRectangleTool(QgsMapToolEmitPoint):
 
         xstep = width / nx
         ystep = height / ny
-        for a in range(1,nx):
-            for b in range(1,ny):
+        for a in range(0,nx):
+            for b in range(0,ny):
                 nxmax = xmin+a*xstep
                 nxmin = xmin+(a-1)*xstep
                 nymax = ymin+b*ystep
                 nymin = ymin+(b-1)*ystep
+                print nxmax, nxmin, nymax, nymin
                 rect  = QgsRectangle(nxmin,nymin,nxmax,nymax)
                 self.canvas.setExtent(rect)
                 self.canvas.refresh()
-                             ##setting up print composer
-                # create image
-                img = QImage(QSize(800, 600), QImage.Format_ARGB32_Premultiplied)
-
-                # set image's background color
-                color = QColor(255, 255, 255)
-                img.fill(color.rgb())
-                
-                # create painter
-                p = QPainter()
-                p.begin(img)
-                p.setRenderHint(QPainter.Antialiasing)
-                
-                render = QgsMapRenderer()
-                
-                # set layer set
-                lst = []
-                layers = self.iface.legendInterface().layers()
-                for layer in layers:
-                    lst.append(layer.id())
-                render.setExtent(rect)
-                print lst
-                render.setLayerSet(lst)
-                # set extent
-                
-                # set output size
-                render.setOutputSize(img.size(), img.logicalDpiX())
-                
-                # do the rendering
-                render.render(p)
-                
-                p.end()
                 
                 name = text+str(a)+str(b)
-                # save image
-                img.save(name+".tif","tif")
-                #mapRenderer = self.iface.mapCanvas().mapRenderer()
-                c = QgsComposition(render)
-                #c.setPlotStyle(QgsComposition.Print)
-              
-                #x, y = 0, 0
-                #w, h = c.paperWidth(), c.paperHeight()
-                #composerMap = QgsComposerMap(c, x,y,w,h)
-                #c.addItem(composerMap)
-                ##item.setComposerMap(composerMap)
-                ##item.applyDefaultSize()
-                ##c.addItem(item)
-                #dpi = 300#c.printResolution
-                #dpmm = dpi / 25.4
-                #width = int(dpmm * c.paperWidth())
-                #height = int(dpmm * c.paperHeight())
-
-                ## create output image and initialize it
-                #image = QImage(QSize(width, height), QImage.Format_ARGB32)
-                #image.setDotsPerMeterX(dpmm * 1000)
-                #image.setDotsPerMeterY(dpmm * 1000)
-                #image.fill(0)
-
-                ## render the composition
-                #imagePainter = QPainter(image)
-                #sourceArea = QRectF(0, 0, c.paperWidth(), c.paperHeight())
-                #targetArea = QRectF(0, 0, width, height)
-                #c.render(imagePainter, targetArea, sourceArea)
-                #imagePainter.end()
-
-                #image.save(name+".tif", "tif")
-                #create a world file for the image
-                #c.setWorldFileMap(composerMap)
-                #c.setGenerateWorldFile(True)
-                #wf = c.computeWorldFileParameters()
-                #with open(name+".tfw","w") as f:
-                #    f.write('%s\n' % wf[0])
-                #    f.write('%s\n' % int(wf[1]))
-                #    f.write('%s\n' % int(wf[3]))
-                #    f.write('%s\n' % wf[4])
-                #    f.write('%s\n' % wf[2])
-                #    f.write('%s\n' % wf[5])
+                self.iface.mapCanvas().saveAsImage(name+'.png')
+               
                
   def canvasMoveEvent(self, e):
       if not self.isEmittingPoint:
