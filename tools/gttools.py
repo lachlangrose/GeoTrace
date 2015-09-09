@@ -78,9 +78,15 @@ class GtRectangleTool(QgsMapToolEmitPoint):
                 nymin = ymin+(b-1)*ystep
                 print nxmax, nxmin, nymax, nymin
                 rect  = QgsRectangle(nxmin,nymin,nxmax,nymax)
-                self.canvas.setExtent(rect)
-                self.canvas.refresh()
-                
+                self.iface.mapCanvas().setExtent(rect)
+                self.iface.mapCanvas().refresh()
+                c, ok = QtGui.QInputDialog.getInt(QtGui.QInputDialog(),
+                                          'GeoTools Tile Creator',
+                                          'continuen: ',
+                                          QtGui.QLineEdit.Normal, 
+                                          5)
+                if not ok:
+                    return
                 name = text+str(a)+str(b)
                 self.iface.mapCanvas().saveAsImage(name+'.png')
                
