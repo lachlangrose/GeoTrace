@@ -70,8 +70,8 @@ class GtRectangleTool(QgsMapToolEmitPoint):
 
         xstep = width / nx
         ystep = height / ny
-        for a in range(0,nx):
-            for b in range(0,ny):
+        for a in range(0,nx+1):
+            for b in range(0,ny+1):
                 nxmax = xmin+a*xstep
                 nxmin = xmin+(a-1)*xstep
                 nymax = ymin+b*ystep
