@@ -26,9 +26,12 @@ from PyQt4.QtGui import QAction, QIcon
 import resources
 # Import the code for the dialog
 from geo_tools_dialog import GeoToolsDialog
-import os.path
-
-
+import os.path,  sys
+# Set up current path.
+currentPath = os.path.dirname( __file__ )
+sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/tools'))
+import gtmaptiles
+import gttools
 class GeoTools:
     """QGIS Plugin Implementation."""
 
@@ -67,7 +70,7 @@ class GeoTools:
         # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'GeoTools')
         self.toolbar.setObjectName(u'GeoTools')
-
+        self.canvas = self.iface.mapCanvas()
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
@@ -166,8 +169,14 @@ class GeoTools:
             text=self.tr(u'GeoTools'),
             callback=self.run,
             parent=self.iface.mainWindow())
-
-
+        self.add_action(
+            icon_path,
+            text=self.tr(u'Export Tiles within area'),
+            callback=self.rectangle,
+            parent=self.iface.mainWindow())
+        self.tool = gttools.GtRectangleTool(self.canvas)
+    def rectangle(self):
+        self.canvas.setMapTool(self.tool)
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
