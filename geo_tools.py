@@ -174,7 +174,7 @@ class GeoTools:
             text=self.tr(u'Export Tiles within area'),
             callback=self.rectangle,
             parent=self.iface.mainWindow())
-        self.tool = gttools.GtRectangleTool(self.canvas)
+        self.tool = gttools.GtRectangleTool(self.canvas,self.iface)
     def rectangle(self):
         self.canvas.setMapTool(self.tool)
     def unload(self):
