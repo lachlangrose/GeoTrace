@@ -80,15 +80,18 @@ class GtRectangleTool(QgsMapToolEmitPoint):
                 rect  = QgsRectangle(nxmin,nymin,nxmax,nymax)
                 self.iface.mapCanvas().setExtent(rect)
                 self.iface.mapCanvas().refresh()
-                c, ok = QtGui.QInputDialog.getInt(QtGui.QInputDialog(),
-                                          'GeoTools Tile Creator',
-                                          'continuen: ',
-                                          QtGui.QLineEdit.Normal, 
-                                          5)
+                #Ask user if the map has loaded
+                ok = QMessageBox.question(QtGui.QWidget(), 'GeoTools', "Has the map loaded?", 
+                        QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                #c, ok = QtGui.QInputDialog.getInt(QtGui.QInputDialog(),
+                #                          'GeoTools Tile Creator',
+                #                          'continuen: ',
+                #                          QtGui.QLineEdit.Normal, 
+                #                          5)
                 if not ok:
                     return
                 name = text+str(a)+str(b)
-                self.iface.mapCanvas().saveAsImage(name+'.png')
+                self.iface.mapCanvas().saveAsImage(name+'.tif',None,'tif')
                
                
   def canvasMoveEvent(self, e):
