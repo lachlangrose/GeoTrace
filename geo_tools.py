@@ -30,8 +30,8 @@ import os.path,  sys
 # Set up current path.
 currentPath = os.path.dirname( __file__ )
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/tools'))
-import gtmaptiles
 import gttools
+import gtlinetool
 class GeoTools:
     """QGIS Plugin Implementation."""
 
@@ -174,9 +174,19 @@ class GeoTools:
             text=self.tr(u'Export Tiles within area'),
             callback=self.rectangle,
             parent=self.iface.mainWindow())
-        self.tool = gttools.GtRectangleTool(self.canvas,self.iface)
+        self.add_action(
+            icon_path,
+            text=self.tr(u'Export Tiles within area'),
+            callback=self.line,
+            parent=self.iface.mainWindow())
+
+
+        self.recttool = gttools.GtRectangleTool(self.canvas,self.iface)
+        self.linetool = gtlinetool.GtLineTool(self.canvas,self.iface)
     def rectangle(self):
-        self.canvas.setMapTool(self.tool)
+        self.canvas.setMapTool(self.recttool)
+    def line(self):
+        self.canvas.setMapTool(self.linetool)
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
