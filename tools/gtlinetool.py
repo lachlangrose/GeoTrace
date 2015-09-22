@@ -39,14 +39,23 @@ class GtLineTool(QgsMapToolEmitPoint):
       self.addPoint(point, azimuth) 
                
   def addPoint(self,point,strike):
+      print "adding point"
+      geom = QgsGeometry.fromPoint(point)
       layer = self.canvas.currentLayer()
+      layerCRSSrsid = layer.crs().srsid()
+      renderer = self.canvas.mapRenderer()
+      projectCRSSrsid = renderer.destinationCrs().srsid()
+      if layerCRSSrsid != projectCRSSrsid:
+            geom.transform(QgsCoordinateTransform(projectCRSSrsid,
+                                                  layerCRSSrsid))
+
       provider = layer.dataProvider()
       fields = provider.fields()
       atrlist = [field.name() for field in layer.pendingFields() ]
       layer.updateFields()
       f = QgsFeature(fields)
       #f[attrName] = azimuth
-      f.setGeometry(QgsGeometry.fromPoint(point))
+      f.setGeometry(geom)
       dip, ok = QtGui.QInputDialog.getInt(QtGui.QInputDialog(),
                                                   'Dip',
                                                   'Dip: ',
@@ -72,17 +81,24 @@ class GtLineTool(QgsMapToolEmitPoint):
       elif strike > 335 and strike <= 360:
           if dip < 0:
               strike = strike -180
-      
+      print "after logic" 
+      strikein = layer.fieldNameIndex('strike')
+      dipin = layer.fieldNameIndex('dip')
       f['strike'] = strike
-
       f['dip'] = np.abs(dip)
-      # compatibility code for older versions: QGIS < 2.4
+      # this is the preferred way of adding features in QGIS >= 2.4
+      # it respects default values, suppression of attribute form, reuse of recent values etc.
+      if QGis.QGIS_VERSION_INT >= 20400:
+        if self.iface.vectorLayerTools().addFeature(layer, {strikein:strike, dipin:dip}, geom):
+            self.canvas.refresh()
+            return True
+        else:
+            return False
+
+        # compatibility code for older versions: QGIS < 2.4
       layer.beginEditCommand("Feature added")
-      layer.addFeature(f,True)
-      # let the user set some attributes
-      #if not self.iface.openFeatureForm(layer, f):
-      #  layer.destroyEditCommand()
-      #return False
+      layer.addFeature(f)
+        
       layer.endEditCommand()
          
       self.canvas.refresh()
