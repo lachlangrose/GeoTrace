@@ -32,6 +32,7 @@ currentPath = os.path.dirname( __file__ )
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/tools'))
 import gttools
 import gtlinetool
+import gtstereo
 class GeoTools:
     """QGIS Plugin Implementation."""
 
@@ -179,14 +180,22 @@ class GeoTools:
             text=self.tr(u'Export Tiles within area'),
             callback=self.line,
             parent=self.iface.mainWindow())
-
+        self.add_action(icon_path,
+            text=self.tr(u'Stereonet'),
+            callback=self.stereo,
+            parent=self.iface.mainWindow())
 
         self.recttool = gttools.GtRectangleTool(self.canvas,self.iface)
         self.linetool = gtlinetool.GtLineTool(self.canvas,self.iface)
+        
     def rectangle(self):
         self.canvas.setMapTool(self.recttool)
     def line(self):
         self.canvas.setMapTool(self.linetool)
+    def stereo(self):
+
+        self.stereo = gtstereo.GtStereo(self.canvas,self.iface)
+        self.stereo.run()
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
