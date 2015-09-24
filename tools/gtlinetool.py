@@ -59,7 +59,7 @@ class GtLineTool(QgsMapToolEmitPoint):
       self.addPoint(point, azimuth) 
                
   def addPoint(self,point,strike):
-      print "adding point"
+      print "adding point haha"
       geom = QgsGeometry.fromPoint(point)
       layer = self.canvas.currentLayer()
       layerCRSSrsid = layer.crs().srsid()
@@ -83,25 +83,26 @@ class GtLineTool(QgsMapToolEmitPoint):
                                                   -90)
       if not ok:
             return
-      if strike<0:
-          strike = 360 - np.abs(strike)
-      
-      if strike >= 0 and strike <= 45:
-          if dip < 0:
-              strike = strike + 180
-      elif strike > 45 and strike <= 135:
-          if dip < 0:
-              strike = strike + 180
-      elif strike > 135 and strike <= 225:
-          if dip > 0:
-              strike = strike + 180
-      elif strike >225 and strike <= 335:
-          if dip > 0:
-              strike = strike + 180
-      elif strike > 335 and strike <= 360:
-          if dip < 0:
-              strike = strike -180
-      print "after logic" 
+      print strike, dip
+      if strike < 0:
+          strike = 360 + strike
+      if dip < 0:
+          strike = strike + 180
+          if strike > 360:
+              strike = strike - 360
+          dip = -1*dip
+      #if strike > 0 and dip > 0:
+      #    strike = strike
+      #    dip = dip
+      #elif strike > 0 and dip < 0:
+      #    strike = strike + 180
+      #    dip = np.abs(dip)
+      #elif strike < 0 and dip > 0:
+      #    strike = 360 + strike
+      #    dip = np.abs(dip)
+      #elif strike < 0 and dip < 0:
+      #    strike = 180 + strike
+      #    dip = np.abs(dip) 
       strikein = layer.fieldNameIndex('strike')
       dipin = layer.fieldNameIndex('dip')
       f['strike'] = strike

@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***************************************************************************/
 """
 import os.path,  sys
+import numpy as np
 currentPath = os.path.dirname( __file__ )
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/../'))
 from geo_tools_dialog import GeoToolsDialog
@@ -59,10 +60,14 @@ class Window(QtGui.QDialog):
         # Just some button connected to `plot` method
         self.polesbutton = QtGui.QPushButton('Plot Poles')
         self.polesbutton.clicked.connect(self.plotpoles)
-        self.circlebutton = QtGui.QPushButton('Plot Circle')
-        self.circlebutton.clicked.connect(self.plotcircles)
+        self.circlebutton = QtGui.QPushButton('Fit Fold')
+        self.circlebutton.clicked.connect(self.fitfold)
         self.densitybutton = QtGui.QPushButton('Plot Density')
         self.densitybutton.clicked.connect(self.plotdensity)
+        self.resetbutton = QtGui.QPushButton('Clear Plot')
+        self.resetbutton.clicked.connect(self.reset)
+
+        self.figure.canvas.mpl_connect('button_press_event',self.onclick)
         # set the layout
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self.toolbar)
@@ -72,8 +77,13 @@ class Window(QtGui.QDialog):
         layout.addWidget(self.polesbutton)
         layout.addWidget(self.circlebutton)
         layout.addWidget(self.densitybutton)
+        layout.addWidget(self.resetbutton)
         self.setLayout(layout)
-
+    def onclick(self,event):
+        strike, dip = mplstereonet.stereonet_math.geographic2pole(event.xdata,event.ydata)
+        self.ax.plane(strike,dip)
+        self.canvas.draw()
+        print strike, dip
     def plotpoles(self):
         strike = []
         dip = []
@@ -81,9 +91,19 @@ class Window(QtGui.QDialog):
             dip.append(f['dip']) #self.dip_combo.currentText()])
             strike.append(f['strike'])#self.strike_combo.currentText()]) 
         self.ax.hold(False)
+        self.ax.hold(True)
         self.ax.pole(strike, dip)
-        self.ax.grid()
+        self.ax.grid(True)
         self.canvas.draw()
+    def reset(self):
+        #hack to reset graph, just plot nothing
+        strike = []
+        dip = []
+        self.ax.hold(False)
+        self.ax.plane(strike, dip)
+        self.ax.grid(True)
+        self.canvas.draw()
+
 
     def plotdensity(self):
         strike = []
@@ -113,8 +133,26 @@ class Window(QtGui.QDialog):
 
         # refresh canvas
         self.canvas.draw()
+    def fitfold(self):
+        strike = []
+        dip = []
+        for f in self.layer.selectedFeatures():
+            dip.append(f['dip']) #self.dip_combo.currentText()])
+            strike.append(f['strike'])#self.strike_combo.currentText()]) 
+        # discards the old graph
+        self.ax.hold(True)
+        fit_strike,fit_dip = mplstereonet.fit_girdle(strike,dip)
+        lon, lat = mplstereonet.pole(fit_strike, fit_dip)
+        (plunge,), (bearing,) = mplstereonet.pole2plunge_bearing(fit_strike, fit_dip)       
+        template = u'P/B of Fold Axis\n{:02.0f}\u00b0/{:03.0f}\u00b0'
+        self.ax.annotate(template.format(plunge, bearing), ha='center', va='bottom',
+            xy=(lon, lat), xytext=(-50, 20), textcoords='offset points',
+            arrowprops=dict(arrowstyle='-|>', facecolor='black'))
 
-
+        print fit_strike, fit_dip
+        self.ax.plane(fit_strike, fit_dip, color='red', lw=2)
+        self.ax.pole(fit_strike, fit_dip, marker='o', color='red', markersize=14)
+        self.canvas.draw() 
 class GtStereo():
   def __init__(self, canvas,iface):
       self.canvas = canvas
