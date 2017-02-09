@@ -33,6 +33,7 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/tools'))
 import gttools
 import gtlinetool
 import gtstereo
+import gttracetool
 class GeoTools:
     """QGIS Plugin Implementation."""
 
@@ -163,6 +164,10 @@ class GeoTools:
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
+        base_icon_path = ':/plugins/GeoTools/'
+        tile_icon_path = ':/plugins/GeoTools/tile.png'
+        stereo_icon_path = ':/plugins/GeoTools/stereo.png'
+        digitize_icon_path = ':/plugins/GeoTools/digitize.png'
 
         icon_path = ':/plugins/GeoTools/icon.png'
         self.add_action(
@@ -171,23 +176,30 @@ class GeoTools:
             callback=self.run,
             parent=self.iface.mainWindow())
         self.add_action(
-            icon_path,
+            tile_icon_path,
             text=self.tr(u'Export Tiles within area'),
             callback=self.rectangle,
             parent=self.iface.mainWindow())
         self.add_action(
-            icon_path,
-            text=self.tr(u'Export Tiles within area'),
+            digitize_icon_path,
+            text=self.tr(u'Digitize Orientation'),
             callback=self.line,
             parent=self.iface.mainWindow())
-        self.add_action(icon_path,
+        self.add_action(
+            stereo_icon_path,
             text=self.tr(u'Stereonet'),
             callback=self.stereo,
             parent=self.iface.mainWindow())
-
+        self.add_action(
+            icon_path,
+            text=self.tr(u'Trace'),
+            callback=self.trace,
+            parent=self.iface.mainWindow())
         self.recttool = gttools.GtRectangleTool(self.canvas,self.iface)
         self.linetool = gtlinetool.GtLineTool(self.canvas,self.iface)
-        
+        self.tracetool = gttracetool.GtTraceTool(self.canvas,self.iface)
+    def trace(self):
+        self.canvas.setMapTool(self.tracetool)    
     def rectangle(self):
         self.canvas.setMapTool(self.recttool)
     def line(self):
