@@ -3,12 +3,14 @@ class ShortestPath():
     def __init__(self):
         self.nodes = []
         self.path_vertex = []
+        self.c = 0
     def set_image(self,im):
         self.im = im
         self.im2 = np.zeros(self.im.shape)
         self.path = np.zeros(self.im.shape)
         self.l, self.w = im.shape
-
+    def get_visited(self):
+        return self.im2
     def add_node(self,node):
         self.nodes.append(node)
     def index_to_i_j(self,index):
@@ -16,7 +18,8 @@ class ShortestPath():
         i = (index - j) / self.w
         return i,j
     def mark_visited(self,index):
-        self.im2[self.index_to_i_j(index)] = 1
+        self.im2[self.index_to_i_j(index)] = self.c
+        self.c+=1
     def mark_path(self,index):
         self.path[self.index_to_i_j(index)] = 1
     def i_j_to_index(self,ij):
@@ -51,14 +54,14 @@ class ShortestPath():
                 indexes.append(self.i_j_to_index([i+ii,j+jj]))
         return indexes
     def find_closest_point(self,openSet,dist):
-        smallest_cost = 99999
-
-        for pair in openSet.iteritems():
-            cost = dist[pair[0]]
-            if cost < smallest_cost:
-                smallest_cost = cost
-                current = pair[0]
-        return current            
+        smallest_cost = 99999999999
+        if openSet:
+            for pair in openSet.iteritems():
+                cost = dist[pair[0]]
+                if cost < smallest_cost:
+                    smallest_cost = cost
+                    current = pair[0]
+            return current            
                 #make sure the current index isn't inaccessible
     def shortest_path(self):
         print "Running shortest path algorithm"
@@ -84,7 +87,7 @@ class ShortestPath():
             #current_d = min_element(current)
             current = self.find_closest_point(openSet,dist)
             closedSet[current] = openSet[current]
-            #self.mark_visited(current)
+            self.mark_visited(current)
             del openSet[current]
             #print current, e_idx
             if current == e_idx:
