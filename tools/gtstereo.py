@@ -28,7 +28,7 @@ from geo_tools_dialog import GeoToolsDialog
 from PyQt4 import QtGui
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
 import mplstereonet
 import random
@@ -144,7 +144,7 @@ class Window(QtGui.QDialog):
         fit_strike,fit_dip = mplstereonet.fit_girdle(strike,dip)
         lon, lat = mplstereonet.pole(fit_strike, fit_dip)
         (plunge,), (bearing,) = mplstereonet.pole2plunge_bearing(fit_strike, fit_dip)       
-        template = u'P/B of Fold Axis\n{:02.0f}\u00b0/{:03.0f}\u00b0'
+        template = u'Plunge / Direction of Fold Axis\n{:02.0f}\u00b0/{:03.0f}\u00b0'
         self.ax.annotate(template.format(plunge, bearing), ha='center', va='bottom',
             xy=(lon, lat), xytext=(-50, 20), textcoords='offset points',
             arrowprops=dict(arrowstyle='-|>', facecolor='black'))

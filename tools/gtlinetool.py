@@ -55,11 +55,12 @@ class GtLineTool(QgsMapToolEmitPoint):
       azimuth  = self.point1.azimuth(self.point2)
       newx = (self.point1.x() + self.point2.x()) /  2
       newy = (self.point1.y() + self.point2.y()) / 2
+      print self.point1.x(), self.point2.x(), self.point1.y(), self.point2.y()
+      print newx, newy
       point = QgsPoint(newx , newy)
       self.addPoint(point, azimuth) 
                
   def addPoint(self,point,strike):
-      print "adding point haha"
       geom = QgsGeometry.fromPoint(point)
       layer = self.canvas.currentLayer()
       layerCRSSrsid = layer.crs().srsid()
