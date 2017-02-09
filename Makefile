@@ -38,13 +38,13 @@ LOCALES =
 # translation
 SOURCES = \
 	__init__.py \
-	geo_tools.py geo_tools_dialog.py
+	geo_tools.py geo_tools_dialog.py tools/gtmaptiles.py tools/gtstereo.py tools/gttools.py tools/gttracetool.py tools/trace.py tools/gtlinetool.py
 
 PLUGINNAME = GeoTools
 
 PY_FILES = \
 	__init__.py \
-	geo_tools.py geo_tools_dialog.py
+	geo_tools.py geo_tools_dialog.py tools/gtmaptiles.py tools/gtstereo.py tools/gttools.py tools/gttracetool.py tools/trace.py tools/gtlinetool.py
 
 UI_FILES = geo_tools_dialog_base.ui
 

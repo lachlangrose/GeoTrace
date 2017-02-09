@@ -33,6 +33,7 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/tools'))
 import gttools
 import gtlinetool
 import gtstereo
+import gttracetool
 class GeoTools:
     """QGIS Plugin Implementation."""
 
@@ -165,29 +166,32 @@ class GeoTools:
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
         icon_path = ':/plugins/GeoTools/icon.png'
+        stereonet_icon = ':/plugins/GeoTools/stereo.png'
+        digitizing_icon = ':/plugins/GeoTools/digitizing.png'
+        tile_icon = ':/plugins/GeoTools/tiles.png'
         self.add_action(
-            icon_path,
-            text=self.tr(u'GeoTools'),
-            callback=self.run,
-            parent=self.iface.mainWindow())
-        self.add_action(
-            icon_path,
+            tile_icon,
             text=self.tr(u'Export Tiles within area'),
             callback=self.rectangle,
             parent=self.iface.mainWindow())
         self.add_action(
-            icon_path,
-            text=self.tr(u'Export Tiles within area'),
+            digitizing_icon,
+            text=self.tr(u'Digitize Orientations Measurements'),
             callback=self.line,
             parent=self.iface.mainWindow())
-        self.add_action(icon_path,
+        self.add_action(
+            stereonet_icon,
             text=self.tr(u'Stereonet'),
             callback=self.stereo,
             parent=self.iface.mainWindow())
-
+        self.add_action(
+            stereonet_icon,
+            text=self.tr(u'Trace'),
+            callback=self.trace,
+            parent=self.iface.mainWindow())
         self.recttool = gttools.GtRectangleTool(self.canvas,self.iface)
         self.linetool = gtlinetool.GtLineTool(self.canvas,self.iface)
-        
+        self.tracetool = gttracetool.GtTraceTool(self.canvas,self.iface)
     def rectangle(self):
         self.canvas.setMapTool(self.recttool)
     def line(self):
@@ -196,6 +200,8 @@ class GeoTools:
 
         self.stereo = gtstereo.GtStereo(self.canvas,self.iface)
         self.stereo.run()
+    def trace(self):
+        self.canvas.setMapTool(self.tracetool)
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:

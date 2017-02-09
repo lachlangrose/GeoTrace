@@ -27,6 +27,8 @@ from PyQt4.QtGui import *
 from qgis.core import *
 from qgis.gui import *
 from osgeo import gdal
+from osgeo.gdalnumeric import *
+from osgeo.gdalconst import *
 import numpy as np
 import time
 import trace
@@ -88,6 +90,7 @@ class GtTraceTool(QgsMapToolEmitPoint):
          vl.commitChanges()
          self.iface.setActiveLayer(vl)
          QgsMapLayerRegistry.instance().addMapLayer(vl)   
+         self.numpyToLayer(self.trace.get_visited())
          self.deactivate()
   def canvasReleaseEvent(self, e):
       self.isEmittingPoint = False
@@ -97,6 +100,20 @@ class GtTraceTool(QgsMapToolEmitPoint):
       ds = gdal.Open(filepath)
       array = np.array(ds.GetRasterBand(1).ReadAsArray())                     
       return array
+  def numpyToLayer(self,array):
+      array = np.rot90(array)
+      outFile = "out2.tiff"
+      sx, sy = array.shape
+      
+      driver = gdal.GetDriverByName("GTiff")
+      dsOut = driver.Create("/home/lgrose/out2.tiff", sx,sy)
+      bandOut=dsOut.GetRasterBand(1)
+      BandWriteArray(bandOut, array)
+      bandOut = None
+      dsOut = None
+      layer = QgsRasterLayer("/home/lgrose/out2.tiff","out2.tiff")
+      QgsMapLayerRegistry.instance().addMapLayer(layer)
+
   #def addPoint(self,point,strike):
       
   def canvasMoveEvent(self, e):
