@@ -20,8 +20,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA. 
 ***************************************************************************/
 """
-from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import QAction, QIcon
+from PyQt4.QtCore import *#QSettings, QTranslator, qVersion, QCoreApplication
+from PyQt4.QtGui import *#QAction, QIcon
 # Initialize Qt resources from file resources.py
 import resources
 # Import the code for the dialog
@@ -64,7 +64,6 @@ class GeoTools:
                 QCoreApplication.installTranslator(self.translator)
 
         # Create the dialog (after translation) and keep reference
-        self.dlg = GeoToolsDialog()
 
         # Declare instance attributes
         self.actions = []
@@ -73,6 +72,8 @@ class GeoTools:
         self.toolbar = self.iface.addToolBar(u'GeoTools')
         self.toolbar.setObjectName(u'GeoTools')
         self.canvas = self.iface.mapCanvas()
+        self.dlg = GeoToolsDialog(self.iface)
+
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
@@ -190,16 +191,22 @@ class GeoTools:
             text=self.tr(u'Stereonet'),
             callback=self.stereo,
             parent=self.iface.mainWindow())
+        
         self.add_action(
             icon_path,
-            text=self.tr(u'Trace'),
-            callback=self.trace,
+            text=self.tr(u'Trace2'),
+            callback=self.open_trace,
             parent=self.iface.mainWindow())
         self.recttool = gttools.GtRectangleTool(self.canvas,self.iface)
         self.linetool = gtlinetool.GtLineTool(self.canvas,self.iface)
-        self.tracetool = gttracetool.GtTraceTool(self.canvas,self.iface)
-    def trace(self):
-        self.canvas.setMapTool(self.tracetool)    
+    def open_trace(self):
+        trace_dockWidget = QDockWidget('qTrace', self.iface.mainWindow())
+        trace_dockWidget.setAttribute(Qt.WA_DeleteOnClose)
+        trace_dockWidget.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+        #self.qProf_QWidget = qprof_QWidget(self.canvas)
+        trace_dockWidget.setWidget(self.dlg)
+        trace_dockWidget.destroyed.connect(self.dlg.closeEvent)
+        self.iface.addDockWidget(Qt.RightDockWidgetArea, trace_dockWidget)
     def rectangle(self):
         self.canvas.setMapTool(self.recttool)
     def line(self):
