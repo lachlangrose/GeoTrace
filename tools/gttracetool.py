@@ -31,7 +31,7 @@ from osgeo.gdalnumeric import *
 from osgeo.gdalconst import *
 import numpy as np
 import time
-import trace
+import gttrace as trace
 
 
 class GtTraceTool(QgsMapToolEmitPoint):
@@ -40,11 +40,19 @@ class GtTraceTool(QgsMapToolEmitPoint):
         self.iface = iface
         self.cost = cost
         self.target = target
+        self.xmin = self.cost.extent().xMinimum()
+        self.ymin = self.cost.extent().yMinimum()
+        self.xmax = self.cost.extent().xMaximum()
+        self.ymax = self.cost.extent().yMaximum()
+        self.xsize = self.cost.rasterUnitsPerPixelX()
+        self.ysize = self.cost.rasterUnitsPerPixelY()
         QgsMapToolEmitPoint.__init__(self, self.canvas)
         self.rubberBand = QgsRubberBand(self.canvas, QGis.Point)
         self.rubberBand.setColor(Qt.red)
-        #self.rubberBand.setWidth(1)
-        self.reset()
+        self.rubberBandLine = QgsRubberBand(self.canvas,QGis.Line)
+        self.rubberBandLine.setColor(Qt.red)
+        self.rubberBandLine.setWidth(1)
+        #self.reset()
         self.trace = trace.ShortestPath()
     def reset(self):
         self.startPoint = self.endPoint = None
@@ -54,29 +62,32 @@ class GtTraceTool(QgsMapToolEmitPoint):
     def delete_control_points(self):
         self.trace.remove_control_points()
         self.rubberBand.reset(QGis.Point)
-    def add_point(self,p):
+    def addPoint(self,p):
         #self.rubberBand.reset(QGis.Line)
         self.rubberBand.addPoint(p, True)
         self.rubberBand.show()     
-    def run_trace(self,layer):
+    def runTrace(self):
+        self.rubberBandLine.reset(QGis.Line)
         self.trace.set_image(self.rasterToNumpy(self.cost)) 
-        paths = self.trace.shortest_path()
-        ltype = 'LineString'
-        inLayerCRS = layer.crs().authid()
+        self.paths = self.trace.shortest_path()
+        s = 0
+        for p in self.paths:
+            points = []
+            for c in p:
+                i = (c[0])
+                j = (c[1])
+                x_ = (float(i))*self.xsize+self.xmin
+                y_ = (float(j))*self.ysize+self.ymin
+                self.rubberBandLine.addPoint(QgsPoint(x_,y_),True,s)
+            s+=1
+    def addLine(self):
     
         vl = self.target        
         pr = vl.dataProvider()
         fields = pr.fields()
-        segment_exists = False
-        for f in fields:
-            if "segment" == f.name():
-                segment_exists = True
-        if segment_exists == False:
-            pr.addAttributes( [QgsField("segment", QVariant.Int)])
         # Enter editing mode
         vl.startEditing()
-        s = 0
-        for p in paths:
+        for p in self.paths:
             points = []
             for c in p:
                 i = (c[0])
@@ -85,27 +96,21 @@ class GtTraceTool(QgsMapToolEmitPoint):
                 y_ = (float(j))*self.ysize+self.ymin
                 points.append(QgsPoint(x_, y_))
             fet = QgsFeature(fields)
-            fet["segment"] = s
             fet.setGeometry( QgsGeometry.fromPolyline(points) )
             pr.addFeatures( [ fet ] ) 
-            s+=1
         vl.commitChanges()
         self.iface.setActiveLayer(vl)
         QgsMapLayerRegistry.instance().addMapLayer(vl)   
-        self.deactivate()
-            
+        self.rubberBandLine.reset(QGis.Line)
+        self.reset()
+        #self.deactivate()
     def canvasPressEvent(self, e):
         point = self.toMapCoordinates(e.pos())
         if type(self.cost) != QgsRasterLayer:
             print "error"
             return
         if e.button() == Qt.LeftButton:
-           self.xmin = self.cost.extent().xMinimum()
-           self.ymin = self.cost.extent().yMinimum()
-           self.xmax = self.cost.extent().xMaximum()
-           self.ymax = self.cost.extent().yMaximum()
-           self.xsize = self.cost.rasterUnitsPerPixelX()
-           self.ysize = self.cost.rasterUnitsPerPixelY()
+
            i = int((point[0] -self.xmin) / self.xsize)
            j = int(( point[1]-self.ymin) / self.ysize)
            self.rows = self.cost.height()
@@ -113,11 +118,10 @@ class GtTraceTool(QgsMapToolEmitPoint):
            j1 = j
            i1 = i
            self.trace.add_node([i1,j1])
-           print i,j,j1,i1
-           print self.rasterToNumpy(self.cost)[i1,j1]
-           self.add_point(point)
+           self.addPoint(point)
+           self.runTrace()
         if e.button() == Qt.RightButton:
-           self.run_trace(self.cost)
+           self.addLine()
     def canvasReleaseEvent(self, e):
         self.isEmittingPoint = False
         #r = self.rectangle()

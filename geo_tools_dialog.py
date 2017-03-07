@@ -23,12 +23,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 import os
 import gttracetool
-
+from gtstereo import *
 from PyQt4 import *
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
 from qgis.gui import *
+
 class GeoToolsDialog(QtGui.QDialog):
     def __init__(self, iface,parent=None):
         """Constructor."""
@@ -44,9 +45,42 @@ class GeoToolsDialog(QtGui.QDialog):
     def setup_gui(self):
         self.dialog_layout = QVBoxLayout()
         self.setLayout(self.dialog_layout)
-        self.setWindowTitle('qTrace')
+        self.setWindowTitle('GeoTools')
+        tab_layout = QTabWidget()
+        tab_layout.addTab(self.setup_trace(),"Trace")
+        tab_layout.addTab(self.setup_stereonet(),"Steronet")
+        tab_layout.addTab(self.setup_rose(),"Rose")
 
-        vector_group = QGroupBox('Select Target Layer')
+        self.dialog_layout.addWidget(tab_layout)
+        
+    def setup_stereonet(self):
+        stereo_main = Window(self.canvas,self.iface)    
+        stereo_widget = QWidget()
+        stereo_layout = QVBoxLayout()
+        stereo_group = QGroupBox("GeoTools Stereonet")
+        stereo_layout.addWidget(stereo_group)
+        stereo_layout.addWidget(stereo_main)
+        stereo_widget.setLayout(stereo_layout)
+        return stereo_widget
+    def setup_rose(self):
+        stereo_widget = QWidget()
+        stereo_layout = QVBoxLayout()
+        stereo_group = QGroupBox("GeoTools Rose Diagram")
+        stereo_layout.addWidget(stereo_group)
+        stereo_widget.setLayout(stereo_layout)
+        return stereo_widget
+    def setup_alignments(self):
+        alignments_widget = QWidget()
+        alignments_layout = QVBoxLayout()
+        alignments_group = QGroupBox("GeoTools Alignments Tools")
+        alignments_layout.addWidget(alignments_group)
+        alignments_widget.setLayout(alignments_layout)
+        return stereo_widget
+        
+    def setup_trace(self):
+        trace_widget = QWidget()
+        trace_main_layout = QVBoxLayout()
+        vector_group = QGroupBox('Output Layer')
         self.vector_layer_combo_box = QgsMapLayerComboBox()
         self.vector_layer_combo_box.setCurrentIndex(-1)
         self.vector_layer_combo_box.setFilters(QgsMapLayerProxyModel.VectorLayer)
@@ -54,29 +88,52 @@ class GeoToolsDialog(QtGui.QDialog):
         vector_layout.addWidget(self.vector_layer_combo_box)
         vector_group.setLayout(vector_layout)
         create_memory_layer = QPushButton("Create Temporary Target Layer")
-        vector_layout.addWidget(create_memory_layer)
+        save_control_points = QRadioButton("Store Control Points") 
+        self.controlpoint_layer_combo_box = QgsMapLayerComboBox()
+        self.controlpoint_layer_combo_box.setCurrentIndex(-1)
+        self.controlpoint_layer_combo_box.setFilters(QgsMapLayerProxyModel.VectorLayer)
+        self.controlpoint_layer_combo_box.setEnabled(False)
+        vector_layout.addWidget(save_control_points)
+        vector_layout.addWidget(self.controlpoint_layer_combo_box)
+        #vector_layout.addWidget(create_memory_layer)
         
 
-        cost_group = QGroupBox('Select Cost Layer')
+        cost_group = QGroupBox('Cost Layer')
+        raster_calculator_button = QPushButton('Raster Calculator')
         cost_layout = QVBoxLayout()
         self.cost_layer_combo_box = QgsMapLayerComboBox()
         self.cost_layer_combo_box.setCurrentIndex(-1)
         self.cost_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
         cost_layout.addWidget(self.cost_layer_combo_box)
+        cost_layout.addWidget(raster_calculator_button)
         cost_group.setLayout(cost_layout)
+        self.fit_plane = QRadioButton("Fit planes")
+        dem_label = QLabel("Find fracture orientation using DEM")
+        cost_layout.addWidget(dem_label)
+        cost_layout.addWidget(self.fit_plane)
+        self.dem_layer_combo_box = QgsMapLayerComboBox()
+        self.dem_layer_combo_box.setCurrentIndex(-1)
+        self.dem_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        self.dem_layer_combo_box.setEnabled(False)
+        cost_layout.addWidget(self.dem_layer_combo_box)
 
 
         trace_group = QGroupBox("Find Trace")
         trace_layout = QFormLayout()
-        run_trace_button = QPushButton("Digitize and run")
-        clear_points_button = QPushButton("Clear Points")
+        run_trace_button = QPushButton("Start Digitizing")
+        clear_points_button = QPushButton("Finish Line")
+        undo_button = QPushButton("Undo")
+
         run_trace_button.clicked.connect(self.run_trace_tool)
         trace_layout.addWidget(run_trace_button) 
         trace_layout.addWidget(clear_points_button) 
         clear_points_button.clicked.connect(self.delete_control_points)
         trace_group.setLayout(trace_layout)
+        
+        
 
-        cost_calculator_group = QGroupBox("Build Cost Layer")
+
+        cost_calculator_group = QGroupBox("Cost Calculator")
         cost_calculator_layout = QFormLayout()
         build_cost_layer_button = QPushButton("Calculate Cost Layer")
         cost_calculator_layout.addWidget(build_cost_layer_button) 
@@ -85,11 +142,12 @@ class GeoToolsDialog(QtGui.QDialog):
         raster_layer_combo_box.setCurrentIndex(-1)
         raster_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
         cost_calculator_layout.addWidget(raster_layer_combo_box)
-
-        self.dialog_layout.addWidget(vector_group)
-        self.dialog_layout.addWidget(cost_group)
-        self.dialog_layout.addWidget(trace_group)
-        self.dialog_layout.addWidget(cost_calculator_group)
+        trace_main_layout.addWidget(vector_group)
+        trace_main_layout.addWidget(cost_group)
+        trace_main_layout.addWidget(cost_calculator_group)
+        trace_main_layout.addWidget(trace_group)
+        trace_widget.setLayout(trace_main_layout)
+        return trace_widget
     def run_trace_tool(self):
         target = self.vector_layer_combo_box.currentLayer()
         cost = self.cost_layer_combo_box.currentLayer() 

@@ -171,36 +171,36 @@ class GeoTools:
         digitize_icon_path = ':/plugins/GeoTools/digitize.png'
 
         icon_path = ':/plugins/GeoTools/icon.png'
-        self.add_action(
-            icon_path,
-            text=self.tr(u'GeoTools'),
-            callback=self.run,
-            parent=self.iface.mainWindow())
-        self.add_action(
-            tile_icon_path,
-            text=self.tr(u'Export Tiles within area'),
-            callback=self.rectangle,
-            parent=self.iface.mainWindow())
-        self.add_action(
-            digitize_icon_path,
-            text=self.tr(u'Digitize Orientation'),
-            callback=self.line,
-            parent=self.iface.mainWindow())
-        self.add_action(
-            stereo_icon_path,
-            text=self.tr(u'Stereonet'),
-            callback=self.stereo,
-            parent=self.iface.mainWindow())
+        #self.add_action(
+        #    icon_path,
+        #    text=self.tr(u'GeoTools'),
+        #    callback=self.run,
+        #    parent=self.iface.mainWindow())
+        #self.add_action(
+        #    tile_icon_path,
+        #    text=self.tr(u'Export Tiles within area'),
+        #    callback=self.rectangle,
+        #    parent=self.iface.mainWindow())
+        #self.add_action(
+        #    digitize_icon_path,
+        #    text=self.tr(u'Digitize Orientation'),
+        #    callback=self.line,
+        #    parent=self.iface.mainWindow())
+        #self.add_action(
+        #    stereo_icon_path,
+        #    text=self.tr(u'Stereonet'),
+        #    callback=self.stereo,
+        #    parent=self.iface.mainWindow())
         
         self.add_action(
             icon_path,
-            text=self.tr(u'Trace2'),
+            text=self.tr(u'GeoTools'),
             callback=self.open_trace,
             parent=self.iface.mainWindow())
         self.recttool = gttools.GtRectangleTool(self.canvas,self.iface)
         self.linetool = gtlinetool.GtLineTool(self.canvas,self.iface)
     def open_trace(self):
-        trace_dockWidget = QDockWidget('qTrace', self.iface.mainWindow())
+        trace_dockWidget = QDockWidget('GeoTools', self.iface.mainWindow())
         trace_dockWidget.setAttribute(Qt.WA_DeleteOnClose)
         trace_dockWidget.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         #self.qProf_QWidget = qprof_QWidget(self.canvas)

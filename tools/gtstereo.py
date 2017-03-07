@@ -23,9 +23,12 @@ import os.path,  sys
 import numpy as np
 currentPath = os.path.dirname( __file__ )
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/../'))
-from geo_tools_dialog import GeoToolsDialog
 
-from PyQt4 import QtGui
+from PyQt4 import *
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
+from qgis.core import *
+from qgis.gui import *
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
@@ -38,8 +41,8 @@ class Window(QtGui.QDialog):
         super(Window, self).__init__(parent)
         self.canvas = canvas
         self.iface = iface
-        self.layer = self.iface.mapCanvas().currentLayer()
-        fields = self.layer.pendingFields()
+        #self.layer = self.iface.mapCanvas().currentLayer()
+        #fields = self.layer.pendingFields()
         #self.strike_combo = QtGui.QComboBox()
         #self.dip_combo = QtGui.QComboBox()
 
@@ -56,7 +59,7 @@ class Window(QtGui.QDialog):
         # this is the Navigation widget
         # it takes the Canvas widget and a parent
         self.toolbar = NavigationToolbar(self.canvas, self)
-
+        
         # Just some button connected to `plot` method
         self.polesbutton = QtGui.QPushButton('Plot Poles')
         self.polesbutton.clicked.connect(self.plotpoles)
@@ -67,9 +70,26 @@ class Window(QtGui.QDialog):
         self.resetbutton = QtGui.QPushButton('Clear Plot')
         self.resetbutton.clicked.connect(self.reset)
 
+        self.vector_layer_combo_box = QgsMapLayerComboBox()
+        self.vector_layer_combo_box.setCurrentIndex(-1)
+        self.vector_layer_combo_box.setFilters(QgsMapLayerProxyModel.VectorLayer)
+        self.dip_dir = QRadioButton("Dip Direction")
+        self.selected_features = QRadioButton("Selected Features")
+        self.strike_combo_box = QgsFieldComboBox()
+        self.dip_combo_box = QgsFieldComboBox()
+    
         self.figure.canvas.mpl_connect('button_press_event',self.onclick)
         # set the layout
         layout = QtGui.QVBoxLayout()
+
+        layout.addWidget(self.vector_layer_combo_box)
+        layout.addWidget(self.strike_combo_box)
+        layout.addWidget(self.dip_combo_box)
+        layout.addWidget(self.dip_dir)
+        layout.addWidget(self.selected_features)
+        self.vector_layer_combo_box.layerChanged.connect(self.strike_combo_box.setLayer)  # setLayer is a native slot function
+        self.vector_layer_combo_box.layerChanged.connect(self.dip_combo_box.setLayer)  # setLayer is a native slot function
+
         layout.addWidget(self.toolbar)
         layout.addWidget(self.canvas)
         #layout.addWidget(self.strike_combo)
@@ -83,13 +103,8 @@ class Window(QtGui.QDialog):
         strike, dip = mplstereonet.stereonet_math.geographic2pole(event.xdata,event.ydata)
         self.ax.plane(strike,dip)
         self.canvas.draw()
-        print strike, dip
     def plotpoles(self):
-        strike = []
-        dip = []
-        for f in self.layer.selectedFeatures():
-            dip.append(f['dip']) #self.dip_combo.currentText()])
-            strike.append(f['strike'])#self.strike_combo.currentText()]) 
+        strike, dip = self.get_strike_dip()
         self.ax.hold(False)
         self.ax.hold(True)
         self.ax.pole(strike, dip)
@@ -104,13 +119,24 @@ class Window(QtGui.QDialog):
         self.ax.grid(True)
         self.canvas.draw()
 
-
-    def plotdensity(self):
+    def get_strike_dip(self):
         strike = []
         dip = []
-        for f in self.layer.selectedFeatures():
-            dip.append(f['dip']) #self.dip_combo.currentText()])
-            strike.append(f['strike'])#self.strike_combo.currentText()]) 
+        dip_name = self.dip_combo_box.currentField()
+        strike_name = self.strike_combo_box.currentField()
+
+        features = self.vector_layer_combo_box.currentLayer().getFeatures()
+        if self.selected_features.isChecked() == True:
+            features = self.vector_layer_combo_box.currentLayer().selectedFeaturesIterator()
+        for f in features:
+            dip.append(f[dip_name]) #self.dip_combo.currentText()])
+            if self.dip_dir.isChecked() == True:
+                strike.append(f[strike_name])
+            else:
+                strike.append(f[strike_name]+90)#self.strike_combo.currentText()]) 
+        return strike, dip
+    def plotdensity(self):
+        strike, dip = self.get_strike_dip()
         # discards the old graph
         self.ax.hold(False)
         self.ax.hold(True)
@@ -122,11 +148,7 @@ class Window(QtGui.QDialog):
         self.canvas.draw()
 
     def plotcircles(self):
-        strike = []
-        dip = []
-        for f in self.layer.selectedFeatures():
-            dip.append(f['dip']) #self.dip_combo.currentText()])
-            strike.append(f['strike'])#self.strike_combo.currentText()]) 
+        strike, dip = self.get_strike_dip()
         self.ax.hold(False)
         self.ax.plane(strike, dip)
         self.ax.grid()
@@ -134,12 +156,8 @@ class Window(QtGui.QDialog):
         # refresh canvas
         self.canvas.draw()
     def fitfold(self):
-        strike = []
-        dip = []
-        for f in self.layer.selectedFeatures():
-            dip.append(f['dip']) #self.dip_combo.currentText()])
-            strike.append(f['strike'])#self.strike_combo.currentText()]) 
-        # discards the old graph
+        strike, dip = self.get_strike_dip()
+                # discards the old graph
         self.ax.hold(True)
         fit_strike,fit_dip = mplstereonet.fit_girdle(strike,dip)
         lon, lat = mplstereonet.pole(fit_strike, fit_dip)
@@ -149,7 +167,6 @@ class Window(QtGui.QDialog):
             xy=(lon, lat), xytext=(-50, 20), textcoords='offset points',
             arrowprops=dict(arrowstyle='-|>', facecolor='black'))
 
-        print fit_strike, fit_dip
         self.ax.plane(fit_strike, fit_dip, color='red', lw=2)
         self.ax.pole(fit_strike, fit_dip, marker='o', color='red', markersize=14)
         self.canvas.draw() 
