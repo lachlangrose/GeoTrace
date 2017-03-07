@@ -73,8 +73,8 @@ class Window(QtGui.QDialog):
         self.vector_layer_combo_box = QgsMapLayerComboBox()
         self.vector_layer_combo_box.setCurrentIndex(-1)
         self.vector_layer_combo_box.setFilters(QgsMapLayerProxyModel.VectorLayer)
-        self.dip_dir = QRadioButton("Dip Direction")
-        self.selected_features = QRadioButton("Selected Features")
+        self.dip_dir = QCheckBox("Dip Direction")
+        self.selected_features = QCheckBox("Selected Features")
         self.strike_combo_box = QgsFieldComboBox()
         self.dip_combo_box = QgsFieldComboBox()
     
