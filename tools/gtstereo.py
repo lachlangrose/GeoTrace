@@ -131,9 +131,9 @@ class Window(QtGui.QDialog):
         for f in features:
             dip.append(f[dip_name]) #self.dip_combo.currentText()])
             if self.dip_dir.isChecked() == True:
-                strike.append(f[strike_name])
+                strike.append(f[strike_name]+90)
             else:
-                strike.append(f[strike_name]+90)#self.strike_combo.currentText()]) 
+                strike.append(f[strike_name])#self.strike_combo.currentText()]) 
         return strike, dip
     def plotdensity(self):
         strike, dip = self.get_strike_dip()

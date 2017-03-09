@@ -29,6 +29,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
 from qgis.gui import *
+_plugin_name_ = "GeoTools"
 
 class GeoToolsDialog(QtGui.QDialog):
     def __init__(self, iface,parent=None):
@@ -52,7 +53,14 @@ class GeoToolsDialog(QtGui.QDialog):
         tab_layout.addTab(self.setup_rose(),"Rose")
 
         self.dialog_layout.addWidget(tab_layout)
-        
+    def setup_histogram(self):
+        histogram_widget = QWidget()
+        histogram_layout = QVBoxLayout()
+        histogram_group = QGroupBox("GeoTools Histogram")
+        histogram_layout.addWidget(histogram_group)
+        histogram_widget.setLayout(histogram_layout)
+        return histogram_widget
+            
     def setup_stereonet(self):
         stereo_main = Window(self.canvas,self.iface)    
         stereo_widget = QWidget()
@@ -88,12 +96,13 @@ class GeoToolsDialog(QtGui.QDialog):
         vector_layout.addWidget(self.vector_layer_combo_box)
         vector_group.setLayout(vector_layout)
         create_memory_layer = QPushButton("Create Temporary Target Layer")
-        save_control_points = QRadioButton("Store Control Points") 
+        self.save_control_points = QRadioButton("Store Control Points") 
+        self.save_control_points.toggled.connect(self.show_control_point_combo_box)
         self.controlpoint_layer_combo_box = QgsMapLayerComboBox()
         self.controlpoint_layer_combo_box.setCurrentIndex(-1)
         self.controlpoint_layer_combo_box.setFilters(QgsMapLayerProxyModel.VectorLayer)
         self.controlpoint_layer_combo_box.setEnabled(False)
-        vector_layout.addWidget(save_control_points)
+        vector_layout.addWidget(self.save_control_points)
         vector_layout.addWidget(self.controlpoint_layer_combo_box)
         #vector_layout.addWidget(create_memory_layer)
         
@@ -151,9 +160,39 @@ class GeoToolsDialog(QtGui.QDialog):
     def run_trace_tool(self):
         target = self.vector_layer_combo_box.currentLayer()
         cost = self.cost_layer_combo_box.currentLayer() 
+        if cost.bandCount() != 1:
+            self.error("Cost Raster has too many bands")
+            return
+        if target.geometryType() != QGis.Line:
+            self.error("Target has wrong geometry type")
+            return 
         self.tracetool = gttracetool.GtTraceTool(self.canvas,self.iface,target,cost)
+        if self.save_control_points.isChecked():
+            ctrl_pt = self.controlpoint_layer_combo_box.currentLayer()
+            if ctrl_pt.geometryType != QGis.Point:
+                self.error("Control points are not points!")
+                return
+            self.tracetool.setControlPoints(self.controlpoint_layer_combo_box.currentLayer())
         self.canvas.setMapTool(self.tracetool)
         #self.dialog_layout.addWidget(self.dlg.)
     def delete_control_points(self):
         if self.tracetool:
             self.tracetool.delete_control_points()
+    def show_control_point_combo_box(self):
+        if self.controlpoint_layer_combo_box:
+            if self.save_control_points.isChecked():
+                self.controlpoint_layer_combo_box.setEnabled(True)
+            if not self.save_control_points.isChecked():
+                self.controlpoint_layer_combo_box.setEnabled(False)
+
+    def info(self, msg):
+        print "Info: "+ msg
+        QMessageBox.information(self, _plugin_name_, msg)
+
+    def warn(self, msg):
+        print "Warning: "+ msg
+        QMessageBox.warning(self, _plugin_name_, msg)
+
+    def error(self, msg):
+        print "Error: "+ msg
+        QMessageBox.critical(self, _plugin_name_, msg)
