@@ -36,10 +36,16 @@ import gttrace as trace
 
 class GtTraceTool(QgsMapToolEmitPoint):
     def __init__(self, canvas,iface,target,cost):
+        #qgis layers/interface
         self.canvas = canvas
         self.iface = iface
         self.cost = cost
         self.target = target
+        #crs reprojection stuff
+        self.targetlayerCRSSrsid = self.target.crs().srsid()
+        self.costlayerCRSSrsid = self.cost.crs().srsid()
+        self.renderer = self.canvas.mapRenderer()
+        self.projectCRSSrsid = self.renderer.destinationCrs().srsid()
         self.use_control_points = False
         self.xmin = self.cost.extent().xMinimum()
         self.ymin = self.cost.extent().yMinimum()
@@ -65,6 +71,10 @@ class GtTraceTool(QgsMapToolEmitPoint):
         self.rubberBand.reset(QGis.Point)
     def addPoint(self,p):
         #self.rubberBand.reset(QGis.Line)
+        if self.costlayerCRSSrsid != self.projectCRSSrsid:
+            transform = QgsCoordinateTransform(self.costlayerCRSSrsid, 
+                                            self.projectCRSSrsid)
+            p = transform.transform(p)
         self.rubberBand.addPoint(p, True)
         self.rubberBand.show()     
     def runTrace(self):
@@ -79,7 +89,13 @@ class GtTraceTool(QgsMapToolEmitPoint):
                 j = (c[1])
                 x_ = (float(i))*self.xsize+self.xmin
                 y_ = (float(j))*self.ysize+self.ymin
-                self.rubberBandLine.addPoint(QgsPoint(x_,y_),True,s)
+                p = QgsPoint(x_,y_)
+                if self.costlayerCRSSrsid != self.projectCRSSrsid:
+                    transform = QgsCoordinateTransform(self.costlayerCRSSrsid, 
+                                            self.projectCRSSrsid)
+                    p = transform.transform(p)
+
+                self.rubberBandLine.addPoint(p,True,s)
             s+=1
     def setControlPoints(self, vector = None):
         if vector == None:
@@ -91,10 +107,7 @@ class GtTraceTool(QgsMapToolEmitPoint):
 
     def addLine(self):
 
-        targetlayerCRSSrsid = self.target.crs().srsid()
 
-        renderer = self.canvas.mapRenderer()
-        projectCRSSrsid = renderer.destinationCrs().srsid()
         if self.use_control_points:
             point_pr = self.control_points.dataProvider()
             point_fields = point_pr.fields()
@@ -107,9 +120,9 @@ class GtTraceTool(QgsMapToolEmitPoint):
                 x_ = (float(p[0]))*self.xsize+self.xmin
                 y_ = (float(p[1]))*self.ysize+self.ymin
                 geom = QgsGeometry.fromPoint(QgsPoint(x_,y_))
-                if layerCRSSrsid != projectCRSSrsid:
-                    geom.transform(QgsCoordinateTransform(projectCRSSrsid,
-                                                      layerCRSSrsid))
+                if pointlayerCRSSrsid != self.costlayerCRSSrsid:
+                    geom.transform(QgsCoordinateTransform(self.costlayerCRSSrsid,
+                                                      pointlayerCRSSrsid))
                 fet.setGeometry(geom) 
                 point_pr.addFeatures([fet])
             self.control_points.commitChanges()
@@ -128,9 +141,9 @@ class GtTraceTool(QgsMapToolEmitPoint):
                 points.append(QgsPoint(x_, y_))
             fet = QgsFeature(fields)
             geom = QgsGeometry.fromPolyline(points)
-            if targetlayerCRSSrsid != projectCRSSrsid:
-                geom.transform(QgsCoordinateTransform(projectCRSSrsid,
-                                                  targetlayerCRSSrsid))
+            if self.targetlayerCRSSrsid != self.costlayerCRSSrsid:
+                geom.transform(QgsCoordinateTransform(self.costlayerCRSSrsid,
+                                                  self.targetlayerCRSSrsid))
 
 
             fet.setGeometry( geom  )
@@ -148,16 +161,20 @@ class GtTraceTool(QgsMapToolEmitPoint):
             print "error"
             return
         if e.button() == Qt.LeftButton:
-
-           i = int((point[0] -self.xmin) / self.xsize)
-           j = int(( point[1]-self.ymin) / self.ysize)
-           self.rows = self.cost.height()
-           self.columns = self.cost.width()
-           j1 = j
-           i1 = i
-           self.trace.add_node([i1,j1])
-           self.addPoint(point)
-           self.runTrace()
+            if self.projectCRSSrsid != self.costlayerCRSSrsid:
+                transform = QgsCoordinateTransform(self.projectCRSSrsid,
+                                                  self.costlayerCRSSrsid)
+                point = transform.transform(point)
+            i = int((point[0] -self.xmin) / self.xsize)
+            j = int(( point[1]-self.ymin) / self.ysize)
+            self.rows = self.cost.height()
+            self.columns = self.cost.width()
+            j1 = j
+            i1 = i
+            print j1,i1, self.rows, self.columns
+            self.trace.add_node([i1,j1])
+            self.addPoint(point)
+            self.runTrace()
         if e.button() == Qt.RightButton:
            self.addLine()
     def canvasReleaseEvent(self, e):
