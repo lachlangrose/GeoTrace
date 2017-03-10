@@ -169,7 +169,7 @@ class GeoToolsDialog(QtGui.QDialog):
         self.tracetool = gttracetool.GtTraceTool(self.canvas,self.iface,target,cost)
         if self.save_control_points.isChecked():
             ctrl_pt = self.controlpoint_layer_combo_box.currentLayer()
-            if ctrl_pt.geometryType != QGis.Point:
+            if ctrl_pt.geometryType() != QGis.Point:
                 self.error("Control points are not points!")
                 return
             self.tracetool.setControlPoints(self.controlpoint_layer_combo_box.currentLayer())

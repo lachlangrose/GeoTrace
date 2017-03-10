@@ -40,6 +40,7 @@ class GtTraceTool(QgsMapToolEmitPoint):
         self.iface = iface
         self.cost = cost
         self.target = target
+        self.use_control_points = False
         self.xmin = self.cost.extent().xMinimum()
         self.ymin = self.cost.extent().yMinimum()
         self.xmax = self.cost.extent().xMaximum()
@@ -80,8 +81,25 @@ class GtTraceTool(QgsMapToolEmitPoint):
                 y_ = (float(j))*self.ysize+self.ymin
                 self.rubberBandLine.addPoint(QgsPoint(x_,y_),True,s)
             s+=1
+    def setControlPoints(self, vector = None):
+        if vector == None:
+            self.use_control_points = False
+            return 
+        self.use_control_points = True
+        self.control_points = vector
+        return
+
     def addLine(self):
-    
+        point_pr = self.control_points.dataProvider()
+        point_fields = point_pr.fields()
+        self.control_points.startEditing()
+        for p in self.trace.nodes:
+            fet = QgsFeature(point_fields)
+            x_ = (float(p[0]))*self.xsize+self.xmin
+            y_ = (float(p[1]))*self.ysize+self.ymin
+            fet.setGeometry(QgsGeometry.fromPoint(QgsPoint(x_,y_))) 
+            point_pr.addFeatures([fet])
+        self.control_points.commitChanges()
         vl = self.target        
         pr = vl.dataProvider()
         fields = pr.fields()
@@ -99,8 +117,8 @@ class GtTraceTool(QgsMapToolEmitPoint):
             fet.setGeometry( QgsGeometry.fromPolyline(points) )
             pr.addFeatures( [ fet ] ) 
         vl.commitChanges()
-        self.iface.setActiveLayer(vl)
-        QgsMapLayerRegistry.instance().addMapLayer(vl)   
+        #self.iface.setActiveLayer(vl)
+        #QgsMapLayerRegistry.instance().addMapLayer(vl)   
         self.rubberBandLine.reset(QGis.Line)
         self.reset()
         #self.deactivate()
