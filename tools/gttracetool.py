@@ -90,16 +90,29 @@ class GtTraceTool(QgsMapToolEmitPoint):
         return
 
     def addLine(self):
-        point_pr = self.control_points.dataProvider()
-        point_fields = point_pr.fields()
-        self.control_points.startEditing()
-        for p in self.trace.nodes:
-            fet = QgsFeature(point_fields)
-            x_ = (float(p[0]))*self.xsize+self.xmin
-            y_ = (float(p[1]))*self.ysize+self.ymin
-            fet.setGeometry(QgsGeometry.fromPoint(QgsPoint(x_,y_))) 
-            point_pr.addFeatures([fet])
-        self.control_points.commitChanges()
+
+        targetlayerCRSSrsid = self.target.crs().srsid()
+
+        renderer = self.canvas.mapRenderer()
+        projectCRSSrsid = renderer.destinationCrs().srsid()
+        if self.use_control_points:
+            point_pr = self.control_points.dataProvider()
+            point_fields = point_pr.fields()
+            self.control_points.startEditing()
+            pointlayerCRSSrsid = self.control_points.crs().srsid()
+
+            for p in self.trace.nodes:
+
+                fet = QgsFeature(point_fields)
+                x_ = (float(p[0]))*self.xsize+self.xmin
+                y_ = (float(p[1]))*self.ysize+self.ymin
+                geom = QgsGeometry.fromPoint(QgsPoint(x_,y_))
+                if layerCRSSrsid != projectCRSSrsid:
+                    geom.transform(QgsCoordinateTransform(projectCRSSrsid,
+                                                      layerCRSSrsid))
+                fet.setGeometry(geom) 
+                point_pr.addFeatures([fet])
+            self.control_points.commitChanges()
         vl = self.target        
         pr = vl.dataProvider()
         fields = pr.fields()
@@ -114,7 +127,14 @@ class GtTraceTool(QgsMapToolEmitPoint):
                 y_ = (float(j))*self.ysize+self.ymin
                 points.append(QgsPoint(x_, y_))
             fet = QgsFeature(fields)
-            fet.setGeometry( QgsGeometry.fromPolyline(points) )
+            geom = QgsGeometry.fromPolyline(points)
+            if targetlayerCRSSrsid != projectCRSSrsid:
+                geom.transform(QgsCoordinateTransform(projectCRSSrsid,
+                                                  targetlayerCRSSrsid))
+
+
+            fet.setGeometry( geom  )
+
             pr.addFeatures( [ fet ] ) 
         vl.commitChanges()
         #self.iface.setActiveLayer(vl)
