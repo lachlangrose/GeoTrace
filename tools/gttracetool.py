@@ -104,7 +104,13 @@ class GtTraceTool(QgsMapToolEmitPoint):
         self.use_control_points = True
         self.control_points = vector
         return
-
+    def setDem(self,raster= None):
+        if raster == None:
+            self.use_dem_for_planes = False
+            return
+        self.use_dem_for_planes = True
+        self.dem = raster
+        return
     def addLine(self):
 
 
@@ -136,8 +142,8 @@ class GtTraceTool(QgsMapToolEmitPoint):
             for c in p:
                 i = (c[0])
                 j = (c[1])
-                x_ = (float(i))*self.xsize+self.xmin
-                y_ = (float(j))*self.ysize+self.ymin
+                x_ = (float(i))*self.xsize+self.xmin + self.xsize*.5
+                y_ = (float(j))*self.ysize+self.ymin + self.ysize*.5
                 points.append(QgsPoint(x_, y_))
             fet = QgsFeature(fields)
             geom = QgsGeometry.fromPolyline(points)

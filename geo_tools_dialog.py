@@ -114,18 +114,19 @@ class GeoToolsDialog(QtGui.QDialog):
         self.cost_layer_combo_box.setCurrentIndex(-1)
         self.cost_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
         cost_layout.addWidget(self.cost_layer_combo_box)
-        cost_layout.addWidget(raster_calculator_button)
+        #cost_layout.addWidget(raster_calculator_button)
         cost_group.setLayout(cost_layout)
         self.fit_plane = QRadioButton("Fit planes")
         dem_label = QLabel("Find fracture orientation using DEM")
+        #TODO filter list to only show single band rasters
         cost_layout.addWidget(dem_label)
         cost_layout.addWidget(self.fit_plane)
-        self.dem_layer_combo_box = QgsMapLayerComboBox()
-        self.dem_layer_combo_box.setCurrentIndex(-1)
-        self.dem_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
-        self.dem_layer_combo_box.setEnabled(False)
-        cost_layout.addWidget(self.dem_layer_combo_box)
-
+        #self.dem_layer_combo_box = QgsMapLayerComboBox()
+        #self.dem_layer_combo_box.setCurrentIndex(-1)
+        #self.dem_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        #self.dem_layer_combo_box.setEnabled(False)
+        #cost_layout.addWidget(self.dem_layer_combo_box)
+        #self.fit_plane.toggled.connect(self.show_plane_combo_box)
 
         trace_group = QGroupBox("Find Trace")
         trace_layout = QFormLayout()
@@ -141,7 +142,7 @@ class GeoToolsDialog(QtGui.QDialog):
         
         
 
-
+        
         cost_calculator_group = QGroupBox("Cost Calculator")
         cost_calculator_layout = QFormLayout()
         build_cost_layer_button = QPushButton("Calculate Cost Layer")
@@ -153,7 +154,7 @@ class GeoToolsDialog(QtGui.QDialog):
         cost_calculator_layout.addWidget(raster_layer_combo_box)
         trace_main_layout.addWidget(vector_group)
         trace_main_layout.addWidget(cost_group)
-        trace_main_layout.addWidget(cost_calculator_group)
+        #trace_main_layout.addWidget(cost_calculator_group)
         trace_main_layout.addWidget(trace_group)
         trace_widget.setLayout(trace_main_layout)
         return trace_widget
@@ -184,7 +185,12 @@ class GeoToolsDialog(QtGui.QDialog):
                 self.controlpoint_layer_combo_box.setEnabled(True)
             if not self.save_control_points.isChecked():
                 self.controlpoint_layer_combo_box.setEnabled(False)
-
+    def show_plane_combo_box(self):
+         if self.dem_layer_combo_box:
+            if self.fit_plane.isChecked():
+                self.dem_layer_combo_box.setEnabled(True)
+            if not self.fit_plane.isChecked():
+                self.dem_layer_combo_box.setEnabled(False)
     def info(self, msg):
         print "Info: "+ msg
         QMessageBox.information(self, _plugin_name_, msg)

@@ -85,7 +85,7 @@ class ShortestPath():
 
             else:
                 continue
-            path, cost = route_through_array(im,start,end,fully_connected=True,geometric=False)
+            path, cost = route_through_array(im,start,end,fully_connected=True,geometric=True)
             paths = []
             for p in path:
                 paths.append([p[0]+xmin,p[1]+ymin])
