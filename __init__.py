@@ -21,7 +21,11 @@
  ***************************************************************************/
  This script initializes the plugin, making it known to QGIS.
 """
+import sys, os
 
+#Add tools directory to python path
+currentPath = os.path.dirname( __file__ )
+sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/tools'))
 
 # noinspection PyPep8Naming
 def classFactory(iface):  # pylint: disable=invalid-name

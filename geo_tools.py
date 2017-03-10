@@ -27,9 +27,7 @@ import resources
 # Import the code for the dialog
 from geo_tools_dialog import GeoToolsDialog
 import os.path,  sys
-# Set up current path.
-currentPath = os.path.dirname( __file__ )
-sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/tools'))
+
 import gttools
 import gtlinetool
 import gtstereo
