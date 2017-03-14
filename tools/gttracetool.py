@@ -182,6 +182,11 @@ class GtTraceTool(QgsMapToolEmitPoint):
                     py = int((y_ - dem_gt[3]) / dem_gt[5])
                     intval=dem_rb.ReadAsArray(px,py,1,1)[0][0]
                     xyz.append([x_,y_,intval])
+            M = np.array(xyz)
+            C = M.T.dot(M)
+            eigvals, eigvec = np.linalg.eig(C)
+            n = eigvec[2]
+            
             fet = QgsFeature(fields)
             geom = QgsGeometry.fromPolyline(points)
             if self.targetlayerCRSSrsid != self.costlayerCRSSrsid:
