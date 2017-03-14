@@ -121,12 +121,12 @@ class GeoToolsDialog(QtGui.QDialog):
         #TODO filter list to only show single band rasters
         cost_layout.addWidget(dem_label)
         cost_layout.addWidget(self.fit_plane)
-        #self.dem_layer_combo_box = QgsMapLayerComboBox()
-        #self.dem_layer_combo_box.setCurrentIndex(-1)
-        #self.dem_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
-        #self.dem_layer_combo_box.setEnabled(False)
-        #cost_layout.addWidget(self.dem_layer_combo_box)
-        #self.fit_plane.toggled.connect(self.show_plane_combo_box)
+        self.dem_layer_combo_box = QgsMapLayerComboBox()
+        self.dem_layer_combo_box.setCurrentIndex(-1)
+        self.dem_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        self.dem_layer_combo_box.setEnabled(False)
+        cost_layout.addWidget(self.dem_layer_combo_box)
+        self.fit_plane.toggled.connect(self.show_plane_combo_box)
 
         trace_group = QGroupBox("Find Trace")
         trace_layout = QFormLayout()
@@ -174,6 +174,13 @@ class GeoToolsDialog(QtGui.QDialog):
                 self.error("Control points are not points!")
                 return
             self.tracetool.setControlPoints(self.controlpoint_layer_combo_box.currentLayer())
+        if self.fit_plane.isChecked():
+            dem = self.dem_layer_combo_box.currentLayer()
+            if dem.bandCount() != 1:
+                self.error("DEM must be single band")
+                return
+            self.tracetool.setDem(dem)
+            self.info("Using DEM for planes")
         self.canvas.setMapTool(self.tracetool)
         #self.dialog_layout.addWidget(self.dlg.)
     def delete_control_points(self):

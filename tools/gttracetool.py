@@ -106,10 +106,36 @@ class GtTraceTool(QgsMapToolEmitPoint):
         return
     def setDem(self,raster= None):
         if raster == None:
+            print "no raster"
             self.use_dem_for_planes = False
             return
+        pr = self.target.dataProvider()
+        fields = pr.fields()
+        strike = False
+        dip = False
+        rms = False
+        attributes = []
+        for f in fields:
+            if f.name() == 'STRIKE':
+                strike = True
+            if f.name() == 'RMS':
+                rms = True
+            if f.name() == 'DIP':
+                dip = True
+        if not dip:
+            attributes.append(QgsField("DIP",QVariant.Double))
+            print "Creating DIP attribute"
+        if not strike:
+            attributes.append(QgsField("STRIKE",QVariant.Double))           
+            print "Creating STRIKE attribute"
+        if not rms:
+            attributes.append(QgsField("RMS",QVariant.Double))            
+            print "Creating RMS attribute"
+        if len(attributes) > 0:
+            pr.addAttributes(attributes)
         self.use_dem_for_planes = True
         self.dem = raster
+        self.target.updateFields()
         return
     def addLine(self):
 
@@ -137,6 +163,12 @@ class GtTraceTool(QgsMapToolEmitPoint):
         fields = pr.fields()
         # Enter editing mode
         vl.startEditing()
+        xyz = []
+        if self.use_dem_for_planes:
+            filepath = self.dem.dataProvider().dataSourceUri()
+            dem_src = gdal.Open(filepath)
+            dem_gt = dem_src.GetGeoTransform()
+            dem_rb = dem_src.GetRasterBand(1)
         for p in self.paths:
             points = []
             for c in p:
@@ -145,6 +177,11 @@ class GtTraceTool(QgsMapToolEmitPoint):
                 x_ = (float(i))*self.xsize+self.xmin + self.xsize*.5
                 y_ = (float(j))*self.ysize+self.ymin + self.ysize*.5
                 points.append(QgsPoint(x_, y_))
+                if self.use_dem_for_planes:
+                    px = int((x_ - dem_gt[0]) / dem_gt[1])
+                    py = int((y_ - dem_gt[3]) / dem_gt[5])
+                    intval=dem_rb.ReadAsArray(px,py,1,1)[0][0]
+                    xyz.append([x_,y_,intval])
             fet = QgsFeature(fields)
             geom = QgsGeometry.fromPolyline(points)
             if self.targetlayerCRSSrsid != self.costlayerCRSSrsid:
@@ -153,14 +190,14 @@ class GtTraceTool(QgsMapToolEmitPoint):
 
 
             fet.setGeometry( geom  )
-
+            if self.use_dem_for_planes:
+                fet['STRIKE']= 0.0
+                fet['DIP']= 1.0
+                fet['RMS'] = 100.0
             pr.addFeatures( [ fet ] ) 
         vl.commitChanges()
-        #self.iface.setActiveLayer(vl)
-        #QgsMapLayerRegistry.instance().addMapLayer(vl)   
         self.rubberBandLine.reset(QGis.Line)
         self.reset()
-        #self.deactivate()
     def canvasPressEvent(self, e):
         point = self.toMapCoordinates(e.pos())
         if type(self.cost) != QgsRasterLayer:
@@ -192,20 +229,6 @@ class GtTraceTool(QgsMapToolEmitPoint):
         array = np.array(ds.GetRasterBand(1).ReadAsArray())                     
         array = np.rot90(np.rot90(np.rot90(array)))
         return array
-    def numpyToLayer(self,array,name):
-        array = (np.rot90(array))
-        outFile = name+".tiff"
-        sx, sy = array.shape
-        
-        driver = gdal.GetDriverByName("GTiff")
-        dsOut = driver.Create("/home/lgrose/out2.tiff", sx,sy)
-        bandOut=dsOut.GetRasterBand(1)
-        BandWriteArray(bandOut, array)
-        bandOut = None
-        dsOut = None
-        layer = QgsRasterLayer("/home/lgrose/out2.tiff","out2.tiff")
-        QgsMapLayerRegistry.instance().addMapLayer(layer)
-    
     def deactivate(self):
         super(GtTraceTool, self).deactivate()
         self.emit(SIGNAL("deactivated()"))
