@@ -32,7 +32,7 @@ from osgeo.gdalconst import *
 import numpy as np
 import time
 import gttrace as trace
-
+import uuid
 
 class GtTraceTool(QgsMapToolEmitPoint):
     def __init__(self, canvas,iface,target,cost):
@@ -137,15 +137,33 @@ class GtTraceTool(QgsMapToolEmitPoint):
         self.dem = raster
         self.target.updateFields()
         return
+    def addField(self,fieldname,fieldtype,layer):
+        #slightly less optimised way to add a field but more compartmentalised
+        pr = layer.dataProvider()
+        fields = pr.fields()
+        strike = False
+        dip = False
+        rms = False
+        attributes = []
+        for f in fields:
+            if f.name() == fieldname:
+                return True
+        pr.addAttributes([QgsField(fieldname,fieldtype)])
+        print "Creating and adding "+fieldname+" attribute"
+        return True
     def addLine(self):
-
-
+        #if using control points add a uuid to the control point and the line
+        lineuuid = uuid.uuid1()
         if self.use_control_points:
+            #add uuid to control point layer
+            self.addField("UUID",QVariant.String,self.control_points)
+            self.addField("UUID",QVariant.String,self.target)
+
             point_pr = self.control_points.dataProvider()
             point_fields = point_pr.fields()
             self.control_points.startEditing()
             pointlayerCRSSrsid = self.control_points.crs().srsid()
-
+            
             for p in self.trace.nodes:
 
                 fet = QgsFeature(point_fields)
@@ -155,7 +173,8 @@ class GtTraceTool(QgsMapToolEmitPoint):
                 if pointlayerCRSSrsid != self.costlayerCRSSrsid:
                     geom.transform(QgsCoordinateTransform(self.costlayerCRSSrsid,
                                                       pointlayerCRSSrsid))
-                fet.setGeometry(geom) 
+                fet.setGeometry(geom)
+                fet['UUID'] = str(lineuuid)
                 point_pr.addFeatures([fet])
             self.control_points.commitChanges()
         vl = self.target        
@@ -199,6 +218,8 @@ class GtTraceTool(QgsMapToolEmitPoint):
                 fet['STRIKE']= 0.0
                 fet['DIP']= 1.0
                 fet['RMS'] = 100.0
+            if self.use_control_points:
+                fet['UUID'] = str(lineuuid)
             pr.addFeatures( [ fet ] ) 
         vl.commitChanges()
         self.rubberBandLine.reset(QGis.Line)
