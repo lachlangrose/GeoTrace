@@ -1,25 +1,33 @@
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
-GeoTools
-A geosciences toolkit for QGIS.
-Copyright (C) 2014  Lachlan Grose
+ File Name: geo_tools_dialog.py
+ Last Change: 
+/*************************************************************************** 
+ ---------------
+ GeoTools
+ ---------------
+ A QGIS plugin
+ Collection of tools for geoscience application. Some tools can be found in 
+ qCompass plugin for CloudCompare. 
+ If you are publishing any work associated with this plugin please cite
+ #TODO add citatioN!
+                             -------------------
+        begin                : 2015-01-1
+        copyright          : (C) 2015 by Lachlan Grose
+        email                : lachlan.grose@monash.edu
+ ***************************************************************************/
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA. 
-***************************************************************************/
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
 """
+
 
 import os
 import gttracetool
@@ -43,6 +51,8 @@ class GeoToolsDialog(QtGui.QDialog):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setup_gui()
+    def closeEvent(self,event):
+        return
     def setup_gui(self):
         self.dialog_layout = QVBoxLayout()
         self.setLayout(self.dialog_layout)
@@ -109,14 +119,16 @@ class GeoToolsDialog(QtGui.QDialog):
 
         cost_group = QGroupBox('Cost Layer')
         raster_calculator_button = QPushButton('Raster Calculator')
+        self.invert_cost = QCheckBox('Invert Cost')
         cost_layout = QVBoxLayout()
         self.cost_layer_combo_box = QgsMapLayerComboBox()
         self.cost_layer_combo_box.setCurrentIndex(-1)
         self.cost_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
         cost_layout.addWidget(self.cost_layer_combo_box)
+        cost_layout.addWidget(self.invert_cost)
         #cost_layout.addWidget(raster_calculator_button)
         cost_group.setLayout(cost_layout)
-        self.fit_plane = QRadioButton("Fit planes")
+        self.fit_plane = QCheckBox("Fit planes")
         dem_label = QLabel("Find fracture orientation using DEM")
         #TODO filter list to only show single band rasters
         cost_layout.addWidget(dem_label)
@@ -136,12 +148,9 @@ class GeoToolsDialog(QtGui.QDialog):
 
         run_trace_button.clicked.connect(self.run_trace_tool)
         trace_layout.addWidget(run_trace_button) 
-        trace_layout.addWidget(clear_points_button) 
+        #trace_layout.addWidget(clear_points_button) 
         clear_points_button.clicked.connect(self.delete_control_points)
         trace_group.setLayout(trace_layout)
-        
-        
-
         
         cost_calculator_group = QGroupBox("Cost Calculator")
         cost_calculator_layout = QFormLayout()
@@ -180,7 +189,8 @@ class GeoToolsDialog(QtGui.QDialog):
                 self.error("DEM must be single band")
                 return
             self.tracetool.setDem(dem)
-            self.info("Using DEM for planes")
+            #self.info("Using DEM for planes")
+        self.tracetool.invertCost(self.invert_cost.isChecked())
         self.canvas.setMapTool(self.tracetool)
         #self.dialog_layout.addWidget(self.dlg.)
     def delete_control_points(self):

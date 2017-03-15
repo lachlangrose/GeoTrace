@@ -1,3 +1,33 @@
+# -*- coding: utf-8 -*-
+"""
+/***************************************************************************
+ File Name: tools/gttace.py
+ Last Change: 
+/*************************************************************************** 
+ ---------------
+ GeoTools
+ ---------------
+ A QGIS plugin
+ Collection of tools for geoscience application. Some tools can be found in 
+ qCompass plugin for CloudCompare. 
+ If you are publishing any work associated with this plugin please cite
+ #TODO add citatioN!
+                             -------------------
+        begin                : 2015-01-1
+        copyright          : (C) 2015 by Lachlan Grose
+        email                : lachlan.grose@monash.edu
+ ***************************************************************************/
+
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
+"""
+
 import numpy as np
 import math
 from skimage.graph import route_through_array

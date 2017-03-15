@@ -1,25 +1,33 @@
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
-GeoTools
-A geosciences toolkit for QGIS.
-Copyright (C) 2014  Lachlan Grose
+ File Name: geo_tools.py
+ Last Change: 
+/*************************************************************************** 
+ ---------------
+ GeoTools
+ ---------------
+ A QGIS plugin
+ Collection of tools for geoscience application. Some tools can be found in 
+ qCompass plugin for CloudCompare. 
+ If you are publishing any work associated with this plugin please cite
+ #TODO add citatioN!
+                             -------------------
+        begin                : 2015-01-1
+        copyright          : (C) 2015 by Lachlan Grose
+        email                : lachlan.grose@monash.edu
+ ***************************************************************************/
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA. 
-***************************************************************************/
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
 """
+
 from PyQt4.QtCore import *#QSettings, QTranslator, qVersion, QCoreApplication
 from PyQt4.QtGui import *#QAction, QIcon
 # Initialize Qt resources from file resources.py
@@ -66,12 +74,11 @@ class GeoTools:
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'&GeoTools')
-        # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'GeoTools')
         self.toolbar.setObjectName(u'GeoTools')
         self.canvas = self.iface.mapCanvas()
-        self.dlg = GeoToolsDialog(self.iface)
-
+        #self.dlg = GeoToolsDialog(self.iface)
+        self.trace_dockWidget = None
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
@@ -169,50 +176,22 @@ class GeoTools:
         digitize_icon_path = ':/plugins/GeoTools/digitize.png'
 
         icon_path = ':/plugins/GeoTools/icon.png'
-        #self.add_action(
-        #    icon_path,
-        #    text=self.tr(u'GeoTools'),
-        #    callback=self.run,
-        #    parent=self.iface.mainWindow())
-        #self.add_action(
-        #    tile_icon_path,
-        #    text=self.tr(u'Export Tiles within area'),
-        #    callback=self.rectangle,
-        #    parent=self.iface.mainWindow())
-        #self.add_action(
-        #    digitize_icon_path,
-        #    text=self.tr(u'Digitize Orientation'),
-        #    callback=self.line,
-        #    parent=self.iface.mainWindow())
-        #self.add_action(
-        #    stereo_icon_path,
-        #    text=self.tr(u'Stereonet'),
-        #    callback=self.stereo,
-        #    parent=self.iface.mainWindow())
-        
         self.add_action(
             icon_path,
             text=self.tr(u'GeoTools'),
             callback=self.open_trace,
             parent=self.iface.mainWindow())
-        self.recttool = gttools.GtRectangleTool(self.canvas,self.iface)
-        self.linetool = gtlinetool.GtLineTool(self.canvas,self.iface)
     def open_trace(self):
-        trace_dockWidget = QDockWidget('GeoTools', self.iface.mainWindow())
-        trace_dockWidget.setAttribute(Qt.WA_DeleteOnClose)
-        trace_dockWidget.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+        if self.trace_dockWidget:
+            self.trace_dockWidget.show()
+            return
+        self.dlg = GeoToolsDialog(self.iface)
+        self.trace_dockWidget = QDockWidget('GeoTools', self.iface.mainWindow())
+        self.trace_dockWidget.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         #self.qProf_QWidget = qprof_QWidget(self.canvas)
-        trace_dockWidget.setWidget(self.dlg)
-        trace_dockWidget.destroyed.connect(self.dlg.closeEvent)
-        self.iface.addDockWidget(Qt.RightDockWidgetArea, trace_dockWidget)
-    def rectangle(self):
-        self.canvas.setMapTool(self.recttool)
-    def line(self):
-        self.canvas.setMapTool(self.linetool)
-    def stereo(self):
-
-        self.stereo = gtstereo.GtStereo(self.canvas,self.iface)
-        self.stereo.run()
+        self.trace_dockWidget.setWidget(self.dlg)
+        self.trace_dockWidget.destroyed.connect(self.dlg.closeEvent)
+        self.iface.addDockWidget(Qt.RightDockWidgetArea, self.trace_dockWidget)
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
@@ -222,16 +201,3 @@ class GeoTools:
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
         del self.toolbar
-
-
-    def run(self):
-        """Run method that performs all the real work"""
-        # show the dialog
-        self.dlg.show()
-        # Run the dialog event loop
-        result = self.dlg.exec_()
-        # See if OK was pressed
-        if result:
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-            pass
