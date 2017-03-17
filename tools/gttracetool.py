@@ -98,17 +98,23 @@ class GtTraceTool(QgsMapToolEmitPoint):
             p = transform.transform(p)
         self.rubberBand.addPoint(p, True)
         self.rubberBand.show()     
+    def removeLastPoint(self):
+        if self.trace.remove_last_node() == False:
+            self.rubberBandLine.reset(QGis.Line)
+        self.rubberBand.removeLastPoint()
     def runTrace(self):
         self.rubberBandLine.reset(QGis.Line)
         self.paths = self.trace.shortest_path()
         s = 0
+        if len(self.paths) == 0:
+            return
         for p in self.paths:
             points = []
             for c in p:
                 i = (c[0])
                 j = (c[1])
-                x_ = (float(i))*self.xsize+self.xmin
-                y_ = (float(j))*self.ysize+self.ymin
+                x_ = (float(i))*self.xsize+self.xmin+self.xsize*.5
+                y_ = (float(j))*self.ysize+self.ymin+self.ysize*.5
                 p = QgsPoint(x_,y_)
                 if self.costlayerCRSSrsid != self.projectCRSSrsid:
                     transform = QgsCoordinateTransform(self.costlayerCRSSrsid, 
@@ -174,6 +180,8 @@ class GtTraceTool(QgsMapToolEmitPoint):
         print "Creating and adding "+fieldname+" attribute"
         return True
     def addLine(self):
+        if len(self.paths) == 0:
+            return
         #if using control points add a uuid to the control point and the line
         lineuuid = uuid.uuid1()
         self.addField("COST",QVariant.String,self.target)
@@ -263,6 +271,12 @@ class GtTraceTool(QgsMapToolEmitPoint):
         self.canvas.refresh()
 
         self.reset()
+    def keyPressEvent(self,e):
+        if e.key() == Qt.Key_Backspace:
+            self.removeLastPoint()
+            self.runTrace()
+        if e.key() == Qt.Key_Enter:
+            self.addLine()
     def canvasPressEvent(self, e):
         point = self.toMapCoordinates(e.pos())
         if type(self.cost) != QgsRasterLayer:
@@ -273,8 +287,8 @@ class GtTraceTool(QgsMapToolEmitPoint):
                 transform = QgsCoordinateTransform(self.projectCRSSrsid,
                                                   self.costlayerCRSSrsid)
                 point = transform.transform(point)
-            i = int((point[0] -self.xmin) / self.xsize)
-            j = int(( point[1]-self.ymin) / self.ysize)
+            i = int((point[0] - self.xmin) / self.xsize)
+            j = int((point[1] - self.ymin) / self.ysize)
             self.rows = self.cost.height()
             self.columns = self.cost.width()
             j1 = j

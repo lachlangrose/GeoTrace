@@ -43,17 +43,17 @@ class ShortestPath():
         self.im2 = np.zeros(self.im.shape)
         self.path = np.zeros(self.im.shape)
         self.l, self.w = im.shape
+        self.imshape = self.im2.shape
     def remove_control_points(self):
         self.nodes = []
         self.segments = []
+    def remove_last_node(self):
+        del self.nodes[-1]
+        return self.setup_segments()
     def add_node(self,node):
         self.nodes.append(node)
-        np_node = np.array(node,dtype=float)
-        if len(self.nodes) < 2:
-            return False
-        if len(self.segments) < 1:
-            self.segments.append([self.nodes[0],self.nodes[1]]) 
-            return True
+        return self.setup_segments()
+    def add_node_to_segments(self,node):
         if len(self.segments) >= 1:
             #first check if the point occurs inside a segment
             for i in range(len(self.segments)):
@@ -70,7 +70,7 @@ class ShortestPath():
                     prev_end = self.segments[i][1]
                     self.segments[i][1] = node
                     self.segments.insert(i+1,[prev_end,node])
-                    return False#split
+                    return True
             #if adding to the end, do we add to start or end?
             start = np.array(self.segments[0][0],dtype=float)
             end = np.array(self.segments[len(self.segments)-1][1],dtype=float)
@@ -84,37 +84,55 @@ class ShortestPath():
             if de < ds:
                 self.segments.append([end,node])
                 return True
-                #make sure the current index isn't inaccessible
+
+    def setup_segments(self):
+        if len(self.nodes) < 2:
+            return False
+        self.segments = []
+        self.segments.append([self.nodes[0],self.nodes[1]]) 
+        for i in range(2,len(self.nodes)):
+            np_node = np.array(self.nodes[i],dtype=float)
+            self.add_node_to_segments(np_node)                  
+        return True
+        
+        
     def shortest_path(self):
         self.paths = []
+        #if segments is empty then don't do anything
+        if len(self.segments) == 0:
+            return []
         for s in self.segments:
+            imshape = self.im.shape
             xmin = min(s[0][0],s[1][0])
             xmax = max(s[0][0],s[1][0])
             ymin = min(s[0][1],s[1][1])
             ymax = max(s[0][1],s[1][1])
-
-            im = self.im[xmin:xmax,ymin:ymax]
-            end = im.shape            
-            end = [end[0]- 1, end[1] - 1]
-            #option1 start in bottom corner
-            p1 = s[0]
-            p2 = s[1]
-            if xmin == p1[0] and ymin == p1[1]:
-                start = [0,0]
-                #start = [0,end[1]]
-
-            elif xmin == p1[0] and ymax == p1[1]:
-                start = [0,end[1]]
-                end = [end[0],0]
-            
-            elif xmin == p2[0] and ymin == p2[1]:
-                start = [0,0]
-            elif xmin == p2[0] and ymax == p2[1]:
-                start = [0,end[1]]
-                end = [end[0],0]
-
+            #Add a buffer to the image 50px - maybe this should be base
+            buffer_v = 50
+            if (xmin - buffer_v)>0:
+                xmin = xmin - buffer_v
             else:
-                continue
+                xmin = 0;
+            if (xmax + buffer_v) < self.imshape[0]:
+                xmax = xmax + buffer_v
+            else:
+                xmax = self.imshape[0];
+
+            if (ymin - buffer_v)>0:
+                ymin = ymin - buffer_v
+            else:
+                ymin = 0;
+            if (ymax - buffer_v) < self.imshape[1]:
+                ymax = ymax + buffer_v
+            else:
+                ymax = 0;
+            
+            im = self.im[xmin:xmax,ymin:ymax]
+            start = s[0]
+            end = s[1]
+            start = [s[0][0]-xmin,s[0][1]-ymin]
+            end = [s[1][0]-xmin,s[1][1]-ymin]
+
             path, cost = route_through_array(im,start,end,fully_connected=True,geometric=True)
             paths = []
             for p in path:
@@ -122,4 +140,5 @@ class ShortestPath():
             #paths2 = []
             self.paths.append(paths)
         return self.paths
+
 
