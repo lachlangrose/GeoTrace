@@ -48,7 +48,8 @@ class ShortestPath():
         self.nodes = []
         self.segments = []
     def remove_last_node(self):
-        del self.nodes[-1]
+        if len(self.nodes) > 0:
+            del self.nodes[-1]
         return self.setup_segments()
     def add_node(self,node):
         self.nodes.append(node)

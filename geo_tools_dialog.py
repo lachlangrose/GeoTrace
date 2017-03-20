@@ -142,12 +142,13 @@ class GeoToolsDialog(QtGui.QDialog):
 
         trace_group = QGroupBox("Find Trace")
         trace_layout = QFormLayout()
-        run_trace_button = QPushButton("Start Digitizing")
+        self.traceToolActive = False
+        self.run_trace_button = QPushButton("Start Digitizing")
         clear_points_button = QPushButton("Finish Line")
         undo_button = QPushButton("Undo")
-
-        run_trace_button.clicked.connect(self.run_trace_tool)
-        trace_layout.addWidget(run_trace_button) 
+        
+        self.run_trace_button.clicked.connect(self.toggle_trace_tool)
+        trace_layout.addWidget(self.run_trace_button) 
         #trace_layout.addWidget(clear_points_button) 
         clear_points_button.clicked.connect(self.delete_control_points)
         trace_group.setLayout(trace_layout)
@@ -166,8 +167,21 @@ class GeoToolsDialog(QtGui.QDialog):
         #trace_main_layout.addWidget(cost_calculator_group)
         trace_main_layout.addWidget(trace_group)
         trace_widget.setLayout(trace_main_layout)
+         
         return trace_widget
-    def run_trace_tool(self):
+    def deactivateTrace(self):
+        self.tracetool.rubberBandLine.reset(QGis.Line)
+        self.tracetool.rubberBand.reset(QGis.Point)
+        self.tracetool.deactivate()
+        self.traceToolActive = False
+        self.canvas.setMapTool(QgsMapToolPan(self.canvas))
+        self.run_trace_button.setText("Start Digitizing")
+        return
+
+    def toggle_trace_tool(self):
+        if self.traceToolActive == True:
+            self.deactivateTrace()
+            return
         target = self.vector_layer_combo_box.currentLayer()
         cost = self.cost_layer_combo_box.currentLayer() 
         if cost.bandCount() != 1:
@@ -177,6 +191,7 @@ class GeoToolsDialog(QtGui.QDialog):
             self.error("Target has wrong geometry type")
             return 
         self.tracetool = gttracetool.GtTraceTool(self.canvas,self.iface,target,cost)
+        #self.tracetool.deactivatedt.connect(self.deactivateTrace)
         if self.save_control_points.isChecked():
             ctrl_pt = self.controlpoint_layer_combo_box.currentLayer()
             if ctrl_pt.geometryType() != QGis.Point:
@@ -191,6 +206,8 @@ class GeoToolsDialog(QtGui.QDialog):
             self.tracetool.setDem(dem)
             #self.info("Using DEM for planes")
         self.tracetool.invertCost(self.invert_cost.isChecked())
+        self.run_trace_button.setText("Stop Digitizing")
+        self.traceToolActive = True
         self.canvas.setMapTool(self.tracetool)
         #self.dialog_layout.addWidget(self.dlg.)
     def delete_control_points(self):

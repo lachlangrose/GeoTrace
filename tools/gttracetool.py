@@ -43,6 +43,7 @@ import gttrace as trace
 import uuid
 
 class GtTraceTool(QgsMapToolEmitPoint):
+    #deactivatedt = pyqtSignal()
     def __init__(self, canvas,iface,target,cost):
         #qgis layers/interface
         self.canvas = canvas
@@ -76,6 +77,11 @@ class GtTraceTool(QgsMapToolEmitPoint):
         self.isEmittingPoint = False
         self.rubberBand.reset(QGis.Point)
         self.trace.remove_control_points()
+        self.rubberBandLine.reset(QGis.Line)
+    def clearRubberBand(self):
+        self.rubberBandLine.reset(QGis.Line)
+        self.rubberBand.reset(QGis.Point)
+        
     def invertCost(self,flag):
         if flag == True:
             array = self.rasterToNumpy(self.cost)
@@ -163,6 +169,7 @@ class GtTraceTool(QgsMapToolEmitPoint):
         self.dem = raster
         self.target.updateFields()
         return
+
     def addField(self,fieldname,fieldtype,layer):
         #slightly less optimised way to add a field but more compartmentalised
         pr = layer.dataProvider()
@@ -271,12 +278,24 @@ class GtTraceTool(QgsMapToolEmitPoint):
         self.canvas.refresh()
 
         self.reset()
-    def keyPressEvent(self,e):
+    def keyReleaseEvent(self,e):
         if e.key() == Qt.Key_Backspace:
             self.removeLastPoint()
             self.runTrace()
+            e.accept()
         if e.key() == Qt.Key_Enter:
             self.addLine()
+        if e.key() == Qt.Key_Escape:
+            self.reset()
+    def keyPressEvent(self,e):
+        if e.key() == Qt.Key_Backspace:
+            e.accept()
+            return
+        if e.key() == Qt.Key_Enter:
+            return
+        if e.key() == Qt.Key_Escape:
+            return
+        return
     def canvasPressEvent(self, e):
         point = self.toMapCoordinates(e.pos())
         if type(self.cost) != QgsRasterLayer:
@@ -308,5 +327,11 @@ class GtTraceTool(QgsMapToolEmitPoint):
         array = np.rot90(np.rot90(np.rot90(array)))
         return array
     def deactivate(self):
-        super(GtTraceTool, self).deactivate()
-        self.emit(SIGNAL("deactivated()"))
+        self.delete_control_points()
+        self.clearRubberBand()
+        QgsMapToolEmitPoint.deactivate(self)
+        #self.deactivatedt.emit()
+        #slight bug when this signal is allowed to 
+        #emit we get a recursive error TODO debug
+
+    #    self.emit(SIGNAL("deactivated()"))
