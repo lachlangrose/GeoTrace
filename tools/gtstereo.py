@@ -67,7 +67,7 @@ class Window(QtGui.QDialog):
 
         # this is the Navigation widget
         # it takes the Canvas widget and a parent
-        self.toolbar = NavigationToolbar(self.canvas, self)
+        #self.toolbar = NavigationToolbar(self.canvas, self)
         
         # Just some button connected to `plot` method
         self.polesbutton = QtGui.QPushButton('Plot Poles')
@@ -82,31 +82,32 @@ class Window(QtGui.QDialog):
         self.vector_layer_combo_box = QgsMapLayerComboBox()
         self.vector_layer_combo_box.setCurrentIndex(-1)
         self.vector_layer_combo_box.setFilters(QgsMapLayerProxyModel.VectorLayer)
-        self.dip_dir = QCheckBox("Dip Direction")
-        self.selected_features = QCheckBox("Selected Features")
+        self.dip_dir = QCheckBox()
+        self.selected_features = QCheckBox()
         self.strike_combo_box = QgsFieldComboBox()
         self.dip_combo_box = QgsFieldComboBox()
     
-        self.figure.canvas.mpl_connect('button_press_event',self.onclick)
+        #self.figure.canvas.mpl_connect('button_press_event',self.onclick)
         # set the layout
+        top_form_layout = QtGui.QFormLayout()
         layout = QtGui.QVBoxLayout()
-
-        layout.addWidget(self.vector_layer_combo_box)
-        layout.addWidget(self.strike_combo_box)
-        layout.addWidget(self.dip_combo_box)
-        layout.addWidget(self.dip_dir)
-        layout.addWidget(self.selected_features)
+        top_form_layout.addRow("Layer:",self.vector_layer_combo_box)
+        top_form_layout.addRow("Direction:",self.strike_combo_box)
+        top_form_layout.addRow("Dip:",self.dip_combo_box)
+        top_form_layout.addRow("Dip Direction:",self.dip_dir)
+        top_form_layout.addRow("Selected Features Only:",self.selected_features)
         self.vector_layer_combo_box.layerChanged.connect(self.strike_combo_box.setLayer)  # setLayer is a native slot function
         self.vector_layer_combo_box.layerChanged.connect(self.dip_combo_box.setLayer)  # setLayer is a native slot function
-
-        layout.addWidget(self.toolbar)
+        layout.addLayout(top_form_layout)
         layout.addWidget(self.canvas)
         #layout.addWidget(self.strike_combo)
         #layout.addWidget(self.dip_combo)
-        layout.addWidget(self.polesbutton)
-        layout.addWidget(self.circlebutton)
-        layout.addWidget(self.densitybutton)
-        layout.addWidget(self.resetbutton)
+        bottom_form_layout = QtGui.QFormLayout()
+        bottom_form_layout.addWidget(self.polesbutton)
+        bottom_form_layout.addWidget(self.circlebutton)
+        bottom_form_layout.addWidget(self.densitybutton)
+        bottom_form_layout.addWidget(self.resetbutton)
+        layout.addLayout(bottom_form_layout)
         self.setLayout(layout)
     def onclick(self,event):
         strike, dip = mplstereonet.stereonet_math.geographic2pole(event.xdata,event.ydata)

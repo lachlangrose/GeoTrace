@@ -31,152 +31,136 @@ import os.path,  sys
 import numpy as np
 currentPath = os.path.dirname( __file__ )
 sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/../'))
-from geo_tools_dialog import GeoToolsDialog
 
-from PyQt4 import QtGui
+from PyQt4 import *
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
+from qgis.core import *
+from qgis.gui import *
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
-import mplstereonet
+from matplotlib.projections import register_projection
 import random
-
-class Window(QtGui.QDialog):
+class GtRose(QtGui.QDialog):
     def __init__(self, canvas, iface, parent=None):
-        super(Window, self).__init__(parent)
+        super(GtRose, self).__init__(parent)
         self.canvas = canvas
         self.iface = iface
-        self.layer = self.iface.mapCanvas().currentLayer()
-        fields = self.layer.pendingFields()
-        #self.strike_combo = QtGui.QComboBox()
-        #self.dip_combo = QtGui.QComboBox()
-
-        #for f in fields:
-        #    self.strike_combo.addItem(f.name())
-        #    self.dip_combo.addItem(f.name())
-            # a figure instance to plot on
-        #self.figure = plt.figure()
-        self.figure, self.ax = mplstereonet.subplots()
-        # this is the Canvas Widget that displays the `figure`
-        # it takes the `figure` instance as a parameter to __init__
+        self.figure = plt.Figure()
+        self.ax = self.figure.add_subplot(1, 1, 1, projection = 'polar')
         self.canvas = FigureCanvas(self.figure)
 
-        # this is the Navigation widget
-        # it takes the Canvas widget and a parent
-        self.toolbar = NavigationToolbar(self.canvas, self)
+        self.ax.set_theta_offset(0.5*np.pi) 
+        self.ax.set_theta_direction(-1)
 
         # Just some button connected to `plot` method
-        self.polesbutton = QtGui.QPushButton('Plot Poles')
-        self.polesbutton.clicked.connect(self.plotpoles)
-        self.circlebutton = QtGui.QPushButton('Fit Fold')
-        self.circlebutton.clicked.connect(self.fitfold)
-        self.densitybutton = QtGui.QPushButton('Plot Density')
-        self.densitybutton.clicked.connect(self.plotdensity)
+        self.polesbutton = QtGui.QPushButton('Plot')
+        self.polesbutton.clicked.connect(self.plot)
+        #self.circlebutton = QtGui.QPushButton('Fit Fold')
+        #self.circlebutton.clicked.connect(self.fitfold)
+        #self.densitybutton = QtGui.QPushButton('Plot Density')
+        #self.densitybutton.clicked.connect(self.plotdensity)
         self.resetbutton = QtGui.QPushButton('Clear Plot')
         self.resetbutton.clicked.connect(self.reset)
 
-        self.figure.canvas.mpl_connect('button_press_event',self.onclick)
-        # set the layout
+        self.vector_layer_combo_box = QgsMapLayerComboBox()
+        self.vector_layer_combo_box.setCurrentIndex(-1)
+        self.vector_layer_combo_box.setFilters(QgsMapLayerProxyModel.VectorLayer)
+        self.dip_dir = QCheckBox()
+        self.selected_features = QCheckBox()
+        self.strike_combo_box = QgsFieldComboBox()
+        #self.dip_combo_box = QgsFieldComboBox()
+    
+        ##self.figure.canvas.mpl_connect('button_press_event',self.onclick)
+        ## set the layout
+        top_form_layout = QtGui.QFormLayout()
         layout = QtGui.QVBoxLayout()
-        layout.addWidget(self.toolbar)
+        top_form_layout.addRow("Layer:",self.vector_layer_combo_box)
+        top_form_layout.addRow("Direction:",self.strike_combo_box)
+        #top_form_layout.addRow("Dip:",self.dip_combo_box)
+        top_form_layout.addRow("Dip Direction:",self.dip_dir)
+        top_form_layout.addRow("Selected Features Only:",self.selected_features)
+        self.vector_layer_combo_box.layerChanged.connect(self.strike_combo_box.setLayer)  # setLayer is a native slot function
+        #self.vector_layer_combo_box.layerChanged.connect(self.dip_combo_box.setLayer)  # setLayer is a native slot function
+        layout.addLayout(top_form_layout)
         layout.addWidget(self.canvas)
-        #layout.addWidget(self.strike_combo)
-        #layout.addWidget(self.dip_combo)
-        layout.addWidget(self.polesbutton)
-        layout.addWidget(self.circlebutton)
-        layout.addWidget(self.densitybutton)
-        layout.addWidget(self.resetbutton)
+        ##layout.addWidget(self.strike_combo)
+        ##layout.addWidget(self.dip_combo)
+        bottom_form_layout = QtGui.QFormLayout()
+        bottom_form_layout.addWidget(self.polesbutton)
+        #bottom_form_layout.addWidget(self.circlebutton)
+        #bottom_form_layout.addWidget(self.densitybutton)
+        bottom_form_layout.addWidget(self.resetbutton)
+        layout.addLayout(bottom_form_layout)
         self.setLayout(layout)
     def onclick(self,event):
-        strike, dip = mplstereonet.stereonet_math.geographic2pole(event.xdata,event.ydata)
-        self.ax.plane(strike,dip)
+        return
+    def plot(self):
+        angle = 20
+        n = int(self.vector_layer_combo_box.currentLayer().featureCount())
+        data = np.zeros((n,2))
+        i = 0
+        strike_name = self.strike_combo_box.currentField()        
+        features = self.vector_layer_combo_box.currentLayer().getFeatures()
+        if self.selected_features.isChecked() == True:
+            features = self.vector_layer_combo_box.currentLayer().selectedFeaturesIterator()
+        for f in features:
+            data[i][0] = f[strike_name]
+            if self.dip_dir.isChecked():
+                data[i][0]+=90.
+            if data[i][0] >= 360:
+                data[i][0] -=360
+            #data[i][0] = float()
+            #data[i][1] = f[weight_prop]
+            i = i + 1
+        weighted = False
+        nsection = 360 / angle
+        sectionadd = 180/angle
+        direction = np.linspace(0, 360, nsection, False) / 180 * np.pi
+        frequency = [0] * (nsection)
+        for i in range(len(data)):
+        #column 2 is the angle column number - 1
+
+            tmp = int((data[i][0] - data[i][0] % angle) / angle)
+            if tmp >= sectionadd:
+                tmp2 = tmp - sectionadd
+            if tmp < sectionadd:
+                tmp2 = tmp + sectionadd
+            #column 3 is the weight column number - 1
+            if weighted:		
+                frequency[tmp2] = frequency[tmp2] + 1 * data[i][1]
+                frequency[tmp] = frequency[tmp] + 1 * data[i][1]
+            else:
+                frequency[tmp2] = frequency[tmp2] + 1# * data[i][2]
+                frequency[tmp] = frequency[tmp] + 1 # data[i][2]
+        width = angle / 180.0 * np.pi * np.ones(nsection)
+        frequency = np.array(frequency) / float(n)
+        bars = self.ax.bar(direction, frequency, width=width, bottom=0.0)
+
+        for r,bar in zip(frequency, bars):
+            bar.set_facecolor(plt.cm.Greys(.5))
+            bar.set_edgecolor('grey')
+            bar.set_alpha(0.8)
+        #self.figure.title('Histogram')
+        self.ax.set_theta_offset(0.5*np.pi) 
+        self.ax.set_theta_direction(-1)
         self.canvas.draw()
-        print strike, dip
-    def plotpoles(self):
-        strike = []
-        dip = []
-        for f in self.layer.selectedFeatures():
-            dip.append(f['dip']) #self.dip_combo.currentText()])
-            strike.append(f['strike'])#self.strike_combo.currentText()]) 
-        self.ax.hold(False)
-        self.ax.hold(True)
-        self.ax.pole(strike, dip)
-        self.ax.grid(True)
-        self.canvas.draw()
+        return
     def reset(self):
         #hack to reset graph, just plot nothing
-        strike = []
-        dip = []
         self.ax.hold(False)
-        self.ax.plane(strike, dip)
+        self.ax.bar([],[], 0, bottom=0.0)
+        self.ax.set_theta_offset(0.5*np.pi) 
+        self.ax.set_theta_direction(-1)
         self.ax.grid(True)
         self.canvas.draw()
 
 
     def plotdensity(self):
-        strike = []
-        dip = []
-        for f in self.layer.selectedFeatures():
-            dip.append(f['dip']) #self.dip_combo.currentText()])
-            strike.append(f['strike'])#self.strike_combo.currentText()]) 
-        # discards the old graph
-        self.ax.hold(False)
-        self.ax.hold(True)
-
-        self.ax.density_contourf(strike,dip,measurement='poles')
-        self.ax.pole(strike, dip)
-        self.ax.grid(True)
-        # refresh canvas
-        self.canvas.draw()
-
+        return
     def plotcircles(self):
-        strike = []
-        dip = []
-        for f in self.layer.selectedFeatures():
-            dip.append(f['dip']) #self.dip_combo.currentText()])
-            strike.append(f['strike'])#self.strike_combo.currentText()]) 
-        self.ax.hold(False)
-        self.ax.plane(strike, dip)
-        self.ax.grid()
-
-        # refresh canvas
-        self.canvas.draw()
+        return
     def fitfold(self):
-        strike = []
-        dip = []
-        for f in self.layer.selectedFeatures():
-            dip.append(f['dip']) #self.dip_combo.currentText()])
-            strike.append(f['strike'])#self.strike_combo.currentText()]) 
-        # discards the old graph
-        self.ax.hold(True)
-        fit_strike,fit_dip = mplstereonet.fit_girdle(strike,dip)
-        lon, lat = mplstereonet.pole(fit_strike, fit_dip)
-        (plunge,), (bearing,) = mplstereonet.pole2plunge_bearing(fit_strike, fit_dip)       
-        template = u'Plunge / Direction of Fold Axis\n{:02.0f}\u00b0/{:03.0f}\u00b0'
-        self.ax.annotate(template.format(plunge, bearing), ha='center', va='bottom',
-            xy=(lon, lat), xytext=(-50, 20), textcoords='offset points',
-            arrowprops=dict(arrowstyle='-|>', facecolor='black'))
-
-        print fit_strike, fit_dip
-        self.ax.plane(fit_strike, fit_dip, color='red', lw=2)
-        self.ax.pole(fit_strike, fit_dip, marker='o', color='red', markersize=14)
-        self.canvas.draw() 
-class GtStereo():
-  def __init__(self, canvas,iface):
-      self.canvas = canvas
-      self.iface = iface
-
-        
-  def run(self):
-        """Run method that performs all the real work"""
-
-        self.main = Window(self.canvas,self.iface)
-        # show the dialog
-        self.main.show()
-        # Run the dialog event loop
-        #result = self.dlg.exec_()
-        # See if OK was pressed
-        #if result:
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-         #   pass      
+        return

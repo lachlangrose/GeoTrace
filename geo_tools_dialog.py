@@ -32,6 +32,7 @@
 import os
 import gttracetool
 from gtstereo import *
+from gtrose import *
 from PyQt4 import *
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -81,12 +82,14 @@ class GeoToolsDialog(QtGui.QDialog):
         stereo_widget.setLayout(stereo_layout)
         return stereo_widget
     def setup_rose(self):
-        stereo_widget = QWidget()
-        stereo_layout = QVBoxLayout()
-        stereo_group = QGroupBox("GeoTools Rose Diagram")
-        stereo_layout.addWidget(stereo_group)
-        stereo_widget.setLayout(stereo_layout)
-        return stereo_widget
+        rose_main = GtRose(self.canvas,self.iface)
+        rose_widget = QWidget()
+        rose_layout = QVBoxLayout()
+        rose_group = QGroupBox("GeoTools Rose Diagram")
+        rose_layout.addWidget(rose_group)
+        rose_layout.addWidget(rose_main)
+        rose_widget.setLayout(rose_layout)
+        return rose_widget 
     def setup_alignments(self):
         alignments_widget = QWidget()
         alignments_layout = QVBoxLayout()
