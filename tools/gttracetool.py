@@ -145,24 +145,38 @@ class GtTraceTool(QgsMapToolEmitPoint):
         fields = pr.fields()
         strike = False
         dip = False
-        rms = False
+        e1 = False
+        e2 = False
+        e3 = False
+
         attributes = []
         for f in fields:
-            if f.name() == 'STRIKE':
+            if f.name() == 'DIP_DIR':
                 strike = True
-            if f.name() == 'RMS':
-                rms = True
+            if f.name() == 'E_1':
+                e1 = True
+            if f.name() == 'E_2':
+                e2 = True
+            if f.name() == 'E_3':
+                e3 = True
             if f.name() == 'DIP':
                 dip = True
         if not dip:
             attributes.append(QgsField("DIP",QVariant.Double))
             print "Creating DIP attribute"
         if not strike:
-            attributes.append(QgsField("STRIKE",QVariant.Double))           
-            print "Creating STRIKE attribute"
-        if not rms:
-            attributes.append(QgsField("RMS",QVariant.Double))            
-            print "Creating RMS attribute"
+            attributes.append(QgsField("DIP_DIR",QVariant.Double))           
+            print "Creating DIP_DIR attribute"
+        if not e1:
+            attributes.append(QgsField("E_1",QVariant.Double))            
+            print "Creating EIGENVALUE_1 attribute"
+        if not e2:
+            attributes.append(QgsField("E_2",QVariant.Double))            
+            print "Creating EIGENVALUE_2 attribute"
+        if not e3:
+            attributes.append(QgsField("E_3",QVariant.Double))            
+            print "Creating EIGENVALUE_3 attribute"
+            
         if len(attributes) > 0:
             pr.addAttributes(attributes)
         self.use_dem_for_planes = True
@@ -223,6 +237,9 @@ class GtTraceTool(QgsMapToolEmitPoint):
         vl.startEditing()
         xyz = []
         if self.use_dem_for_planes:
+            if self.dem == None:
+                print "No DEM selected"
+                return
             filepath = self.dem.dataProvider().dataSourceUri()
             dem_src = gdal.Open(filepath)
             dem_gt = dem_src.GetGeoTransform()
@@ -242,9 +259,10 @@ class GtTraceTool(QgsMapToolEmitPoint):
                     xyz.append([x_,y_,intval])
             if self.use_dem_for_planes:
                 M = np.array(xyz)
+                M -=  np.mean(M,axis=0)
                 C = M.T.dot(M)
                 eigvals, eigvec = np.linalg.eig(C)
-                n = eigvec[2]
+                n = eigvec[np.argmax(eigvals)]
                 if n[2] < 0:
                     n[0] = -n[0]
                     n[1] = -n[1]
@@ -262,18 +280,21 @@ class GtTraceTool(QgsMapToolEmitPoint):
             if not self.invert:
                 fet['COST'] = self.cost.name()
             if self.use_dem_for_planes:
-                strike = 180.0 - np.arctan2(n[1],n[0]) * 180.0 / np.pi
+                dip_dir = 180.0 - np.arctan2(n[1],n[0]) * 180.0 / np.pi
                 point_type = np.sqrt(n[0]*n[0]+n[1]*n[1]+n[2]*n[2])
-                dip = np.arctan2(point_type,n[0])*180.0 / np.pi
-                
-                fet['STRIKE']= float(strike)
+                dip = np.arctan2(point_type,n[2])*180.0 / np.pi
+                eigvals.sort()
+                fet['DIP_DIR']= float(dip_dir)
                 fet['DIP']= float(dip)
-                fet['RMS'] = 100.0
+                fet['E_1'] = float(eigvals[0])
+                fet['E_2'] = float(eigvals[1])
+                fet['E_3'] = float(eigvals[2])
             if self.use_control_points:
                 fet['UUID'] = str(lineuuid)
-            pr.addFeatures( [ fet ] ) 
+            vl.addFeature(fet)
         vl.commitChanges()
         vl.updateFields()
+        vl.dataProvider().forceReload()
         self.rubberBandLine.reset(QGis.Line)
         self.canvas.refresh()
 

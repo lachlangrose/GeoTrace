@@ -187,6 +187,8 @@ class GeoTools:
             return
         self.dlg = GeoToolsDialog(self.iface)
         self.trace_dockWidget = QDockWidget('GeoTools', self.iface.mainWindow())
+        #for some reason dockwidget wasn't given a name and then the main qgis
+        #save state was throwing an error - causing minidump??
         self.trace_dockWidget.setObjectName("GeoToolsDock")
         self.trace_dockWidget.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         #self.qProf_QWidget = qprof_QWidget(self.canvas)
