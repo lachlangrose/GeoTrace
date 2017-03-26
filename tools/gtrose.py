@@ -107,7 +107,11 @@ class GtRose(QtGui.QDialog):
         if self.selected_features.isChecked() == True:
             features = self.vector_layer_combo_box.currentLayer().selectedFeaturesIterator()
         for f in features:
-            data[i][0] = f[strike_name]
+            d = f[strike_name]
+            if d == NULL:
+                print d
+                continue
+            data[i][0] = d
             if self.dip_dir.isChecked():
                 data[i][0]+=90.
             if data[i][0] >= 360:

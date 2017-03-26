@@ -204,7 +204,7 @@ class GeoToolsDialog(QtGui.QDialog):
         if self.fit_plane.isChecked():
             dem = self.dem_layer_combo_box.currentLayer()
             if dem.bandCount() != 1:
-                self.error("DEM must be single band")
+                self.error("DEM must be single band") == 0)
                 return
             self.tracetool.setDem(dem)
             #self.info("Using DEM for planes")

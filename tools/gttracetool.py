@@ -53,8 +53,8 @@ class GtTraceTool(QgsMapToolEmitPoint):
         #crs reprojection stuff
         self.targetlayerCRSSrsid = self.target.crs().srsid()
         self.costlayerCRSSrsid = self.cost.crs().srsid()
-        self.renderer = self.canvas.mapRenderer()
-        self.projectCRSSrsid = self.renderer.destinationCrs().srsid()
+        #self.renderer = self.canvas.mapRenderer()
+        self.projectCRSSrsid = self.canvas.mapSettings().destinationCrs().srsid()
         self.use_control_points = False
         self.use_dem_for_planes = False
         self.xmin = self.cost.extent().xMinimum()
@@ -72,6 +72,7 @@ class GtTraceTool(QgsMapToolEmitPoint):
         self.trace = trace.ShortestPath()
         self.invert = False
         self.trace.set_image(self.rasterToNumpy(self.cost)) 
+        self.paths = []#self.trace.shortest_path()
     def reset(self):
         self.startPoint = self.endPoint = None
         self.isEmittingPoint = False

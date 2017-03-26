@@ -50,26 +50,8 @@ class Window(QtGui.QDialog):
         super(Window, self).__init__(parent)
         self.canvas = canvas
         self.iface = iface
-        #self.layer = self.iface.mapCanvas().currentLayer()
-        #fields = self.layer.pendingFields()
-        #self.strike_combo = QtGui.QComboBox()
-        #self.dip_combo = QtGui.QComboBox()
-
-        #for f in fields:
-        #    self.strike_combo.addItem(f.name())
-        #    self.dip_combo.addItem(f.name())
-            # a figure instance to plot on
-        #self.figure = plt.figure()
         self.figure, self.ax = mplstereonet.subplots()
-        # this is the Canvas Widget that displays the `figure`
-        # it takes the `figure` instance as a parameter to __init__
         self.canvas = FigureCanvas(self.figure)
-
-        # this is the Navigation widget
-        # it takes the Canvas widget and a parent
-        #self.toolbar = NavigationToolbar(self.canvas, self)
-        
-        # Just some button connected to `plot` method
         self.polesbutton = QtGui.QPushButton('Plot Poles')
         self.polesbutton.clicked.connect(self.plotpoles)
         self.circlebutton = QtGui.QPushButton('Fit Fold')
@@ -86,9 +68,6 @@ class Window(QtGui.QDialog):
         self.selected_features = QCheckBox()
         self.strike_combo_box = QgsFieldComboBox()
         self.dip_combo_box = QgsFieldComboBox()
-    
-        #self.figure.canvas.mpl_connect('button_press_event',self.onclick)
-        # set the layout
         top_form_layout = QtGui.QFormLayout()
         layout = QtGui.QVBoxLayout()
         top_form_layout.addRow("Layer:",self.vector_layer_combo_box)
