@@ -60,9 +60,10 @@ class GeoToolsDialog(QtGui.QDialog):
         self.setWindowTitle('GeoTools')
         tab_layout = QTabWidget()
         tab_layout.addTab(self.setup_trace(),"Trace")
+        tab_layout.addTab(self.setup_cost_calculator(),"Cost Calculator")
         tab_layout.addTab(self.setup_stereonet(),"Steronet")
         tab_layout.addTab(self.setup_rose(),"Rose")
-
+        
         self.dialog_layout.addWidget(tab_layout)
     def setup_histogram(self):
         histogram_widget = QWidget()
@@ -97,7 +98,31 @@ class GeoToolsDialog(QtGui.QDialog):
         alignments_layout.addWidget(alignments_group)
         alignments_widget.setLayout(alignments_layout)
         return stereo_widget
+    def setup_cost_calculator(self):
+        cost_calc_widget = QWidget()
+        cost_calc_layout = QFormLayout()
+        self.raster_layer_combo_box = QgsMapLayerComboBox()
+        self.raster_layer_combo_box.setCurrentIndex(-1)
+        self.raster_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
         
+        self.lightness_checkbox = QCheckBox()
+        self.darkness_checkbox = QCheckBox()
+        self.gradient_checkbox = QCheckBox()
+        self.rbg_similatiry_checkbox = QCheckBox()
+        self.rbg_gradient_checkbox = QCheckBox()
+        self.curvature_checkbox = QCheckBox()
+        self.distance_checkbox = QCheckBox()
+        cost_calc_layout.addRow("Reference Raster: ", self.raster_layer_combo_box) 
+        cost_calc_layout.addRow("Lightness",self.lightness_checkbox)
+        cost_calc_layout.addRow("Darkness",self.darkness_checkbox)
+        cost_calc_layout.addRow("RBG Similarity",self.rbg_similatiry_checkbox)
+        cost_calc_layout.addRow("RBG Gradient",self.rbg_gradient_checkbox)
+        cost_calc_layout.addRow("Curvature",self.curvature_checkbox)
+        cost_calc_layout.addRow("Distance",self.distance_checkbox)
+        cost_calculator_run = QPushButton("Run")
+        cost_calc_layout.addRow(cost_calculator_run)
+        cost_calc_widget.setLayout(cost_calc_layout)
+        return cost_calc_widget
     def setup_trace(self):
         trace_widget = QWidget()
         trace_main_layout = QVBoxLayout()
@@ -204,7 +229,7 @@ class GeoToolsDialog(QtGui.QDialog):
         if self.fit_plane.isChecked():
             dem = self.dem_layer_combo_box.currentLayer()
             if dem.bandCount() != 1:
-                self.error("DEM must be single band") == 0)
+                self.error("DEM must be single band")
                 return
             self.tracetool.setDem(dem)
             #self.info("Using DEM for planes")

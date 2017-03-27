@@ -95,8 +95,8 @@ class GtTraceTool(QgsMapToolEmitPoint):
             self.trace.set_image(array)
             self.invert = False
     def delete_control_points(self):
-        self.trace.remove_control_points()
         self.rubberBand.reset(QGis.Point)
+        self.trace.remove_control_points()
     def addPoint(self,p):
         #self.rubberBand.reset(QGis.Line)
         if self.costlayerCRSSrsid != self.projectCRSSrsid:
@@ -245,8 +245,9 @@ class GtTraceTool(QgsMapToolEmitPoint):
             dem_src = gdal.Open(filepath)
             dem_gt = dem_src.GetGeoTransform()
             dem_rb = dem_src.GetRasterBand(1)
+        
+        points = []
         for p in self.paths:
-            points = []
             for c in p:
                 i = (c[0])
                 j = (c[1])
@@ -258,41 +259,44 @@ class GtTraceTool(QgsMapToolEmitPoint):
                     py = int((y_ - dem_gt[3]) / dem_gt[5])
                     intval=dem_rb.ReadAsArray(px,py,1,1)[0][0]
                     xyz.append([x_,y_,intval])
-            if self.use_dem_for_planes:
-                M = np.array(xyz)
-                M -=  np.mean(M,axis=0)
-                C = M.T.dot(M)
-                eigvals, eigvec = np.linalg.eig(C)
-                n = eigvec[np.argmax(eigvals)]
-                if n[2] < 0:
-                    n[0] = -n[0]
-                    n[1] = -n[1]
-                    n[2] = -n[2] 
-            fet = QgsFeature(fields)
-            geom = QgsGeometry.fromPolyline(points)
-            if self.targetlayerCRSSrsid != self.costlayerCRSSrsid:
-                geom.transform(QgsCoordinateTransform(self.costlayerCRSSrsid,
-                                                  self.targetlayerCRSSrsid))
+        if self.use_dem_for_planes:
+            M = np.array(xyz)
+            M -=  np.mean(M,axis=0)
+            C = M.T.dot(M)
+            eigvals, eigvec = np.linalg.eig(C)
+            n = eigvec[np.argmin(eigvals)]
+            if n[2] < 0:
+                n[0] = -n[0]
+                n[1] = -n[1]
+                n[2] = -n[2] 
+
+        fet = QgsFeature(fields)
+        geom = QgsGeometry.fromPolyline(points)
+        if self.targetlayerCRSSrsid != self.costlayerCRSSrsid:
+            geom.transform(QgsCoordinateTransform(self.costlayerCRSSrsid,
+                                              self.targetlayerCRSSrsid))
 
 
-            fet.setGeometry( geom  )
-            if self.invert:
-                fet['COST'] = self.cost.name()+"_inverted"
-            if not self.invert:
-                fet['COST'] = self.cost.name()
-            if self.use_dem_for_planes:
-                dip_dir = 180.0 - np.arctan2(n[1],n[0]) * 180.0 / np.pi
-                point_type = np.sqrt(n[0]*n[0]+n[1]*n[1]+n[2]*n[2])
-                dip = np.arctan2(point_type,n[2])*180.0 / np.pi
-                eigvals.sort()
-                fet['DIP_DIR']= float(dip_dir)
-                fet['DIP']= float(dip)
-                fet['E_1'] = float(eigvals[0])
-                fet['E_2'] = float(eigvals[1])
-                fet['E_3'] = float(eigvals[2])
-            if self.use_control_points:
-                fet['UUID'] = str(lineuuid)
-            vl.addFeature(fet)
+        fet.setGeometry( geom  )
+        if self.invert:
+            fet['COST'] = self.cost.name()+"_inverted"
+        if not self.invert:
+            fet['COST'] = self.cost.name()
+        if self.use_dem_for_planes:
+            dip_dir = 90. - np.arctan2(n[1],n[0]) * 180.0 / np.pi
+            if dip_dir > 360.:
+                dip_dir -= 360.
+            point_type = np.sqrt(n[0]*n[0]+n[1]*n[1]+n[2]*n[2])
+            dip = np.arccos(n[2])*180.0 / np.pi
+            eigvals.sort()
+            fet['DIP_DIR']= float(dip_dir)
+            fet['DIP']= float(dip)
+            fet['E_1'] = float(eigvals[0])
+            fet['E_2'] = float(eigvals[1])
+            fet['E_3'] = float(eigvals[2])
+        if self.use_control_points:
+            fet['UUID'] = str(lineuuid)
+        vl.addFeature(fet)
         vl.commitChanges()
         vl.updateFields()
         vl.dataProvider().forceReload()
@@ -345,7 +349,7 @@ class GtTraceTool(QgsMapToolEmitPoint):
     def rasterToNumpy(self,layer):
         filepath = layer.dataProvider().dataSourceUri()
         ds = gdal.Open(filepath)
-        array = np.array(ds.GetRasterBand(1).ReadAsArray())                     
+        array = np.array(ds.GetRasterBand(1).ReadAsArray()).astype('int')                     
         array = np.rot90(np.rot90(np.rot90(array)))
         return array
     def deactivate(self):
