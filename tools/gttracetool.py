@@ -291,9 +291,9 @@ class GtTraceTool(QgsMapToolEmitPoint):
             eigvals.sort()
             fet['DIP_DIR']= float(dip_dir)
             fet['DIP']= float(dip)
-            fet['E_1'] = float(eigvals[0])
+            fet['E_1'] = float(eigvals[2])
             fet['E_2'] = float(eigvals[1])
-            fet['E_3'] = float(eigvals[2])
+            fet['E_3'] = float(eigvals[0])
         if self.use_control_points:
             fet['UUID'] = str(lineuuid)
         vl.addFeature(fet)
