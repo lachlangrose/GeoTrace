@@ -71,6 +71,7 @@ class ShortestPath():
                     prev_end = self.segments[i][1]
                     self.segments[i][1] = node
                     self.segments.insert(i+1,[prev_end,node])
+                    print "added segment mid"
                     return True
             #if adding to the end, do we add to start or end?
             start = np.array(self.segments[0][0],dtype=float)
@@ -81,8 +82,10 @@ class ShortestPath():
             de = np.linalg.norm(ne)
             if ds < de:
                 self.segments.insert(0,[start,node])
+                print "adding to start"
                 return True
             if de < ds:
+                print "adding to end"
                 self.segments.append([end,node])
                 return True
 
@@ -135,11 +138,20 @@ class ShortestPath():
             end = [s[1][0]-xmin,s[1][1]-ymin]
 
             path, cost = route_through_array(im,start,end,fully_connected=True,geometric=True)
-            paths = []
-            for p in path:
-                paths.append([p[0]+xmin,p[1]+ymin])
+
+            if len(self.paths) > 0:
+                if path[0][0] + xmin != self.paths[-1][0] or \
+                    path[0][1] + ymin != self.paths[-1][1]:
+                    for p in reversed(path):
+                        self.paths.append([p[0]+xmin,p[1]+ymin])
+                else:
+                    for p in path:               
+                        self.paths.append([p[0]+xmin,p[1]+ymin])
+            else:
+                for p in path:               
+                    self.paths.append([p[0]+xmin,p[1]+ymin])
+
             #paths2 = []
-            self.paths.append(paths)
         return self.paths
 
 

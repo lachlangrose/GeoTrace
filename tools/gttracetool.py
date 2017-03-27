@@ -115,21 +115,18 @@ class GtTraceTool(QgsMapToolEmitPoint):
         s = 0
         if len(self.paths) == 0:
             return
-        for p in self.paths:
-            points = []
-            for c in p:
-                i = (c[0])
-                j = (c[1])
-                x_ = (float(i))*self.xsize+self.xmin+self.xsize*.5
-                y_ = (float(j))*self.ysize+self.ymin+self.ysize*.5
-                p = QgsPoint(x_,y_)
-                if self.costlayerCRSSrsid != self.projectCRSSrsid:
-                    transform = QgsCoordinateTransform(self.costlayerCRSSrsid, 
-                                            self.projectCRSSrsid)
-                    p = transform.transform(p)
+        for c in self.paths:
+            i = (c[0])
+            j = (c[1])
+            x_ = (float(i))*self.xsize+self.xmin+self.xsize*.5
+            y_ = (float(j))*self.ysize+self.ymin+self.ysize*.5
+            p = QgsPoint(x_,y_)
+            if self.costlayerCRSSrsid != self.projectCRSSrsid:
+                transform = QgsCoordinateTransform(self.costlayerCRSSrsid, 
+                                        self.projectCRSSrsid)
+                p = transform.transform(p)
 
-                self.rubberBandLine.addPoint(p,True,s)
-            s+=1
+            self.rubberBandLine.addPoint(p,True)
     def setControlPoints(self, vector = None):
         if vector == None:
             self.use_control_points = False
@@ -247,18 +244,17 @@ class GtTraceTool(QgsMapToolEmitPoint):
             dem_rb = dem_src.GetRasterBand(1)
         
         points = []
-        for p in self.paths:
-            for c in p:
-                i = (c[0])
-                j = (c[1])
-                x_ = (float(i))*self.xsize+self.xmin + self.xsize*.5
-                y_ = (float(j))*self.ysize+self.ymin + self.ysize*.5
-                points.append(QgsPoint(x_, y_))
-                if self.use_dem_for_planes:
-                    px = int((x_ - dem_gt[0]) / dem_gt[1])
-                    py = int((y_ - dem_gt[3]) / dem_gt[5])
-                    intval=dem_rb.ReadAsArray(px,py,1,1)[0][0]
-                    xyz.append([x_,y_,intval])
+        for c in self.paths:
+            i = (c[0])
+            j = (c[1])
+            x_ = (float(i))*self.xsize+self.xmin + self.xsize*.5
+            y_ = (float(j))*self.ysize+self.ymin + self.ysize*.5
+            points.append(QgsPoint(x_, y_))
+            if self.use_dem_for_planes:
+                px = int((x_ - dem_gt[0]) / dem_gt[1])
+                py = int((y_ - dem_gt[3]) / dem_gt[5])
+                intval=dem_rb.ReadAsArray(px,py,1,1)[0][0]
+                xyz.append([x_,y_,intval])
         if self.use_dem_for_planes:
             M = np.array(xyz)
             M -=  np.mean(M,axis=0)
