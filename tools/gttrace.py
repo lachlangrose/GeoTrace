@@ -71,7 +71,6 @@ class ShortestPath():
                     prev_end = self.segments[i][1]
                     self.segments[i][1] = node
                     self.segments.insert(i+1,[node,prev_end])
-                    print "added segment mid"
                     return True
             #if adding to the end, do we add to start or end?
             start = np.array(self.segments[0][0],dtype=float)
@@ -82,10 +81,8 @@ class ShortestPath():
             de = np.linalg.norm(ne)
             if ds < de:
                 self.segments.insert(0,[start,node])
-                print "adding to start"
                 return True
             if de < ds:
-                print "adding to end"
                 self.segments.append([end,node])
                 return True
 
