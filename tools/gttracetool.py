@@ -35,8 +35,6 @@ from PyQt4.QtGui import *
 from qgis.core import *
 from qgis.gui import *
 from osgeo import gdal
-from osgeo.gdalnumeric import *
-from osgeo.gdalconst import *
 import numpy as np
 import time
 import gttrace as trace

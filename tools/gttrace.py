@@ -70,7 +70,7 @@ class ShortestPath():
                 if dot < 0:
                     prev_end = self.segments[i][1]
                     self.segments[i][1] = node
-                    self.segments.insert(i+1,[prev_end,node])
+                    self.segments.insert(i+1,[node,prev_end])
                     print "added segment mid"
                     return True
             #if adding to the end, do we add to start or end?
@@ -93,8 +93,8 @@ class ShortestPath():
         if len(self.nodes) < 2:
             return False
         self.segments = []
-        self.segments.append([self.nodes[0],self.nodes[1]]) 
-        for i in range(2,len(self.nodes)):
+        self.segments.append([self.nodes[0],self.nodes[-1]]) 
+        for i in range(1,len(self.nodes)-1):
             np_node = np.array(self.nodes[i],dtype=float)
             self.add_node_to_segments(np_node)                  
         return True
@@ -152,6 +152,6 @@ class ShortestPath():
                     self.paths.append([p[0]+xmin,p[1]+ymin])
 
             #paths2 = []
-        return self.paths
+        return self.paths#self.segments
 
 
