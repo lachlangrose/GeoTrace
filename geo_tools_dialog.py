@@ -100,29 +100,31 @@ class GeoToolsDialog(QtGui.QDialog):
         return stereo_widget
     def setup_cost_calculator(self):
         cost_calc_widget = QWidget()
-        cost_calc_layout = QFormLayout()
+        self.cost_calc_layout = QFormLayout()
         self.raster_layer_combo_box = QgsMapLayerComboBox()
         self.raster_layer_combo_box.setCurrentIndex(-1)
         self.raster_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
-        
-        self.lightness_checkbox = QCheckBox()
-        self.darkness_checkbox = QCheckBox()
-        self.gradient_checkbox = QCheckBox()
-        self.rbg_similatiry_checkbox = QCheckBox()
-        self.rbg_gradient_checkbox = QCheckBox()
-        self.curvature_checkbox = QCheckBox()
-        self.distance_checkbox = QCheckBox()
-        cost_calc_layout.addRow("Reference Raster: ", self.raster_layer_combo_box) 
-        cost_calc_layout.addRow("Lightness",self.lightness_checkbox)
-        cost_calc_layout.addRow("Darkness",self.darkness_checkbox)
-        cost_calc_layout.addRow("RBG Similarity",self.rbg_similatiry_checkbox)
-        cost_calc_layout.addRow("RBG Gradient",self.rbg_gradient_checkbox)
-        cost_calc_layout.addRow("Curvature",self.curvature_checkbox)
-        cost_calc_layout.addRow("Distance",self.distance_checkbox)
+        self.raster_layer_combo_box.currentIndexChanged.connect(self.updateCostName)
+        self.costs = []
+        self.cost_calc_layout.addRow("Reference Raster: ", self.raster_layer_combo_box) 
+    
+        self.addCost('_lightness','Lightness')
+        self.addCost('_darkness','Darkness')
+        self.addCost('_canny','Canny')
+
+        self.cost_name = QLineEdit()
+        self.cost_calc_layout.addRow("Cost Layer Name",self.cost_name)
         cost_calculator_run = QPushButton("Run")
-        cost_calc_layout.addRow(cost_calculator_run)
-        cost_calc_widget.setLayout(cost_calc_layout)
+        self.cost_calc_layout.addRow(cost_calculator_run)
+        cost_calc_widget.setLayout(self.cost_calc_layout)
+        cost_calculator_run.clicked.connect(self.run_costcalculator)
+
         return cost_calc_widget
+    def addCost(self,shortname,longname):
+        radio = QRadioButton()
+        self.costs.append([shortname,radio])
+        self.cost_calc_layout.addRow(longname,radio)
+        radio.clicked.connect(self.updateCostName)
     def setup_trace(self):
         trace_widget = QWidget()
         trace_main_layout = QVBoxLayout()
@@ -205,7 +207,40 @@ class GeoToolsDialog(QtGui.QDialog):
         self.canvas.setMapTool(QgsMapToolPan(self.canvas))
         self.run_trace_button.setText("Start Digitizing")
         return
-
+    def updateCostName(self,string=None):
+        name = self.raster_layer_combo_box.currentLayer().name()
+        for c in self.costs:
+            if c[1].isChecked():
+                name+=c[0]
+        #name+=''
+        self.cost_name.setText(name)
+        return
+    def run_costcalculator(self):
+        print "ahaha"
+        layer = self.raster_layer_combo_box.currentLayer()
+        if layer:
+            print "stupid python"
+            calc = gttracetool.CostCalculator(layer)
+            for c in self.costs:
+                if c[1].isChecked():
+                    calc.run_calculator(c[0],self.cost_name.text())
+                
+        return 
+    def toggle_cost_calculator_layout(self):
+        #if self.lightness_checkbox.checked():
+        #    
+        #if selfdarkness_checkbox.checked():
+        #    
+        #if self.gradient_checkbox.checked():
+        #    
+        #if self.rbg_similatiry_checkbox.checked():
+        #
+        #if self.rbg_gradient_checkbox.checked():
+        #     
+        #if self.curvature_checkbox.checked():
+        #
+        #if self.distance_checkbox.checked():
+        return  
     def toggle_trace_tool(self):
         if self.traceToolActive == True:
             self.deactivateTrace()

@@ -332,6 +332,8 @@ class GtTraceTool(QgsMapToolEmitPoint):
             self.columns = self.cost.width()
             j1 = j
             i1 = i
+            if i < 0 or i>self.rows or j <0 or j > self.columns:
+                return 
             self.trace.add_node([i1,j1])
             self.addPoint(point)
             self.runTrace()
@@ -355,3 +357,48 @@ class GtTraceTool(QgsMapToolEmitPoint):
         #emit we get a recursive error TODO debug
 
     #    self.emit(SIGNAL("deactivated()"))
+
+class CostCalculator():
+    def __init__(self,layer):
+        self.layer = layer
+    def layer_to_numpy(self,layer):
+        filepath = layer.dataProvider().dataSourceUri()
+        print filepath
+        ds = gdal.Open(filepath)
+        if ds == None:
+            return
+        self.arrays = []
+        for i in range(self.layer.bandCount()):
+            array = np.array(ds.GetRasterBand(i+1).ReadAsArray()).astype('int')
+            self.arrays.append(np.rot90(array,3))
+        return self.arrays
+    def numpy_to_layer(self,array,name):
+        array = np.rot90(array)
+        sx, sy = array.shape
+        pathname = name
+        driver = gdal.GetDriverByName("GTiff")
+        dsOut = driver.Create(pathname, sx,sy)
+        bandOut=dsOut.GetRasterBand(1)
+        BandWriteArray(bandOut, array)
+        bandOut = None
+        dsOut = None
+        layer = QgsRasterLayer(pathname,name)
+        QgsMapLayerRegistry.instance().addMapLayer(layer)
+    def run_calculator(self,string,name):
+        if 'canny' in string:
+            array = self.calc_canny()
+            
+        if 'darkness' in string:
+            array = self.calc_darkness()
+    
+    def calc_darkness(self):
+        self.layer_to_numpy(self.layer)
+        cost=np.array(self.arrays[0])
+        cost.fill(0)
+        for i in range(len(self.arrays)):
+            cost+=self.arrays[i]
+        cost /= len(self.arrays)
+    def calc_canny(self):
+        if self.layer.bandCount() > 1:
+            return False
+        canny = skimage.feature.canny(self.arrays[0])
