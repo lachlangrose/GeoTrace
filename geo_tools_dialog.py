@@ -108,10 +108,15 @@ class GeoToolsDialog(QtGui.QDialog):
         self.costs = []
         self.cost_calc_layout.addRow("Reference Raster: ", self.raster_layer_combo_box) 
     
-        self.addCost('_lightness','Lightness')
+        #self.addCost('_lightness','Lightness')
         self.addCost('_darkness','Darkness')
-        self.addCost('_canny','Canny')
-
+        self.addCost('_sobel','Sobel')
+        self.addCost('_sobv','Sobel Vertical Transform')
+        self.addCost('_sobh','Sobel Horizontal Transform')
+        self.addCost('_roberts','Roberts\' cross opperator')
+        self.addCost('_prewitt','Prewitt Transform')
+        self.addCost('_scharr','Scharr transform')
+        #self.addCost('_phase','Phase Congruency')
         self.cost_name = QLineEdit()
         self.cost_calc_layout.addRow("Cost Layer Name",self.cost_name)
         cost_calculator_run = QPushButton("Run")
@@ -216,10 +221,8 @@ class GeoToolsDialog(QtGui.QDialog):
         self.cost_name.setText(name)
         return
     def run_costcalculator(self):
-        print "ahaha"
         layer = self.raster_layer_combo_box.currentLayer()
         if layer:
-            print "stupid python"
             calc = gttracetool.CostCalculator(layer)
             for c in self.costs:
                 if c[1].isChecked():

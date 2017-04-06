@@ -35,11 +35,15 @@ from PyQt4.QtGui import *
 from qgis.core import *
 from qgis.gui import *
 from osgeo import gdal
+from osgeo.gdalnumeric import *
+from osgeo.gdalconst import *
 import numpy as np
 import time
 import gttrace as trace
 import uuid
-
+import matplotlib.pyplot as plt
+from skimage import filters
+#import phasepack
 class GtTraceTool(QgsMapToolEmitPoint):
     #deactivatedt = pyqtSignal()
     def __init__(self, canvas,iface,target,cost):
@@ -363,8 +367,8 @@ class CostCalculator():
         self.layer = layer
     def layer_to_numpy(self,layer):
         filepath = layer.dataProvider().dataSourceUri()
-        print filepath
         ds = gdal.Open(filepath)
+        self.transform = ds.GetGeoTransform()
         if ds == None:
             return
         self.arrays = []
@@ -377,7 +381,8 @@ class CostCalculator():
         sx, sy = array.shape
         pathname = name
         driver = gdal.GetDriverByName("GTiff")
-        dsOut = driver.Create(pathname, sx,sy)
+        dsOut = driver.Create(pathname, sx,sy,1,gdal.GDT_Float32 ,)
+        dsOut.SetGeoTransform(self.transform)
         bandOut=dsOut.GetRasterBand(1)
         BandWriteArray(bandOut, array)
         bandOut = None
@@ -385,12 +390,38 @@ class CostCalculator():
         layer = QgsRasterLayer(pathname,name)
         QgsMapLayerRegistry.instance().addMapLayer(layer)
     def run_calculator(self,string,name):
-        if 'canny' in string:
-            array = self.calc_canny()
-            
+        if 'sobel' in string:
+            array = self.calc_edges(0)
+            self.numpy_to_layer(array,name) 
+            return
+        if 'sobh' in string:
+            array = self.calc_edges(1)
+            self.numpy_to_layer(array,name) 
+            return
+        if 'sobv' in string:
+            array = self.calc_edges(2)
+            self.numpy_to_layer(array,name) 
+            return        
+        if 'prewitt' in string:
+            array = self.calc_edges(3)
+            self.numpy_to_layer(array,name) 
+            return 
+        if 'roberts' in string:
+            array = self.calc_edges(4)
+            self.numpy_to_layer(array,name) 
+            return 
+        if 'scharr' in string:
+            array = self.calc_edges(5)
+            self.numpy_to_layer(array,name) 
+            return             
+        #if 'phase' in string:
+        #    array = self.calc_edges(6)
+        #    self.numpy_to_layer(array,name) 
+        #    return
         if 'darkness' in string:
             array = self.calc_darkness()
-    
+            self.numpy_to_layer(array,name) 
+            return            
     def calc_darkness(self):
         self.layer_to_numpy(self.layer)
         cost=np.array(self.arrays[0])
@@ -398,7 +429,27 @@ class CostCalculator():
         for i in range(len(self.arrays)):
             cost+=self.arrays[i]
         cost /= len(self.arrays)
-    def calc_canny(self):
+        return cost
+        #print cost.shape
+ 
+    def calc_edges(self,t):
+        self.layer_to_numpy(self.layer)    
         if self.layer.bandCount() > 1:
+            print "returning false"
             return False
-        canny = skimage.feature.canny(self.arrays[0])
+        if t == 0:
+            return filters.sobel(self.arrays[0].astype(float))
+        if t == 1:
+            return filters.sobel_h(self.arrays[0].astype(float))
+        if t == 2:
+            return filters.sobel_v(self.arrays[0].astype(float))    
+        if t == 3:
+            return filters.prewitt(self.arrays[0].astype(float))    
+        if t == 4:
+            return filters.roberts(self.arrays[0].astype(float))    
+        if t == 5:
+            return filters.scharr(self.arrays[0].astype(float))  
+        #if t == 6:
+        #    M, ori, ft, T = phasepack.phasecongmono(self.arrays[0].astype(float))
+        #    return M
+              
