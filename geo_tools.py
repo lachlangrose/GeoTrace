@@ -78,6 +78,7 @@ class GeoTools:
         self.toolbar.setObjectName(u'GeoTools')
         self.canvas = self.iface.mapCanvas()
         #self.dlg = GeoToolsDialog(self.iface)
+        self.linetool= gtlinetool.GtLineTool(self.canvas,self.iface)
         self.trace_dockWidget = None
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -94,7 +95,8 @@ class GeoTools:
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate('GeoTools', message)
 
-
+    def line(self):
+        self.canvas.setMapTool(self.linetool)
     def add_action(
         self,
         icon_path,
@@ -180,6 +182,11 @@ class GeoTools:
             icon_path,
             text=self.tr(u'GeoTools'),
             callback=self.open_trace,
+            parent=self.iface.mainWindow())
+        self.add_action(
+            icon_path,
+            text=self.tr(u'Export Tiles within area'),
+            callback=self.line,
             parent=self.iface.mainWindow())
     def open_trace(self):
         if self.trace_dockWidget:

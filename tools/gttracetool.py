@@ -375,10 +375,12 @@ class CostCalculator():
         for i in range(self.layer.bandCount()):
             array = np.array(ds.GetRasterBand(i+1).ReadAsArray()).astype('int')
             self.arrays.append(np.rot90(array,3))
+            print array.shape
         return self.arrays
     def numpy_to_layer(self,array,name):
         array = np.rot90(array)
         sx, sy = array.shape
+        print array.shape
         pathname = name
         driver = gdal.GetDriverByName("GTiff")
         dsOut = driver.Create(pathname, sx,sy,1,gdal.GDT_Float32 ,)

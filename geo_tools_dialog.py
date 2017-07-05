@@ -63,6 +63,7 @@ class GeoToolsDialog(QtGui.QDialog):
         tab_layout.addTab(self.setup_cost_calculator(),"Cost Calculator")
         tab_layout.addTab(self.setup_stereonet(),"Steronet")
         tab_layout.addTab(self.setup_rose(),"Rose")
+        tab_layout.addTab(self.setup_alignments(),"Alignments Analysis")
         
         self.dialog_layout.addWidget(tab_layout)
     def setup_histogram(self):
@@ -93,11 +94,29 @@ class GeoToolsDialog(QtGui.QDialog):
         return rose_widget 
     def setup_alignments(self):
         alignments_widget = QWidget()
-        alignments_layout = QVBoxLayout()
-        alignments_group = QGroupBox("GeoTools Alignments Tools")
-        alignments_layout.addWidget(alignments_group)
+        alignments_layout = QFormLayout()
+        #alignments_group = QGroupBox("GeoTools Alignments Tools")
+        self.pointset_combo_box = QgsMapLayerComboBox()
+        
+        self.pointset_combo_box= QgsMapLayerComboBox()
+        self.pointset_combo_box.setCurrentIndex(-1)
+        self.pointset_combo_box.setFilters(QgsMapLayerProxyModel.PointLayer)
+        self.method_combo_box = QComboBox()
+        self.method_combo_box.addItem('Hough Transform')
+        self.hough_parameters = QVBoxLayout()
+        self.method_combo_box.addItem('Ransac Method')
+        self.ransac_parameters = QVBoxLayout()
+        self.method_combo_box.addItem('Three Point Azimuth')
+        self.theepoint_parameters = QVBoxLayout()
+        self.method_combo_box.addItem('Two Point Alignment')
+        self.twopoint_parameters = QVBoxLayout()
+        alignments_layout.addRow('Pointset',self.pointset_combo_box)
+        alignments_layout.addRow('Method',self.method_combo_box)
+        
+
+        #alignments_layout.addWidget(alignments_group)
         alignments_widget.setLayout(alignments_layout)
-        return stereo_widget
+        return alignments_widget
     def setup_cost_calculator(self):
         cost_calc_widget = QWidget()
         self.cost_calc_layout = QFormLayout()
