@@ -355,6 +355,9 @@ class GtTraceTool(QgsMapToolEmitPoint):
         ds = gdal.Open(filepath)
         array = np.array(ds.GetRasterBand(1).ReadAsArray()).astype('int')                     
         array = np.rot90(np.rot90(np.rot90(array)))
+        min_ = np.min(array)
+        if min_<0:
+            array+=-min_
         return array
     def deactivate(self):
         self.delete_control_points()
@@ -373,23 +376,22 @@ class CostCalculator():
         filepath = layer.dataProvider().dataSourceUri()
         ds = gdal.Open(filepath)
         self.transform = ds.GetGeoTransform()
+        self.wkt = ds.GetProjection()
         if ds == None:
             return
         self.arrays = []
         for i in range(self.layer.bandCount()):
             array = np.array(ds.GetRasterBand(i+1).ReadAsArray()).astype('int')
             self.arrays.append(np.rot90(array,3))
-            print array.shape
         return self.arrays
     def numpy_to_layer(self,array,name):
         array = np.rot90(array)
         sy, sx = array.shape
-        print array.shape
-        pathname = name
+        pathname = QgsProject.instance().readPath("./")+'/'+name
         driver = gdal.GetDriverByName("GTiff")
         dsOut = driver.Create(pathname, sx+1,sy+1,1,gdal.GDT_Float32 ,)
-        print self.transform
         dsOut.SetGeoTransform(self.transform)
+        dsOut.SetProjection(self.wkt)
         bandOut=dsOut.GetRasterBand(1)
         BandWriteArray(bandOut, array)
         bandOut = None
