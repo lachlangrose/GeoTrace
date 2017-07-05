@@ -57,6 +57,8 @@ class GtTraceTool(QgsMapToolEmitPoint):
         self.costlayerCRSSrsid = self.cost.crs().srsid()
         #self.renderer = self.canvas.mapRenderer()
         self.projectCRSSrsid = self.canvas.mapSettings().destinationCrs().srsid()
+        if self.targetlayerCRSSrsid != self.costlayerCRSSrsid:
+            print "Target and cost have different CRS"
         self.use_control_points = False
         self.use_dem_for_planes = False
         self.xmin = self.cost.extent().xMinimum()
@@ -82,8 +84,9 @@ class GtTraceTool(QgsMapToolEmitPoint):
         self.trace.remove_control_points()
         self.rubberBandLine.reset(QGis.Line)
     def clearRubberBand(self):
-        self.rubberBandLine.reset(QGis.Line)
-        self.rubberBand.reset(QGis.Point)
+        if self.rubberBandLine:
+            self.rubberBandLine.reset(QGis.Line)
+            self.rubberBand.reset(QGis.Point)
         
     def invertCost(self,flag):
         if flag == True:
@@ -97,7 +100,8 @@ class GtTraceTool(QgsMapToolEmitPoint):
             self.trace.set_image(array)
             self.invert = False
     def delete_control_points(self):
-        self.rubberBand.reset(QGis.Point)
+        if self.rubberBand:
+            self.rubberBand.reset(QGis.Point)
         self.trace.remove_control_points()
     def addPoint(self,p):
         #self.rubberBand.reset(QGis.Line)
@@ -322,6 +326,7 @@ class GtTraceTool(QgsMapToolEmitPoint):
         return
     def canvasPressEvent(self, e):
         point = self.toMapCoordinates(e.pos())
+        print point
         if type(self.cost) != QgsRasterLayer:
             print "error"
             return
@@ -336,7 +341,8 @@ class GtTraceTool(QgsMapToolEmitPoint):
             self.columns = self.cost.width()
             j1 = j
             i1 = i
-            if i < 0 or i>self.rows or j <0 or j > self.columns:
+            if i < 0 or i>self.columns or j <0 or j > self.rows:
+                print "out of bounds"
                 return 
             self.trace.add_node([i1,j1])
             self.addPoint(point)
