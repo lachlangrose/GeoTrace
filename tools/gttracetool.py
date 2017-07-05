@@ -326,9 +326,7 @@ class GtTraceTool(QgsMapToolEmitPoint):
         return
     def canvasPressEvent(self, e):
         point = self.toMapCoordinates(e.pos())
-        print point
         if type(self.cost) != QgsRasterLayer:
-            print "error"
             return
         if e.button() == Qt.LeftButton:
             if self.projectCRSSrsid != self.costlayerCRSSrsid:
@@ -385,11 +383,12 @@ class CostCalculator():
         return self.arrays
     def numpy_to_layer(self,array,name):
         array = np.rot90(array)
-        sx, sy = array.shape
+        sy, sx = array.shape
         print array.shape
         pathname = name
         driver = gdal.GetDriverByName("GTiff")
-        dsOut = driver.Create(pathname, sx,sy,1,gdal.GDT_Float32 ,)
+        dsOut = driver.Create(pathname, sx+1,sy+1,1,gdal.GDT_Float32 ,)
+        print self.transform
         dsOut.SetGeoTransform(self.transform)
         bandOut=dsOut.GetRasterBand(1)
         BandWriteArray(bandOut, array)
