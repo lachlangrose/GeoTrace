@@ -437,8 +437,7 @@ class CostCalculator():
         self.layer_to_numpy(self.layer)
         cost=np.array(self.arrays[0])
         cost.fill(0)
-        
-        for i in range(self.arrays[0]):
+        for i in range(len(self.arrays)):
             cost+=self.arrays[i]
         cost /= len(self.arrays)
         return cost
