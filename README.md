@@ -7,17 +7,17 @@ The trace extraction method (*Trace* tab) uses a least-cost path algorithm to "f
 single-channel cost raster in which the structures of interest are represented by low values, and the background by high values. A variety of
 functions for quickly calculating such a cost function have been included in the *Cost Calculator* tab.
 
-#Installation
+# Installation
 Clone GeoTools into your QGIS plugin path or create link to this directory. 
 
-##Dependencies
+## Dependencies
 GeoTools uses Numpy, Matplotlib, mplstereonet so you will need to make sure these are installed for your python distribution.
 
-#Licence
+# Licence
 GeoTools is free software licenced under the GNU licence v2
 
 
-#Further Reading and Citation
+# Further Reading and Citation
 
 If you found this tool useful, please cite *Thiele et al., 2017*. The publication (currently in prep.) also contains a more detailed description of the methods employed by this plugin.
 
