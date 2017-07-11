@@ -340,7 +340,9 @@ class GtTraceTool(QgsMapToolEmitPoint):
             j1 = j
             i1 = i
             if i < 0 or i>self.columns or j <0 or j > self.rows:
-                print "out of bounds"
+                self.iface.messageBar().pushMessage(
+                "Warning", "Selected point is not within raster and cannot be used",
+                 level=QgsMessageBar.WARNING)#print "out of bounds"
                 return 
             self.trace.add_node([i1,j1])
             self.addPoint(point)
@@ -356,8 +358,8 @@ class GtTraceTool(QgsMapToolEmitPoint):
         array = np.array(ds.GetRasterBand(1).ReadAsArray()).astype('int')                     
         array = np.rot90(np.rot90(np.rot90(array)))
         min_ = np.min(array)
-        if min_<0:
-            array+=-min_
+        #if min_<0:
+        #    array+=abs(min_)+1
         return array
     def deactivate(self):
         self.delete_control_points()
@@ -435,7 +437,8 @@ class CostCalculator():
         self.layer_to_numpy(self.layer)
         cost=np.array(self.arrays[0])
         cost.fill(0)
-        for i in range(len(self.arrays)):
+        
+        for i in range(self.arrays[0]):
             cost+=self.arrays[i]
         cost /= len(self.arrays)
         return cost

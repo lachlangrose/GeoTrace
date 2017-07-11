@@ -36,7 +36,6 @@ import resources
 from geo_tools_dialog import GeoToolsDialog
 import os.path,  sys
 
-import gttools
 import gtlinetool
 import gtstereo
 import gttracetool
@@ -172,22 +171,17 @@ class GeoTools:
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
-        base_icon_path = ':/plugins/GeoTools/'
-        tile_icon_path = ':/plugins/GeoTools/tile.png'
-        stereo_icon_path = ':/plugins/GeoTools/stereo.png'
-        digitize_icon_path = ':/plugins/GeoTools/digitize.png'
-
         icon_path = ':/plugins/GeoTools/icon.png'
         self.add_action(
             icon_path,
             text=self.tr(u'GeoTools'),
             callback=self.open_trace,
             parent=self.iface.mainWindow())
-        self.add_action(
-            icon_path,
-            text=self.tr(u'Export Tiles within area'),
-            callback=self.line,
-            parent=self.iface.mainWindow())
+        #self.add_action(
+        #    icon_path,
+        #    text=self.tr(u'Digitize'),
+        #    callback=self.line,
+        #    parent=self.iface.mainWindow())
     def open_trace(self):
         if self.trace_dockWidget:
             self.trace_dockWidget.show()

@@ -63,7 +63,7 @@ class GeoToolsDialog(QtGui.QDialog):
         tab_layout.addTab(self.setup_cost_calculator(),"Cost Calculator")
         tab_layout.addTab(self.setup_stereonet(),"Steronet")
         tab_layout.addTab(self.setup_rose(),"Rose")
-        tab_layout.addTab(self.setup_alignments(),"Alignments Analysis")
+        #tab_layout.addTab(self.setup_alignments(),"Alignments Analysis")
         
         self.dialog_layout.addWidget(tab_layout)
     def setup_histogram(self):
