@@ -183,9 +183,6 @@ class GeoTools:
         #    callback=self.line,
         #    parent=self.iface.mainWindow())
     def open_trace(self):
-        if self.trace_dockWidget:
-            self.trace_dockWidget.show()
-            return
         self.dlg = GeoToolsDialog(self.iface)
         self.trace_dockWidget = QDockWidget('GeoTools', self.iface.mainWindow())
         #for some reason dockwidget wasn't given a name and then the main qgis
@@ -196,6 +193,8 @@ class GeoTools:
         self.trace_dockWidget.setWidget(self.dlg)
         self.trace_dockWidget.destroyed.connect(self.dlg.closeEvent)
         self.iface.addDockWidget(Qt.RightDockWidgetArea, self.trace_dockWidget)
+
+        self.trace_dockWidget.visibilityChanged.connect(self.dlg.close)
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:

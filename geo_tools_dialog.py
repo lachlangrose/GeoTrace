@@ -53,6 +53,7 @@ class GeoToolsDialog(QtGui.QDialog):
         # #widgets-and-dialogs-with-auto-connect
         self.setup_gui()
     def closeEvent(self,event):
+        self.deactivateTrace()
         return
     def setup_gui(self):
         self.dialog_layout = QVBoxLayout()
