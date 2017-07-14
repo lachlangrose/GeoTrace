@@ -66,6 +66,7 @@ class GeoToolsDialog(QtGui.QDialog):
         tab_layout.addTab(self.setup_rose(),"Rose")
         #tab_layout.addTab(self.setup_alignments(),"Alignments Analysis")
         
+
         self.dialog_layout.addWidget(tab_layout)
     def setup_histogram(self):
         histogram_widget = QWidget()
@@ -225,6 +226,8 @@ class GeoToolsDialog(QtGui.QDialog):
          
         return trace_widget
     def deactivateTrace(self):
+        if self.traceToolActive == False:
+            return
         self.tracetool.rubberBandLine.reset(QGis.Line)
         self.tracetool.rubberBand.reset(QGis.Point)
         self.tracetool.deactivate()
