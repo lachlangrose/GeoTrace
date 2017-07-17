@@ -44,8 +44,10 @@ import uuid
 import matplotlib.pyplot as plt
 from skimage import filters
 #import phasepack
-class GtTraceBase():
+class GtTraceBase(object):
     def __init__(self,*args):
+        super(GtTraceBase,self).__init__(*args)
+        
         self.canvas = args[0]
         self.cost = args[1]
         self.target = args[2]
@@ -261,18 +263,17 @@ class GtTraceBase():
         self.reset()
 class GtMapToolEmitPoint(QgsMapToolEmitPoint):
     def __init__(self,*args):
+        super(GtMapToolEmitPoint,self).__init__(args[0])
         canvas = args[0]#kwargs['canvas']
-        QgsMapToolEmitPoint.__init__(self,canvas)
-class GtTraceTool(GtMapToolEmitPoint,GtTraceBase):
+        #QgsMapToolEmitPoint.__init__(self,canvas)
+class GtTraceTool(GtTraceBase,GtMapToolEmitPoint):
     #deactivatedt = pyqtSignal()
     def __init__(self, canvas_,iface_,target_,cost_):
         #qgis layers/interface
         
-        super(GtTraceTool,self).__init__(canvas_,cost_,target_,iface_)
+        super(GtTraceTool,self).__init__(canvas_,cost_,target_,iface_,canvas_)
 
         self.iface = iface_
-        self.setup_rubberband()
-    def setup_rubberband(self):     
         print self.canvas
         self.rubberBand = QgsRubberBand(self.canvas, QGis.Point)
         self.rubberBand.setColor(Qt.red)
