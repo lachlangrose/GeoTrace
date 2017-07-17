@@ -61,12 +61,10 @@ class GeoToolsDialog(QtGui.QDialog):
         self.setWindowTitle('GeoTools')
         tab_layout = QTabWidget()
         tab_layout.addTab(self.setup_trace(),"Trace")
+        #tab_layout.addTab(self.setup_advanced_trace(),"Advanced Trace")
         tab_layout.addTab(self.setup_cost_calculator(),"Cost Calculator")
         tab_layout.addTab(self.setup_stereonet(),"Steronet")
         tab_layout.addTab(self.setup_rose(),"Rose")
-        #tab_layout.addTab(self.setup_alignments(),"Alignments Analysis")
-        
-
         self.dialog_layout.addWidget(tab_layout)
     def setup_histogram(self):
         histogram_widget = QWidget()
@@ -119,6 +117,93 @@ class GeoToolsDialog(QtGui.QDialog):
         #alignments_layout.addWidget(alignments_group)
         alignments_widget.setLayout(alignments_layout)
         return alignments_widget
+    def setup_advanced_trace(self):
+        trace_widget = QWidget()
+        trace_main_layout = QVBoxLayout()
+        vector_group = QGroupBox()
+        self.vector_layer_combo_box = QgsMapLayerComboBox()
+        self.vector_layer_combo_box.setCurrentIndex(-1)
+        self.vector_layer_combo_box.setFilters(QgsMapLayerProxyModel.LineLayer)
+        vector_layout = QFormLayout()
+        vector_layout.addRow('Output Layer',self.vector_layer_combo_box)
+        vector_group.setLayout(vector_layout)
+        self.controlpoint_layer_combo_box = QgsMapLayerComboBox()
+        self.controlpoint_layer_combo_box.setCurrentIndex(-1)
+        self.controlpoint_layer_combo_box.setFilters(QgsMapLayerProxyModel.PointLayer)
+        self.unique_field = QgsFieldComboBox()
+        vector_layout.addRow('Control Points',self.controlpoint_layer_combo_box)
+        vector_layout.addRow('Unique ID field',self.unique_field)
+        self.controlpoint_layer_combo_box.layerChanged.connect(self.unique_field.setLayer)
+        self.cost_layer_combo_box = QgsMapLayerComboBox()
+        self.cost_layer_combo_box.setCurrentIndex(-1)
+        self.cost_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        self.invert_cost = QCheckBox()
+
+        vector_layout.addRow('Cost layer',self.cost_layer_combo_box)
+        vector_layout.addRow('Invert Cost',self.invert_cost )
+
+        self.fit_plane = QCheckBox()
+        self.dem_layer_combo_box = QgsMapLayerComboBox()
+        self.dem_layer_combo_box.setCurrentIndex(-1)
+        self.dem_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        self.dem_layer_combo_box.setEnabled(False)
+        self.fit_plane.toggled.connect(self.show_plane_combo_box)
+        vector_layout.addRow("Find orientation using DEM",self.fit_plane)
+        vector_layout.addRow('DEM',self.dem_layer_combo_box)
+
+        self.run_trace_button = QPushButton("Run")
+        vector_layout.addRow(self.run_trace_button)
+        #vector_layout.addWidget(create_memory_layer)
+        trace_main_layout.addWidget(vector_group)
+        trace_widget.setLayout(trace_main_layout)
+        self.run_trace_button.clicked.connect(self.toggle_trace_tool)
+
+
+        return trace_widget        
+
+        cost_group = QGroupBox('Cost Layer')
+        raster_calculator_button = QPushButton('Raster Calculator')
+        self.invert_cost = QCheckBox('Invert Cost')
+        cost_layout = QVBoxLayout()
+        cost_layout.addWidget(self.cost_layer_combo_box)
+        cost_layout.addWidget(self.invert_cost)
+        #cost_layout.addWidget(raster_calculator_button)
+        cost_group.setLayout(cost_layout)
+        self.fit_plane = QCheckBox("Fit planes")
+        dem_label = QLabel("Find fracture orientation using DEM")
+        #TODO filter list to only show single band rasters
+        cost_layout.addWidget(dem_label)
+        cost_layout.addWidget(self.fit_plane)
+        self.dem_layer_combo_box = QgsMapLayerComboBox()
+        self.dem_layer_combo_box.setCurrentIndex(-1)
+        self.dem_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        self.dem_layer_combo_box.setEnabled(False)
+        cost_layout.addWidget(self.dem_layer_combo_box)
+        self.fit_plane.toggled.connect(self.show_plane_combo_box)
+
+        trace_group = QGroupBox("Find Trace")
+        trace_layout = QFormLayout()
+        self.traceToolActive = False
+        self.run_trace_button = QPushButton("Run")
+        undo_button = QPushButton("Undo")
+        
+        self.run_trace_button.clicked.connect(self.toggle_trace_tool)
+        trace_layout.addWidget(self.run_trace_button) 
+        #trace_layout.addWidget(clear_points_button) 
+        trace_group.setLayout(trace_layout)
+        
+        cost_calculator_layout = QFormLayout()
+        raster_layer_combo_box = QgsMapLayerComboBox()
+        raster_layer_combo_box.setCurrentIndex(-1)
+        raster_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        cost_calculator_layout.addWidget(raster_layer_combo_box)
+        trace_main_layout.addWidget(vector_group)
+        trace_main_layout.addWidget(cost_group)
+        trace_main_layout.addWidget(trace_group)
+        trace_widget.setLayout(trace_main_layout)
+         
+        return trace_widget
+
     def setup_cost_calculator(self):
         cost_calc_widget = QWidget()
         self.cost_calc_layout = QFormLayout()
