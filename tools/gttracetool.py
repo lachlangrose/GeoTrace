@@ -46,7 +46,7 @@ from skimage import filters
 #import phasepack
 class GtTraceBase(object):
     def __init__(self,*args):
-        super(GtTraceBase,self).__init__(*args)
+        super(GtTraceBase,self).__init__()
         
         self.canvas = args[0]
         self.cost = args[1]
@@ -156,10 +156,10 @@ class GtTraceBase(object):
             array = max_v+1 - array
             self.trace.set_image(array)
             self.invert = True
-        #if flag == False:
-            #array = self.rasterToNumpy(self.cost)
-            #self.trace.set_image(array)
-            #self.invert = False
+        if flag == False:
+            array = self.rasterToNumpy(self.cost)
+            self.trace.set_image(array)
+            self.invert = False
     def addLine(self):
         if len(self.paths) == 0:
             return
@@ -260,7 +260,6 @@ class GtTraceBase(object):
         vl.dataProvider().forceReload()
         self.canvas.refresh()
 
-        self.reset()
 class GtMapToolEmitPoint(QgsMapToolEmitPoint):
     def __init__(self,*args):
         super(GtMapToolEmitPoint,self).__init__(args[0])
@@ -274,7 +273,6 @@ class GtTraceTool(GtTraceBase,GtMapToolEmitPoint):
         super(GtTraceTool,self).__init__(canvas_,cost_,target_,iface_,canvas_)
 
         self.iface = iface_
-        print self.canvas
         self.rubberBand = QgsRubberBand(self.canvas, QGis.Point)
         self.rubberBand.setColor(Qt.red)
         self.rubberBandLine = QgsRubberBand(self.canvas,QGis.Line)
@@ -336,10 +334,11 @@ class GtTraceTool(GtTraceBase,GtMapToolEmitPoint):
     def keyReleaseEvent(self,e):
         if e.key() == Qt.Key_Backspace:
             self.removeLastPoint()
-            self.runTraceInteractive()
+            self.rrunInteractiveTrace()
             e.accept()
         if e.key() == Qt.Key_Enter:
             self.addLine()
+            self.reset()
         if e.key() == Qt.Key_Escape:
             self.reset()
     def keyPressEvent(self,e):
@@ -373,8 +372,8 @@ class GtTraceTool(GtTraceBase,GtMapToolEmitPoint):
                 return 
             self.trace.add_node([i1,j1])
             self.addPoint(point)
-            self.runTrace()
-            #clear rubber band
+            self.runInteractiveTrace()
+
         if e.button() == Qt.RightButton:
            self.addLine()
            self.rubberBandLine.reset(QGis.Line)
@@ -392,246 +391,50 @@ class GtTraceTool(GtTraceBase,GtMapToolEmitPoint):
         #emit we get a recursive error TODO debug
 
     #    self.emit(SIGNAL("deactivated()"))
-class GtBatchTrace():
-    def __init__(self, canvas,target,cost,controlpoints):
+class GtBatchTrace(GtTraceBase):
+    def __init__(self, canvas,target,iface,cost,controlpoints,fieldname):
             #qgis layers/interface
-        self.canvas = canvas
-        self.cost = cost
+        super(GtBatchTrace,self).__init__(canvas,cost,target)
+
         self.controlpoints = controlpoints
-        self.target = target
-        #crs reprojection stuff
-        self.targetlayerCRSSrsid = self.target.crs().srsid()
-        self.costlayerCRSSrsid = self.cost.crs().srsid()
-        #self.renderer = self.canvas.mapRenderer()
-        self.projectCRSSrsid = self.canvas.mapSettings().destinationCrs().srsid()
-        if self.targetlayerCRSSrsid != self.costlayerCRSSrsid:
-            print "Target and cost have different CRS"
-        self.use_control_points = False
-        self.use_dem_for_planes = False
-        self.xmin = self.cost.extent().xMinimum()
-        self.ymin = self.cost.extent().yMinimum()
-        self.xmax = self.cost.extent().xMaximum()
-        self.ymax = self.cost.extent().yMaximum()
-        self.xsize = self.cost.rasterUnitsPerPixelX()
-        self.ysize = self.cost.rasterUnitsPerPixelY()
-        self.trace = trace.ShortestPath()
-        self.invert = False
-        self.trace.set_image(self.rasterToNumpy(self.cost)) 
-        self.paths = []#self.trace.shortest_path()
-    def clearRubberBand(self):
-        if self.rubberBandLine:
-            self.rubberBandLine.reset(QGis.Line)
-            self.rubberBand.reset(QGis.Point)
-        
-    def invertCost(self,flag):
-        if flag == True:
-            array = self.rasterToNumpy(self.cost)
-            max_v = np.max(array)
-            array = max_v+1 - array
-            self.trace.set_image(array)
-            self.invert = True
-        if flag == False:
-            array = self.rasterToNumpy(self.cost)
-            self.trace.set_image(array)
-            self.invert = False
+        self.fieldname = fieldname
+        self.cpCRSSrsid = self.controlpoints.crs().srsid()
+        self.iface = iface
     def runBatchTrace(self):
-        self.paths = self.trace.shortest_path()
-        s = 0
-        if len(self.paths) == 0:
-            return
-        for c in self.paths:
-            i = (c[0])
-            j = (c[1])
-            x_ = (float(i))*self.xsize+self.xmin+self.xsize*.5
-            y_ = (float(j))*self.ysize+self.ymin+self.ysize*.5
-            p = QgsPoint(x_,y_)
-            if self.costlayerCRSSrsid != self.projectCRSSrsid:
-                transform = QgsCoordinateTransform(self.costlayerCRSSrsid, 
-                                        self.projectCRSSrsid)
-                p = transform.transform(p)
-
-    def setControlPoints(self, vector = None):
-        if vector == None:
-            self.use_control_points = False
-            return 
-        self.use_control_points = True
-        self.control_points = vector
-        return
-    def setDem(self,raster= None):
-        if raster == None:
-            print "no raster"
-            self.use_dem_for_planes = False
-            return
-        pr = self.target.dataProvider()
-        fields = pr.fields()
-        strike = False
-        dip = False
-        e1 = False
-        e2 = False
-        e3 = False
-
-        attributes = []
-        for f in fields:
-            if f.name() == 'DIP_DIR':
-                strike = True
-            if f.name() == 'E_1':
-                e1 = True
-            if f.name() == 'E_2':
-                e2 = True
-            if f.name() == 'E_3':
-                e3 = True
-            if f.name() == 'DIP':
-                dip = True
-        if not dip:
-            attributes.append(QgsField("DIP",QVariant.Double))
-            print "Creating DIP attribute"
-        if not strike:
-            attributes.append(QgsField("DIP_DIR",QVariant.Double))           
-            print "Creating DIP_DIR attribute"
-        if not e1:
-            attributes.append(QgsField("E_1",QVariant.Double))            
-            print "Creating EIGENVALUE_1 attribute"
-        if not e2:
-            attributes.append(QgsField("E_2",QVariant.Double))            
-            print "Creating EIGENVALUE_2 attribute"
-        if not e3:
-            attributes.append(QgsField("E_3",QVariant.Double))            
-            print "Creating EIGENVALUE_3 attribute"
-            
-        if len(attributes) > 0:
-            pr.addAttributes(attributes)
-        self.use_dem_for_planes = True
-        self.dem = raster
-        self.target.updateFields()
-        return
-
-    def addField(self,fieldname,fieldtype,layer):
-        #slightly less optimised way to add a field but more compartmentalised
-        pr = layer.dataProvider()
-        fields = pr.fields()
-        strike = False
-        dip = False
-        rms = False
-        attributes = []
-        for f in fields:
-            if f.name() == fieldname:
-                return True
-        pr.addAttributes([QgsField(fieldname,fieldtype)])
-        layer.updateFields()
-
-        print "Creating and adding "+fieldname+" attribute"
-        return True
-    def addLine(self):
-        if len(self.paths) == 0:
-            return
-        #if using control points add a uuid to the control point and the line
-        lineuuid = uuid.uuid1()
-        self.addField("COST",QVariant.String,self.target)
-        if self.use_control_points:
-            #add uuid to control point layer
-            self.addField("UUID",QVariant.String,self.control_points)
-            self.addField("UUID",QVariant.String,self.target)
-
-            point_pr = self.control_points.dataProvider()
-            point_fields = point_pr.fields()
-            self.control_points.startEditing()
-            pointlayerCRSSrsid = self.control_points.crs().srsid()
-            
-            for p in self.trace.nodes:
-
-                fet = QgsFeature(point_fields)
-                x_ = (float(p[0]))*self.xsize+self.xmin
-                y_ = (float(p[1]))*self.ysize+self.ymin
-                geom = QgsGeometry.fromPoint(QgsPoint(x_,y_))
-                if pointlayerCRSSrsid != self.costlayerCRSSrsid:
-                    geom.transform(QgsCoordinateTransform(self.costlayerCRSSrsid,
-                                                      pointlayerCRSSrsid))
-                fet.setGeometry(geom)
-                fet['UUID'] = str(lineuuid)
-                point_pr.addFeatures([fet])
-            self.control_points.commitChanges()
-            self.control_points.updateFields()
-        vl = self.target        
-        pr = vl.dataProvider()
-        fields = pr.fields()
-        # Enter editing mode
-        vl.startEditing()
-        xyz = []
-        if self.use_dem_for_planes:
-            if self.dem == None:
-                print "No DEM selected"
-                return
-            filepath = self.dem.dataProvider().dataSourceUri()
-            dem_src = gdal.Open(filepath)
-            dem_gt = dem_src.GetGeoTransform()
-            dem_rb = dem_src.GetRasterBand(1)
-        
         points = []
-        for c in self.paths:
-            i = (c[0])
-            j = (c[1])
-            x_ = (float(i))*self.xsize+self.xmin + self.xsize*.5
-            y_ = (float(j))*self.ysize+self.ymin + self.ysize*.5
-            points.append(QgsPoint(x_, y_))
-            if self.use_dem_for_planes:
-                px = int((x_ - dem_gt[0]) / dem_gt[1])
-                py = int((y_ - dem_gt[3]) / dem_gt[5])
-                intval=dem_rb.ReadAsArray(px,py,1,1)[0][0]
-                xyz.append([x_,y_,intval])
-        if self.use_dem_for_planes:
-            M = np.array(xyz)
-            M -=  np.mean(M,axis=0)
-            C = M.T.dot(M)
-            eigvals, eigvec = np.linalg.eig(C)
-            n = eigvec[np.argmin(eigvals)]
-            if n[2] < 0:
-                n[0] = -n[0]
-                n[1] = -n[1]
-                n[2] = -n[2] 
+        idx = self.controlpoints.fieldNameIndex(self.fieldname)
+        values = self.controlpoints.uniqueValues(idx)
+        for v in values:
+            temp = []
+            for fet in self.controlpoints.getFeatures():
+                if fet[self.fieldname] == v:
+                    point = fet.geometry().asPoint()
+                    if self.cpCRSSrsid != self.costlayerCRSSrsid:
+                        print "transforming"
+                        print point
+                        transform = QgsCoordinateTransform(self.cpCRSSrsid,
+                                                  self.costlayerCRSSrsid)
+                        point = transform.transform(point)
+                        print point
+                    print point[0], self.xmin, self.xsize
+                    print point[1], self.ymin, self.ysize
+                    i = int((point[0] - self.xmin) / self.xsize)
+                    j = int((point[1] - self.ymin) / self.ysize)
+                    print point, i, j
+                    self.rows = self.cost.height()
+                    self.columns = self.cost.width()
+                    j1 = j
+                    i1 = i
+                    if i < 0 or i>self.columns or j <0 or j > self.rows:
+                        self.iface.messageBar().pushMessage(
+                        "Warning", "Selected point is not within raster and cannot be used",
+                         level=QgsMessageBar.WARNING)#print "out of bounds"
+                        continue
+                    self.trace.add_node([i1,j1])
+            self.runTrace()
+            self.addLine()
+            self.trace.remove_control_points()
 
-        fet = QgsFeature(fields)
-        geom = QgsGeometry.fromPolyline(points)
-        if self.targetlayerCRSSrsid != self.costlayerCRSSrsid:
-            geom.transform(QgsCoordinateTransform(self.costlayerCRSSrsid,
-                                              self.targetlayerCRSSrsid))
-
-
-        fet.setGeometry( geom  )
-        if self.invert:
-            fet['COST'] = self.cost.name()+"_inverted"
-        if not self.invert:
-            fet['COST'] = self.cost.name()
-        if self.use_dem_for_planes:
-            dip_dir = 90. - np.arctan2(n[1],n[0]) * 180.0 / np.pi
-            if dip_dir > 360.:
-                dip_dir -= 360.
-            point_type = np.sqrt(n[0]*n[0]+n[1]*n[1]+n[2]*n[2])
-            dip = np.arccos(n[2])*180.0 / np.pi
-            eigvals.sort()
-            fet['DIP_DIR']= float(dip_dir)
-            fet['DIP']= float(dip)
-            fet['E_1'] = float(eigvals[2])
-            fet['E_2'] = float(eigvals[1])
-            fet['E_3'] = float(eigvals[0])
-        if self.use_control_points:
-            fet['UUID'] = str(lineuuid)
-        vl.addFeature(fet)
-        vl.commitChanges()
-        vl.updateFields()
-        vl.dataProvider().forceReload()
-        self.rubberBandLine.reset(QGis.Line)
-        self.canvas.refresh()
-
-        self.reset()
-    def rasterToNumpy(self,layer):
-        filepath = layer.dataProvider().dataSourceUri()
-        ds = gdal.Open(filepath)
-        array = np.array(ds.GetRasterBand(1).ReadAsArray()).astype('int')                     
-        array = np.rot90(np.rot90(np.rot90(array)))
-        min_ = np.min(array)
-        #if min_<0:
-        #    array+=abs(min_)+1
-        return array
 class CostCalculator():
     def __init__(self,layer):
         self.layer = layer
