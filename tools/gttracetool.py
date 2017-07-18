@@ -46,8 +46,6 @@ from skimage import filters
 #import phasepack
 class GtTraceBase(object):
     def __init__(self,*args):
-        super(GtTraceBase,self).__init__()
-        
         self.canvas = args[0]
         self.cost = args[1]
         self.target = args[2]
@@ -262,16 +260,18 @@ class GtTraceBase(object):
 
 class GtMapToolEmitPoint(QgsMapToolEmitPoint):
     def __init__(self,*args):
-        super(GtMapToolEmitPoint,self).__init__(args[0])
+        print args
+        #super(GtMapToolEmitPoint,self).__init__(args[0])
         canvas = args[0]#kwargs['canvas']
-        #QgsMapToolEmitPoint.__init__(self,canvas)
+        QgsMapToolEmitPoint.__init__(self,canvas)
 class GtTraceTool(GtTraceBase,GtMapToolEmitPoint):
     #deactivatedt = pyqtSignal()
     def __init__(self, canvas_,iface_,target_,cost_):
         #qgis layers/interface
-        
-        super(GtTraceTool,self).__init__(canvas_,cost_,target_,iface_,canvas_)
-
+        GtMapToolEmitPoint.__init__(self,canvas_) 
+        GtTraceBase.__init__(self,canvas_,cost_,target_,iface_)
+        #super(GtTraceTool,self).__init__(canvas_,cost_,target_,iface_,canvas_)
+        #    super(GtMapToolEmitPoint,self).__init__(canvas_)
         self.iface = iface_
         self.rubberBand = QgsRubberBand(self.canvas, QGis.Point)
         self.rubberBand.setColor(Qt.red)
@@ -394,8 +394,8 @@ class GtTraceTool(GtTraceBase,GtMapToolEmitPoint):
 class GtBatchTrace(GtTraceBase):
     def __init__(self, canvas,target,iface,cost,controlpoints,fieldname):
             #qgis layers/interface
-        super(GtBatchTrace,self).__init__(canvas,cost,target)
-
+        GtTraceBase.__init__(self,canvas,cost,target,iface)
+        #super(GtBatchTrace,self).__init__(canvas,cost,target)
         self.controlpoints = controlpoints
         self.fieldname = fieldname
         self.cpCRSSrsid = self.controlpoints.crs().srsid()
