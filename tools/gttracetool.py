@@ -158,11 +158,12 @@ class GtTraceBase(object):
             array = self.rasterToNumpy(self.cost)
             self.trace.set_image(array)
             self.invert = False
-    def addLine(self):
+    def addLine(self,lineuuid=None):
         if len(self.paths) == 0:
             return
         #if using control points add a uuid to the control point and the line
-        lineuuid = uuid.uuid1()
+        if lineuuid==None:
+            lineuuid = uuid.uuid1()
         self.addField("COST",QVariant.String,self.target)
         if self.use_control_points:
             #add uuid to control point layer
@@ -404,6 +405,7 @@ class GtBatchTrace(GtTraceBase):
         points = []
         idx = self.controlpoints.fieldNameIndex(self.fieldname)
         values = self.controlpoints.uniqueValues(idx)
+        self.addField(self.fieldname,QVariant.String,self.target)
         for v in values:
             temp = []
             for fet in self.controlpoints.getFeatures():
@@ -432,7 +434,7 @@ class GtBatchTrace(GtTraceBase):
                         continue
                     self.trace.add_node([i1,j1])
             self.runTrace()
-            self.addLine()
+            self.addLine(v)
             self.trace.remove_control_points()
 
 class CostCalculator():
