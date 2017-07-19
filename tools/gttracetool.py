@@ -410,17 +410,17 @@ class GtBatchTrace(GtTraceBase):
                 if fet[self.fieldname] == v:
                     point = fet.geometry().asPoint()
                     if self.cpCRSSrsid != self.costlayerCRSSrsid:
-                        print "transforming"
-                        print point
+                        #print "transforming"
+                        #print point
                         transform = QgsCoordinateTransform(self.cpCRSSrsid,
                                                   self.costlayerCRSSrsid)
                         point = transform.transform(point)
-                        print point
-                    print point[0], self.xmin, self.xsize
-                    print point[1], self.ymin, self.ysize
+                        #print point
+                    #print point[0], self.xmin, self.xsize
+                    #print point[1], self.ymin, self.ysize
                     i = int((point[0] - self.xmin) / self.xsize)
                     j = int((point[1] - self.ymin) / self.ysize)
-                    print point, i, j
+                    #print point, i, j
                     self.rows = self.cost.height()
                     self.columns = self.cost.width()
                     j1 = j
