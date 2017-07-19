@@ -165,10 +165,10 @@ class GtTraceBase(object):
         if lineuuid==None:
             lineuuid = uuid.uuid1()
         self.addField("COST",QVariant.String,self.target)
+        self.addField("UUID",QVariant.String,self.target) #add UID field
         if self.use_control_points:
             #add uuid to control point layer
             self.addField("UUID",QVariant.String,self.control_points)
-            self.addField("UUID",QVariant.String,self.target)
 
             point_pr = self.control_points.dataProvider()
             point_fields = point_pr.fields()
@@ -235,6 +235,7 @@ class GtTraceBase(object):
 
 
         fet.setGeometry( geom  )
+        fet['UUID'] = str(lineuuid) #store UUID on polyline also
         if self.invert:
             fet['COST'] = self.cost.name()+"_inverted"
         if not self.invert:
