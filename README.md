@@ -21,8 +21,8 @@ in most cases however:
 2. Check pip (a python package manager) is up to date with the following: `python -m pip install --upgrade setuptools`
 3. Install *mplstereonet* first, using the following command: `python -m pip install mplstereonet`
 4. Download precompiled 32 bit python wheels for *cython* and *scikit-image* 2.7 (otherwise you need to install a c-compiler) from:
-	* [cython] (http://www.lfd.uci.edu/~gohlke/pythonlibs/#cython) 
-	* [scikit-image] (http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image)
+	- http://www.lfd.uci.edu/~gohlke/pythonlibs/#cython 
+	- http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image
 5. Navigate the console to the directory containing these downloaded wheels: `cd C:/DirectoryName/Wheels`
 6. Install each package using pip: `python -m pip install Cython-0.26-cp27-cp27m-win32.whl` and `python -m pip install scikit_image-0.13.0-cp27-cp27m-win32.whl`
 
@@ -40,13 +40,14 @@ is organised into 5 tabs, each of which is described below.
 ## Trace tab
 
 The trace tab is used for computer-assisted digitization. Before starting, select:
-	* An output layer (polyline .shp file) to write digitized traces to
-	* A point layer to store the control points in [optional]
-	* A cost layer. This must be a one-channel raster, in which traces will *follow* low values. (Though the *Invert Cost* check will make the trace follow high values). The 'Cost Calculator* tab can be used to assist creation of the single-channel cost raster.
-	* A DEM layer, used to estimate 3D orientations from the traces [opional]
-	
-	Once the relevent information has been set, start interpreting by clicking the `Start Digitizing` button. Left-click now adds control points to your trace and Right-Click completes a trace. Hit *Backspace* to undo.
-	
+	- An output layer (polyline .shp file) to write digitized traces to
+	- mA point layer to store the control points in (optional)
+	- A cost layer. This must be a one-channel raster, in which traces will *follow* low values. (Though the *Invert Cost* check will make the trace follow high values). The 'Cost Calculator* tab can be used to assist creation of the single-channel cost raster.
+	- A DEM layer, used to estimate 3D orientations from the traces (optional)
+
+Once the relevent information has been set, start interpreting by clicking the `Start Digitizing` button.
+Left-click adds control points to your trace and Right-Click completes a trace. Hit *Backspace* to undo.
+
 ## Advanced Trace
 
 The Advanced trace tab is used to generate traces from predefined control points. This uses a *Cost layer* and writes to an *Output layer*, as above, but rather than requiring manually 
@@ -55,7 +56,7 @@ on clicking `Run`.
 
 ## Cost Calculator
 
-This tab wraps a variety of python functions from the scikit-image package for easy generation of cost rasters. Please refer to the [scikit-image] (http://scikit-image.org/) website for detailed
+This tab wraps a variety of python functions from the scikit-image package for easy generation of cost rasters. Please refer to the scikit-image (http://scikit-image.org/) website for detailed
 descriptions of each of these functions.
 
 ## Stereonet
