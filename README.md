@@ -8,7 +8,7 @@ single-channel cost raster in which the structures of interest are represented b
 functions for quickly calculating such a cost function have been included in the *Cost Calculator* tab.
 
 # Installation
-Clone GeoTools into your QGIS plugin path or create link to this directory. 
+Clone (or download and unzip) the GeoTools directoryy into your QGIS plugin path. On windows, this path will be something like `C:/Users/USERNAME/.qgs2/python/plugins`.
 
 ## Dependencies
 GeoTools uses `Numpy`, `Matplotlib`, `mplstereonet` and `scikit-image`, so you will need to make sure these are installed for your python distribution.
@@ -28,7 +28,45 @@ in most cases however:
 
 Assuming these all installed correctly, you should now be set to use the plugin.
 
-These can be 
+# Usage Instructions
+
+On launching QGIS for the first time, the plugin needs to be activated using the QGIS plugin manager (*Plugins->Manage and Install Plugins...*). Providing the plugin has been
+installed to the correct directory (see above), `GeoTools` should appear in the list of available plugins. Make sure it's checked, and with some luck QGIS won't complain about it
+(throw errors).
+
+Assuming this worked, a friendly compass icon should appear in the toolbar somewhere. Click this to launch the plugin. A window-pane should then appear, containing plugin GUI. This
+is organised into 5 tabs, each of which is described below.
+
+## Trace tab
+
+The trace tab is used for computer-assisted digitization. Before starting, select:
+	* An output layer (polyline .shp file) to write digitized traces to
+	* A point layer to store the control points in [optional]
+	* A cost layer. This must be a one-channel raster, in which traces will *follow* low values. (Though the *Invert Cost* check will make the trace follow high values). The 'Cost Calculator* tab can be used to assist creation of the single-channel cost raster.
+	* A DEM layer, used to estimate 3D orientations from the traces [opional]
+	
+	Once the relevent information has been set, start interpreting by clicking the `Start Digitizing` button. Left-click now adds control points to your trace and Right-Click completes a trace. Hit *Backspace* to undo.
+	
+## Advanced Trace
+
+The Advanced trace tab is used to generate traces from predefined control points. This uses a *Cost layer* and writes to an *Output layer*, as above, but rather than requiring manually 
+inserted control points it takes a point feature layer (*Control Points*) and ID field defining which trace each point belongs to (*Unique ID Field*), and will then automatically generate traces
+on clicking `Run`.
+
+## Cost Calculator
+
+This tab wraps a variety of python functions from the scikit-image package for easy generation of cost rasters. Please refer to the [scikit-image] (http://scikit-image.org/) website for detailed
+descriptions of each of these functions.
+
+## Stereonet
+
+The stereonet tab can be used to plot stereonets of planar orientation estimates (strike/dip or dip/dip direction) created using this plugin, or otherwise. Simply select the layer
+and associated fields containing the orientation estimates and then use the plotting tools to draw the stereonet.
+
+## Rose
+
+This tab works as above, but creates a rose diagram rather than a stereonet.
+
 # Licence
 GeoTools is free software licenced under the GNU licence v2
 
