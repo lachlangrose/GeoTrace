@@ -45,9 +45,9 @@ import matplotlib.pyplot as plt
 import mplstereonet
 import random
 
-class Window(QtGui.QDialog):
+class GtStereo(QtGui.QDialog):
     def __init__(self, canvas, iface, parent=None):
-        super(Window, self).__init__(parent)
+        super(GtStereo, self).__init__(parent)
         self.canvas = canvas
         self.iface = iface
         self.figure, self.ax = mplstereonet.subplots()
@@ -159,22 +159,4 @@ class Window(QtGui.QDialog):
         self.ax.plane(fit_strike, fit_dip, color='red', lw=2)
         self.ax.pole(fit_strike, fit_dip, marker='o', color='red', markersize=14)
         self.canvas.draw() 
-class GtStereo():
-  def __init__(self, canvas,iface):
-      self.canvas = canvas
-      self.iface = iface
 
-        
-  def run(self):
-        """Run method that performs all the real work"""
-
-        self.main = Window(self.canvas,self.iface)
-        # show the dialog
-        self.main.show()
-        # Run the dialog event loop
-        #result = self.dlg.exec_()
-        # See if OK was pressed
-        #if result:
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-         #   pass      

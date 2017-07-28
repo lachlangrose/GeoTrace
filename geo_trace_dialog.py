@@ -5,7 +5,7 @@
  Last Change: 
 /*************************************************************************** 
  ---------------
- GeoTools
+ GeoTrace
  ---------------
  A QGIS plugin
  Collection of tools for geoscience application. Some tools can be found in 
@@ -30,20 +30,17 @@
 
 
 import os
-import gttracetool
-from gtstereo import *
-from gtrose import *
 from PyQt4 import *
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
 from qgis.gui import *
-_plugin_name_ = "GeoTools"
+_plugin_name_ = "GeoTrace"
 
-class GeoToolsDialog(QtGui.QDialog):
+class GeoTraceDialog(QtGui.QDialog):
     def __init__(self, iface,parent=None):
         """Constructor."""
-        super(GeoToolsDialog, self).__init__(parent)
+        super(GeoTraceDialog, self).__init__(parent)
         self.iface = iface
         self.canvas = iface.mapCanvas()
         # Set up the user interface from Designer.
@@ -58,39 +55,59 @@ class GeoToolsDialog(QtGui.QDialog):
     def setup_gui(self):
         self.dialog_layout = QVBoxLayout()
         self.setLayout(self.dialog_layout)
-        self.setWindowTitle('GeoTools')
+        self.setWindowTitle('GeoTrace')
         tab_layout = QTabWidget()
-        tab_layout.addTab(self.setup_trace(),"Trace")
-        tab_layout.addTab(self.setup_advanced_trace(),"Advanced Trace")
-        tab_layout.addTab(self.setup_cost_calculator(),"Cost Calculator")
-        tab_layout.addTab(self.setup_stereonet(),"Steronet")
-        tab_layout.addTab(self.setup_rose(),"Rose")
+        try:
+            import gttracetool
+        except ImportError:
+            print 'a'#tab_layout.addTab(self.setup_error(),"Trace")
+            #tab_layout.addTab(self.setup_error(),"Advanced Trace")
+            #tab_layout.addTab(self.setup_error(),"Cost Calculator")
+        else:           
+            tab_layout.addTab(self.setup_trace(),"Trace")
+            tab_layout.addTab(self.setup_advanced_trace(),"Advanced Trace")
+            tab_layout.addTab(self.setup_cost_calculator(),"Cost Calculator")
+        #try:
+        #    from gtstereo import *
+        #except ImportError:
+        #    print 'a'#tab_layout.addTab(self.setup_error(),"Steronet")
+        #else:
+        #    tab_layout.addTab(self.setup_stereonet(),"Steronet")
+        try:
+            import gtrose 
+        except ImportError:
+            print 'a'#tab_layout.addTab(self.setup_error(),"Rose")
+        else:
+            tab_layout.addTab(self.setup_rose(),"Rose")
         tab_layout.addTab(self.setup_about(),"About")
         self.dialog_layout.addWidget(tab_layout)
+    def setup_error(self):
+        error_widget= QWidget()
+        return error_widget
     def setup_histogram(self):
         histogram_widget = QWidget()
         histogram_layout = QVBoxLayout()
-        histogram_group = QGroupBox("GeoTools Histogram")
+        histogram_group = QGroupBox("GeoTrace Histogram")
         histogram_layout.addWidget(histogram_group)
         histogram_widget.setLayout(histogram_layout)
         return histogram_widget
     def setup_about(self):
         about_widget = QWidget()
-        return  about_widget
+        return  about_widget
     def setup_stereonet(self):
         stereo_main = Window(self.canvas,self.iface)    
         stereo_widget = QWidget()
         stereo_layout = QVBoxLayout()
-        stereo_group = QGroupBox("GeoTools Stereonet")
+        stereo_group = QGroupBox("GeoTrace Stereonet")
         stereo_layout.addWidget(stereo_group)
         stereo_layout.addWidget(stereo_main)
         stereo_widget.setLayout(stereo_layout)
         return stereo_widget
     def setup_rose(self):
-        rose_main = GtRose(self.canvas,self.iface)
+        rose_main = gtrose.GtRose(self.canvas,self.iface)
         rose_widget = QWidget()
         rose_layout = QVBoxLayout()
-        rose_group = QGroupBox("GeoTools Rose Diagram")
+        rose_group = QGroupBox("GeoTrace Rose Diagram")
         rose_layout.addWidget(rose_group)
         rose_layout.addWidget(rose_main)
         rose_widget.setLayout(rose_layout)

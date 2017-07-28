@@ -35,5 +35,5 @@ def classFactory(iface):  # pylint: disable=invalid-name
     :type iface: QgsInterface
     """
     #
-    from .geo_tools import GeoTools
-    return GeoTools(iface)
+    from .geo_trace import GeoTrace
+    return GeoTrace(iface)

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
- File Name: geo_tools.py
+ File Name: geo_trace.py
  Last Change: 
 /*************************************************************************** 
  ---------------
- GeoTools
+ GeoTrace
  ---------------
  A QGIS plugin
  Collection of tools for geoscience application. Some tools can be found in 
@@ -33,13 +33,10 @@ from PyQt4.QtGui import *#QAction, QIcon
 # Initialize Qt resources from file resources.py
 import resources
 # Import the code for the dialog
-from geo_tools_dialog import GeoToolsDialog
+from geo_trace_dialog import GeoTraceDialog
 import os.path,  sys
-
 import gtlinetool
-import gtstereo
-import gttracetool
-class GeoTools:
+class GeoTrace:
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
@@ -59,7 +56,7 @@ class GeoTools:
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
-            'GeoTools_{}.qm'.format(locale))
+            'GeoTrace_{}.qm'.format(locale))
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
@@ -72,11 +69,11 @@ class GeoTools:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&GeoTools')
-        self.toolbar = self.iface.addToolBar(u'GeoTools')
-        self.toolbar.setObjectName(u'GeoTools')
+        self.menu = self.tr(u'&GeoTrace')
+        self.toolbar = self.iface.addToolBar(u'GeoTrace')
+        self.toolbar.setObjectName(u'GeoTrace')
         self.canvas = self.iface.mapCanvas()
-        #self.dlg = GeoToolsDialog(self.iface)
+        #self.dlg = GeoTraceDialog(self.iface)
         self.linetool= gtlinetool.GtLineTool(self.canvas,self.iface)
         self.trace_dockWidget = None
     # noinspection PyMethodMayBeStatic
@@ -92,7 +89,7 @@ class GeoTools:
         :rtype: QString
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
-        return QCoreApplication.translate('GeoTools', message)
+        return QCoreApplication.translate('GeoTrace', message)
 
     def line(self):
         self.canvas.setMapTool(self.linetool)
@@ -171,10 +168,10 @@ class GeoTools:
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
-        icon_path = ':/plugins/GeoTools/icon.png'
+        icon_path = ':/plugins/GeoTrace/icon.png'
         self.add_action(
             icon_path,
-            text=self.tr(u'GeoTools'),
+            text=self.tr(u'GeoTrace'),
             callback=self.open_trace,
             parent=self.iface.mainWindow())
         #self.add_action(
@@ -183,11 +180,11 @@ class GeoTools:
         #    callback=self.line,
         #    parent=self.iface.mainWindow())
     def open_trace(self):
-        self.dlg = GeoToolsDialog(self.iface)
-        self.trace_dockWidget = QDockWidget('GeoTools', self.iface.mainWindow())
+        self.dlg = GeoTraceDialog(self.iface)
+        self.trace_dockWidget = QDockWidget('GeoTrace', self.iface.mainWindow())
         #for some reason dockwidget wasn't given a name and then the main qgis
         #save state was throwing an error - causing minidump??
-        self.trace_dockWidget.setObjectName("GeoToolsDock")
+        self.trace_dockWidget.setObjectName("GeoTraceDock")
         self.trace_dockWidget.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         #self.qProf_QWidget = qprof_QWidget(self.canvas)
         self.trace_dockWidget.setWidget(self.dlg)
@@ -199,7 +196,7 @@ class GeoTools:
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginMenu(
-                self.tr(u'&GeoTools'),
+                self.tr(u'&GeoTrace'),
                 action)
             self.iface.removeToolBarIcon(action)
         # remove the toolbar

@@ -38,17 +38,17 @@ LOCALES =
 # translation
 SOURCES = \
 	__init__.py \
-	geo_tools.py geo_tools_dialog.py tools/gtlinetool.py tools/gtrose.py tools/gtstereo.py  tools/gttracetool.py  tools/gttrace.py
+	geo_trace.py geo_trace_dialog.py tools/gtlinetool.py tools/gtrose.py tools/gtstereo.py  tools/gttracetool.py  tools/gttrace.py
 
-PLUGINNAME = GeoTools
+PLUGINNAME = GeoTrace
 
 PY_FILES = \
 	__init__.py \
-	geo_tools.py geo_tools_dialog.py tools/gtlinetool.py  tools/gtrose.py tools/gtstereo.py tools/gttracetool.py tools/gttrace.py
+	geo_trace.py geo_trace_dialog.py tools/gtlinetool.py  tools/gtrose.py tools/gtstereo.py tools/gttracetool.py tools/gttrace.py
 
-UI_FILES = geo_tools_dialog_base.ui
+UI_FILES = \ \ 
 
-EXTRAS = metadata.txt icon.png digitize.png stereo.png tile.png
+EXTRAS = metadata.txt icon.png 
 
 COMPILED_RESOURCE_FILES = resources.py
 
@@ -105,7 +105,6 @@ deploy: compile doc transcompile
 	# $HOME/$(QGISDIR)/python/plugins
 	mkdir -p $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vf $(PY_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
-	cp -vf $(UI_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vf $(COMPILED_RESOURCE_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vf $(EXTRAS) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vfr i18n $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
