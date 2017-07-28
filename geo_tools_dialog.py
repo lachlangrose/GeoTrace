@@ -65,6 +65,7 @@ class GeoToolsDialog(QtGui.QDialog):
         tab_layout.addTab(self.setup_cost_calculator(),"Cost Calculator")
         tab_layout.addTab(self.setup_stereonet(),"Steronet")
         tab_layout.addTab(self.setup_rose(),"Rose")
+        tab_layout.addTab(self.setup_about(),"About")
         self.dialog_layout.addWidget(tab_layout)
     def setup_histogram(self):
         histogram_widget = QWidget()
@@ -73,7 +74,9 @@ class GeoToolsDialog(QtGui.QDialog):
         histogram_layout.addWidget(histogram_group)
         histogram_widget.setLayout(histogram_layout)
         return histogram_widget
-            
+    def setup_about(self):
+        about_widget = QWidget()
+        return  about_widget
     def setup_stereonet(self):
         stereo_main = Window(self.canvas,self.iface)    
         stereo_widget = QWidget()
@@ -92,31 +95,6 @@ class GeoToolsDialog(QtGui.QDialog):
         rose_layout.addWidget(rose_main)
         rose_widget.setLayout(rose_layout)
         return rose_widget 
-    def setup_alignments(self):
-        alignments_widget = QWidget()
-        alignments_layout = QFormLayout()
-        #alignments_group = QGroupBox("GeoTools Alignments Tools")
-        self.pointset_combo_box = QgsMapLayerComboBox()
-        
-        self.pointset_combo_box= QgsMapLayerComboBox()
-        self.pointset_combo_box.setCurrentIndex(-1)
-        self.pointset_combo_box.setFilters(QgsMapLayerProxyModel.PointLayer)
-        self.method_combo_box = QComboBox()
-        self.method_combo_box.addItem('Hough Transform')
-        self.hough_parameters = QVBoxLayout()
-        self.method_combo_box.addItem('Ransac Method')
-        self.ransac_parameters = QVBoxLayout()
-        self.method_combo_box.addItem('Three Point Azimuth')
-        self.theepoint_parameters = QVBoxLayout()
-        self.method_combo_box.addItem('Two Point Alignment')
-        self.twopoint_parameters = QVBoxLayout()
-        alignments_layout.addRow('Pointset',self.pointset_combo_box)
-        alignments_layout.addRow('Method',self.method_combo_box)
-        
-
-        #alignments_layout.addWidget(alignments_group)
-        alignments_widget.setLayout(alignments_layout)
-        return alignments_widget
     def setup_advanced_trace(self):
         trace_widget = QWidget()
         trace_main_layout = QVBoxLayout()

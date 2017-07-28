@@ -8,8 +8,11 @@ single-channel cost raster in which the structures of interest are represented b
 functions for quickly calculating such a cost function have been included in the *Cost Calculator* tab.
 
 # Installation
-Clone (or download and unzip) the GeoTools directoryy into your QGIS plugin path. On windows, this path will be something like `C:/Users/USERNAME/.qgs2/python/plugins`.
-
+The plugin can be in two ways.
+1. The prefered option is to use the QGIS plugin repository as this will retrieve the most recent stable version of the plugin. To do this use the plugin manager in QGIS and select experimental plugins. 
+2. Clone (or download and unzip) the GeoTools directory into your QGIS plugin path.
+>. - On windows, this path will be something like `C:/Users/USERNAME/.qgs2/python/plugins`.
+>. - Linux the plugin can be cloned to any directory and then the relevant files are copied to the correct locations using the by running the command 'make deploy' 
 ## Dependencies
 GeoTools uses `Numpy`, `Matplotlib`, `mplstereonet` and `scikit-image`, so you will need to make sure these are installed for your python distribution.
 QGis should come bundled with `Numpy` and `Matplotlib`. The other packages can be installed using pip. 
@@ -27,7 +30,10 @@ in most cases however:
 6. Install each package using pip: `python -m pip install Cython-0.26-cp27-cp27m-win32.whl` and `python -m pip install scikit_image-0.13.0-cp27-cp27m-win32.whl`
 
 Assuming these all installed correctly, you should now be set to use the plugin.
-
+### Linux
+1. Open a terminal window 'ctrl+alt+t'
+2. Install *mplstereonet* first, using the following command: `sudo pip install mplstereonet` 
+3. Install *scikit-image* using the following command: 'sudo pip install sudo pip install scikit-image'  
 # Usage Instructions
 
 On launching QGIS for the first time, the plugin needs to be activated using the QGIS plugin manager (*Plugins->Manage and Install Plugins...*). Providing the plugin has been
