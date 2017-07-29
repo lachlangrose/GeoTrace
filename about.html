@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>About GeoTrace</h1>
+<p>GeoTrace is a a QGIS plugin developed by <a href="mailto:lachlan.grose@monash.edu">Lachlan Grose</a> and <a href="mailto:samuel.thiele@monash.edu">Sam Thiele</a> containing some helpful tools for extracting and analysing the orientations of geological structures. It can be used to rapidly digitize structural traces in raster data, estimate their 3D orientations using an associated DEM, and then visualise the results on stereonets and rose diagrams. There is a complementary plugin, Compass, for CloudCompare that provides similar functionalities for 3D point clouds</p>
+
+<p>The trace extraction method (Trace tab) uses a least-cost path algorithm to "follow" linear features in the raster. This relies on a single-channel cost raster in which the structures of interest are represented by low values, and the background by high values. A variety of functions for quickly calculating such a cost function have been included in the Cost Calculator tab.</p>
+
+<h2>Useage Instructions</h2>
+<h3>Trace tab</h3>
+<p>The trace tab is used for computer-assisted digitization. Before starting, select: - An output layer (polyline .shp file) to write digitized traces to - mA point layer to store the control points in (optional) - A cost layer. This must be a one-channel raster, in which traces will follow low values. (Though the Invert Cost check will make the trace follow high values). The 'Cost Calculator* tab can be used to assist creation of the single-channel cost raster. - A DEM layer, used to estimate 3D orientations from the traces (optional)</p>
+
+<p>Once the relevent information has been set, start interpreting by clicking the Start Digitizing button. Left-click adds control points to your trace and Right-Click completes a trace. Hit Backspace to undo.</p>
+<h3>Advanced Trace</h3>
+<p>The Advanced trace tab is used to generate traces from predefined control points. This uses a Cost layer and writes to an Output layer, as above, but rather than requiring manually inserted control points it takes a point feature layer (Control Points) and ID field defining which trace each point belongs to (Unique ID Field), and will then automatically generate traces on clicking Run.</p>
+
+<h3>Cost Calculator</h3>
+<p>This tab wraps a variety of python functions from the scikit-image package for easy generation of cost rasters. Please refer to the <a href="http://scikit-image.org/">scikit-image</a> website for detailed descriptions of each of these functions.</p>
+
+<h3>Stereonet</h3>
+<p>The stereonet tab can be used to plot stereonets of planar orientation estimates (strike/dip or dip/dip direction) created using this plugin, or otherwise. Simply select the layer and associated fields containing the orientation estimates and then use the plotting tools to draw the stereonet. </p>
+
+<p>The stereonet utility is a wrapper around the python library <a href="nehttps://github.com/joferkington/mplstereonet"><i>mplstereonet</i></a></p>
+
+<h3>Rose Diagram</h3>
+<p>This tab works as above, but creates a rose diagram rather than a stereonet.</p>
+<h2> Licence </h2>
+<p>GeoTrace was developed by Lachlan Grose and Sam Thiele and is free software licenced under the GNU licence v2</p>
+<h2>Support
+
+<h2>Further Reading and Citation</h2>
+<p>If you found this tool useful, please cite <i>Thiele et al., 2017</i>. The publication (currently in prep.) also contains a more detailed 
+description of the methods employed by this plugin.</p>
+<p>
+<i>Thiele, ST., Grose, L., Samsu, A., Micklethwaite, S., Vollgger, SA. &amp; Cruden, S., 2017, 'A computer-assisted approach to structural interpretation of point clouds and rasters', Journal TBA </i>
+</p>
+<p></p><p></p>
+</body>
+</html>

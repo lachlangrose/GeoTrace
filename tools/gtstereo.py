@@ -30,9 +30,6 @@
 
 import os.path,  sys
 import numpy as np
-currentPath = os.path.dirname( __file__ )
-sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/../'))
-
 from PyQt4 import *
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *

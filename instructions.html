@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>Installing Dependencies</h1>
+<p>It looks like your are missing a required dependency for GeoTrace! GeoTrace uses Numpy, Matplotlib, mplstereonet and scikit-image, so you will need to make sure these are installed for your python distribution. QGis should come bundled with Numpy and Matplotlib. The other packages can be installed using pip.</p>
+<h2>Windows</h2>
+<p>Installing mplstereonet and scikit-image on Windows can be a little tricky, as skimage contains uncompiled c-code. The following instructions should work in most cases however:</p>
+<ol>
+    <li>Open the start menu and search for OSGeo4W Shell. Right-click on it and select Run as administrator. This tool gives you access to the qGIS version of python</li>
+    <li>Check pip (a python package manager) is up to date with the following: python -m pip install --upgrade setuptools</li>
+    <li>Install mplstereonet first, using the following command: python -m pip install mplstereonet</li>
+    <li>Download precompiled 32 bit python wheels for cython and scikit-image 2.7 (otherwise you need to install a c-compiler) from:</li>
+    <ul>
+       <li> http://www.lfd.uci.edu/~gohlke/pythonlibs/#cython</li>
+       <li> http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image</li>
+    </ul>
+    <li>Navigate the console to the directory containing these downloaded wheels: cd C:/DirectoryName/Wheels</li>
+    <li>Install each package using pip: python -m pip install Cython-0.26-cp27-cp27m-win32.whl and python -m pip install scikit_image-0.13.0-cp27-cp27m-win32.whl</li>
+</ol>
+<p>Assuming these all installed correctly, you should now be set to use the plugin after you restart QGIS<p>
+
+<h2>Linux/OXS</h2>
+<p>Linux and OSX should be much simpler because they have a working C compiler.</p>
+<ol>
+    <li>Open a terminal window 'ctrl+alt+t'</li>
+    <li>Install mplstereonet first, using the following command: sudo pip install mplstereonet</li>
+    <li>Install scikit-image using the following command: 'sudo pip install sudo pip install scikit-image'</li>
+</ol>
+<h2>Further Reading and Citation</h2>
+<p>If you found this tool useful, please cite <i>Thiele et al., 2017</i>. The publication (currently in prep.) also contains a more detailed 
+description of the methods employed by this plugin.</p>
+<p>
+<i>Thiele, ST., Grose, L., Samsu, A., Micklethwaite, S., Vollgger, SA. &amp; Cruden, S., 2017, 'A computer-assisted approach to structural interpretation of point clouds and rasters', Journal TBA </i>
+</p>
+<p></p><p></p>
+</body>
+</html>

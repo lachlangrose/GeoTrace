@@ -36,10 +36,6 @@ from PyQt4.QtGui import *
 from qgis.core import *
 from qgis.gui import *
 _plugin_name_ = "GeoTrace"
-
-import gtrose
-import gttracetool
-
 class GeoTraceDialog(QtGui.QDialog):
     def __init__(self, iface,parent=None):
         """Constructor."""
@@ -61,31 +57,41 @@ class GeoTraceDialog(QtGui.QDialog):
         self.setWindowTitle('GeoTrace')
         tab_layout = QTabWidget()
         try:
-            import gttracetool
-        except ImportError:
-            print 'a'#tab_layout.addTab(self.setup_error(),"Trace")
-            #tab_layout.addTab(self.setup_error(),"Advanced Trace")
-            #tab_layout.addTab(self.setup_error(),"Cost Calculator")
-        else:           
             tab_layout.addTab(self.setup_trace(),"Trace")
-            tab_layout.addTab(self.setup_advanced_trace(),"Advanced Trace")
-            tab_layout.addTab(self.setup_cost_calculator(),"Cost Calculator")
-        #try:
-        #    from gtstereo import *
-        #except ImportError:
-        #    print 'a'#tab_layout.addTab(self.setup_error(),"Steronet")
-        #else:
-        #    tab_layout.addTab(self.setup_stereonet(),"Steronet")
-        try:
-            import gtrose 
         except ImportError:
-            print 'a'#tab_layout.addTab(self.setup_error(),"Rose")
-        else:
+            tab_layout.addTab(self.setup_error(),"Trace")
+        try:
+            tab_layout.addTab(self.setup_advanced_trace(),"Advanced Trace")
+        except ImportError:
+            tab_layout.addTab(self.setup_error(),"Advanced Trace")
+        try:
+            tab_layout.addTab(self.setup_cost_calculator(),"Cost Calculator")
+        except ImportError:
+            tab_layout.addTab(self.setup_error(),"Cost Calculator")
+
+        try:
+            tab_layout.addTab(self.setup_stereonet(),"Steronet")
+        except ImportError:
+            tab_layout.addTab(self.setup_error(),"Steronet")
+        try:
             tab_layout.addTab(self.setup_rose(),"Rose")
+        except ImportError:
+            tab_layout.addTab(self.setup_error(),"Rose")
         tab_layout.addTab(self.setup_about(),"About")
         self.dialog_layout.addWidget(tab_layout)
     def setup_error(self):
         error_widget= QWidget()
+        main_layout = QGridLayout()
+        missing = QGroupBox("Missing Dependencies")
+        error = QTextBrowser()
+        info = QFile("instructions.html")
+        info.open(QFile.ReadOnly)
+        text = QTextStream(info)
+        error.setHtml(text.readAll())
+        main_layout.addWidget(missing)
+        error.setOpenExternalLinks(True)
+        main_layout.addWidget(error)
+        error_widget.setLayout(main_layout)
         return error_widget
     def setup_histogram(self):
         histogram_widget = QWidget()
@@ -96,9 +102,20 @@ class GeoTraceDialog(QtGui.QDialog):
         return histogram_widget
     def setup_about(self):
         about_widget = QWidget()
+        main_layout = QGridLayout()
+        text_box = QTextBrowser()
+        about = QFile("about.html")
+        about.open(QFile.ReadOnly)
+        text = QTextStream(about)
+        text_box.setHtml(text.readAll())
+        text_box.setOpenExternalLinks(True)
+        main_layout.addWidget(text_box)
+        about_widget.setLayout(main_layout)
+
         return  about_widget
     def setup_stereonet(self):
-        stereo_main = Window(self.canvas,self.iface)    
+        import gtstereo 
+        stereo_main = gtstereo.GtStereo(self.canvas,self.iface)    
         stereo_widget = QWidget()
         stereo_layout = QVBoxLayout()
         stereo_group = QGroupBox("GeoTrace Stereonet")
@@ -107,6 +124,7 @@ class GeoTraceDialog(QtGui.QDialog):
         stereo_widget.setLayout(stereo_layout)
         return stereo_widget
     def setup_rose(self):
+        import gtrose 
         rose_main = gtrose.GtRose(self.canvas,self.iface)
         rose_widget = QWidget()
         rose_layout = QVBoxLayout()
@@ -116,6 +134,7 @@ class GeoTraceDialog(QtGui.QDialog):
         rose_widget.setLayout(rose_layout)
         return rose_widget 
     def setup_advanced_trace(self):
+        import gttracetool
         trace_widget = QWidget()
         trace_main_layout = QVBoxLayout()
         vector_group = QGroupBox()
@@ -159,6 +178,7 @@ class GeoTraceDialog(QtGui.QDialog):
 
         return trace_widget        
     def setup_cost_calculator(self):
+        import gttracetool
         cost_calc_widget = QWidget()
         self.cost_calc_layout = QFormLayout()
         self.raster_layer_combo_box = QgsMapLayerComboBox()
@@ -191,6 +211,7 @@ class GeoTraceDialog(QtGui.QDialog):
         self.cost_calc_layout.addRow(longname,radio)
         radio.clicked.connect(self.updateCostName)
     def setup_trace(self):
+        import gttracetool
         trace_widget = QWidget()
         trace_main_layout = QVBoxLayout()
         vector_group = QGroupBox('Output Layer')
