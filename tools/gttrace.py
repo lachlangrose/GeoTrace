@@ -108,32 +108,24 @@ class ShortestPath():
             xmax = max(s[0][0],s[1][0])
             ymin = min(s[0][1],s[1][1])
             ymax = max(s[0][1],s[1][1])
-            #Add a buffer to the image 50px - maybe this should be base
-            buffer_v = 50
-            if (xmin - buffer_v)>0:
-                xmin = xmin - buffer_v
-            else:
-                xmin = 0;
-            if (xmax + buffer_v) < self.imshape[0]:
-                xmax = xmax + buffer_v
-            else:
-                xmax = self.imshape[0];
-
-            if (ymin - buffer_v)>0:
-                ymin = ymin - buffer_v
-            else:
-                ymin = 0;
-            if (ymax - buffer_v) < self.imshape[1]:
-                ymax = ymax + buffer_v
-            else:
-                ymax = 0;
             
+            #Calculate local image to compute shortet path, including a buffer around the points of 100px (maybe this should be base?)
+            buffer_v = 100
+            xmin = max(xmin-buffer_v, 0) #n.b. min/max args ensure bounds remain within the image...
+            ymin = max(ymin-buffer_v, 0)
+            xmax = min(xmax+buffer_v, self.imshape[0])
+            ymax = min(ymax+buffer_v, self.imshape[1])
+            
+            #extract local image
             im = self.im[xmin:xmax,ymin:ymax]
+            
+            #get start and end points in local-image coords
             start = s[0]
             end = s[1]
             start = [s[0][0]-xmin,s[0][1]-ymin]
             end = [s[1][0]-xmin,s[1][1]-ymin]
 
+            #compute shortest path
             path, cost = route_through_array(im,start,end,fully_connected=True,geometric=True)
 
             if len(self.paths) > 0:

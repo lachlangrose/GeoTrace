@@ -336,7 +336,7 @@ class GtTraceTool(GtTraceBase,GtMapToolEmitPoint):
     def keyReleaseEvent(self,e):
         if e.key() == Qt.Key_Backspace:
             self.removeLastPoint()
-            self.rrunInteractiveTrace()
+            self.runInteractiveTrace()
             e.accept()
         if e.key() == Qt.Key_Enter:
             self.addLine()
