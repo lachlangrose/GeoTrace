@@ -36,6 +36,8 @@ import resources
 from geo_trace_dialog import GeoTraceDialog
 import os.path,  sys
 import gtlinetool
+import gtrose
+
 class GeoTrace:
     """QGIS Plugin Implementation."""
 

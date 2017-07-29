@@ -79,8 +79,8 @@ class GtTraceBase(object):
         array = np.array(ds.GetRasterBand(1).ReadAsArray()).astype('int')                     
         array = np.rot90(np.rot90(np.rot90(array)))
         min_ = np.min(array)
-        #if min_<0:
-        #    array+=abs(min_)+1
+        if min_<0: #we don't want negative or zero costs
+            array+=abs(min_)+1
         return array
     def setDem(self,raster= None):
         if raster == None:
@@ -284,14 +284,14 @@ class GtTraceTool(GtTraceBase,GtMapToolEmitPoint):
     def reset(self):
         self.startPoint = self.endPoint = None
         self.isEmittingPoint = False
-        self.rubberBand.reset(QGis.Point)
         self.trace.remove_control_points()
-        self.rubberBandLine.reset(QGis.Line)
+        self.clearRubberBand()
+        #self.rubberBandLine.reset(QGis.Line)
+        #self.rubberBand.reset(QGis.Point)
     def clearRubberBand(self):
         if self.rubberBandLine:
             self.rubberBandLine.reset(QGis.Line)
             self.rubberBand.reset(QGis.Point)
-        
     def delete_control_points(self):
         if self.rubberBand:
             self.rubberBand.reset(QGis.Point)
@@ -378,7 +378,7 @@ class GtTraceTool(GtTraceBase,GtMapToolEmitPoint):
 
         if e.button() == Qt.RightButton:
            self.addLine()
-           self.rubberBandLine.reset(QGis.Line)
+           self.reset()
            #clear rubber band
 
     def canvasReleaseEvent(self, e):

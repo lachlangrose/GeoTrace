@@ -37,6 +37,9 @@ from qgis.core import *
 from qgis.gui import *
 _plugin_name_ = "GeoTrace"
 
+import gtrose
+import gttracetool
+
 class GeoTraceDialog(QtGui.QDialog):
     def __init__(self, iface,parent=None):
         """Constructor."""

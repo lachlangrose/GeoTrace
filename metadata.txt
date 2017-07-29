@@ -7,14 +7,14 @@
 # This file should be included when you package your plugin.# Mandatory items:
 
 [general]
-name=GeoTools
+name=GeoTrace
 qgisMinimumVersion=2.8
-description=Collection of tools for geoscience analysis
-version=0.1
+description=Collection of tools extracting trace data from commonly used geoscience rasters such as imagery, topography and geophysics.
+version=1.0
 author=Lachlan Grose
 email=lachlan.grose@monash.edu
 
-about=Plugin is a collection of tools for geosciences. Including stereonet from selected data points. Create georeferenced tiles from your project.
+about=GeoTrace contains some helpful tools for extracting and analysing the orientations of geological structures. It can be used to rapidly digitize structural traces in raster data, estimate their 3D orientations using an associated DEM, and then visualise the results on stereonets and rose diagrams.
 
 tracker=https://github.com/lachlangrose/GeoTools
 repository=https://github.com/lachlangrose/GeoTools
