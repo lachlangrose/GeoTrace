@@ -408,7 +408,6 @@ class GtBatchTrace(GtTraceBase):
         values = self.controlpoints.uniqueValues(idx)
         self.addField(self.fieldname,QVariant.String,self.target)
         for f in self.controlpoints.getFeatures():
-            print f[self.fieldname]
             if f[self.fieldname] == None:
                 return False
         for v in values:
