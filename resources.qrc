@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/plugins/GeoTools" >
+    <qresource prefix="/plugins/GeoTrace" >
         <file>icon.png</file>
     </qresource>
 </RCC>
