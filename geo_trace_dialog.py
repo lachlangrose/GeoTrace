@@ -36,6 +36,12 @@ from PyQt4.QtGui import *
 from qgis.core import *
 from qgis.gui import *
 _plugin_name_ = "GeoTrace"
+trace_imported  = True
+try:
+    import gttracetool
+    trace_imported  = True
+except ImportError:
+    trace_imported = False
 class GeoTraceDialog(QtGui.QDialog):
     def __init__(self, iface,parent=None):
         """Constructor."""
@@ -56,19 +62,15 @@ class GeoTraceDialog(QtGui.QDialog):
         self.setLayout(self.dialog_layout)
         self.setWindowTitle('GeoTrace')
         tab_layout = QTabWidget()
-        try:
+        if trace_imported:
             tab_layout.addTab(self.setup_trace(),"Trace")
-        except ImportError:
-            tab_layout.addTab(self.setup_error(),"Trace")
-        try:
             tab_layout.addTab(self.setup_advanced_trace(),"Advanced Trace")
-        except ImportError:
-            tab_layout.addTab(self.setup_error(),"Advanced Trace")
-        try:
             tab_layout.addTab(self.setup_cost_calculator(),"Cost Calculator")
-        except ImportError:
-            tab_layout.addTab(self.setup_error(),"Cost Calculator")
 
+        else:
+            tab_layout.addTab(self.setup_error(),"Trace")
+            tab_layout.addTab(self.setup_error(),"Advanced Trace")
+            tab_layout.addTab(self.setup_error(),"Cost Calculator")
         try:
             tab_layout.addTab(self.setup_stereonet(),"Steronet")
         except ImportError:
@@ -134,7 +136,6 @@ class GeoTraceDialog(QtGui.QDialog):
         rose_widget.setLayout(rose_layout)
         return rose_widget 
     def setup_advanced_trace(self):
-        import gttracetool
         trace_widget = QWidget()
         trace_main_layout = QVBoxLayout()
         vector_group = QGroupBox()
@@ -178,7 +179,6 @@ class GeoTraceDialog(QtGui.QDialog):
 
         return trace_widget        
     def setup_cost_calculator(self):
-        import gttracetool
         cost_calc_widget = QWidget()
         self.cost_calc_layout = QFormLayout()
         self.raster_layer_combo_box = QgsMapLayerComboBox()
@@ -211,7 +211,6 @@ class GeoTraceDialog(QtGui.QDialog):
         self.cost_calc_layout.addRow(longname,radio)
         radio.clicked.connect(self.updateCostName)
     def setup_trace(self):
-        import gttracetool
         trace_widget = QWidget()
         trace_main_layout = QVBoxLayout()
         vector_group = QGroupBox('Output Layer')
@@ -345,6 +344,7 @@ class GeoTraceDialog(QtGui.QDialog):
         batch_trace.runBatchTrace()
         return
     def toggle_trace_tool(self):
+        
         if self.traceToolActive == True:
             self.deactivateTrace()
             return
