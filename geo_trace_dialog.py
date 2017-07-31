@@ -311,26 +311,24 @@ class GeoTraceDialog(QtGui.QDialog):
                     calc.run_calculator(c[0],self.cost_name.text())
                 
         return 
-    def toggle_cost_calculator_layout(self):
-        #if self.lightness_checkbox.checked():
-        #    
-        #if selfdarkness_checkbox.checked():
-        #    
-        #if self.gradient_checkbox.checked():
-        #    
-        #if self.rbg_similatiry_checkbox.checked():
-        #
-        #if self.rbg_gradient_checkbox.checked():
-        #     
-        #if self.curvature_checkbox.checked():
-        #
-        #if self.distance_checkbox.checked():
-        return  
+
     def run_advanced_trace_tool(self):
         target = self.at_vector_layer_combo_box.currentLayer()
         cost = self.at_cost_layer_combo_box.currentLayer() 
         ctrl_pt = self.at_controlpoint_layer_combo_box.currentLayer()
         field= self.unique_field.currentField()
+        if not target:
+            self.error("No target layer selected")
+            return
+        if not cost:
+            self.error("No cost layer selected")
+            return
+        if not ctrl_pt:
+            self.error("No control points layer selected")
+            return
+        if not field:
+            self.error("No unique field iD selected")
+            return
         if cost.bandCount() != 1:
             self.error("Cost Raster has too many bands")
             return
@@ -339,6 +337,7 @@ class GeoTraceDialog(QtGui.QDialog):
             return 
         if ctrl_pt.geometryType() != QGis.Point:
             self.error("Target has wrong geometry type")
+
 
         batch_trace = gttracetool.GtBatchTrace(self.canvas,target,self.iface,cost,ctrl_pt,field)
         batch_trace.runBatchTrace()
@@ -350,6 +349,13 @@ class GeoTraceDialog(QtGui.QDialog):
             return
         target = self.vector_layer_combo_box.currentLayer()
         cost = self.cost_layer_combo_box.currentLayer() 
+        if not target:
+            self.error("No target layer selected")
+            return
+        if not cost:
+            self.error("No cost layer selected")
+            return
+
         if cost.bandCount() != 1:
             self.error("Cost Raster has too many bands")
             return
@@ -357,15 +363,23 @@ class GeoTraceDialog(QtGui.QDialog):
             self.error("Target has wrong geometry type")
             return 
         self.tracetool = gttracetool.GtTraceTool(self.canvas,self.iface,target,cost)
+        if not self.tracetool:
+            self.error("Failed to create TraceTool.")
         #self.tracetool.deactivatedt.connect(self.deactivateTrace)
         if self.save_control_points.isChecked():
             ctrl_pt = self.controlpoint_layer_combo_box.currentLayer()
+            if not ctrl_pt:
+                self.error("No control point layer selected")
+                return
             if ctrl_pt.geometryType() != QGis.Point:
                 self.error("Control points are not points!")
                 return
             self.tracetool.setControlPoints(self.controlpoint_layer_combo_box.currentLayer())
         if self.fit_plane.isChecked():
             dem = self.dem_layer_combo_box.currentLayer()
+            if not dem:
+                self.error("DEM layer not selected")
+                return
             if dem.bandCount() != 1:
                 self.error("DEM must be single band")
                 return

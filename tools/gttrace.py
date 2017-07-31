@@ -126,7 +126,7 @@ class ShortestPath():
             end = [s[1][0]-xmin,s[1][1]-ymin]
 
             #compute shortest path
-            path, cost = route_through_array(im,start,end,fully_connected=True,geometric=True)
+            path, cost = route_through_array(im,int(start),int(end),fully_connected=True,geometric=True)
 
             if len(self.paths) > 0:
                 if path[0][0] + xmin != self.paths[-1][0] or \
