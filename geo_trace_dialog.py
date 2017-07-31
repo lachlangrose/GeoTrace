@@ -340,7 +340,8 @@ class GeoTraceDialog(QtGui.QDialog):
 
 
         batch_trace = gttracetool.GtBatchTrace(self.canvas,target,self.iface,cost,ctrl_pt,field)
-        batch_trace.runBatchTrace()
+        if batch_trace.runBatchTrace() == False:
+            self.error("Failed to run batch trace, check your input data")
         return
     def toggle_trace_tool(self):
         
