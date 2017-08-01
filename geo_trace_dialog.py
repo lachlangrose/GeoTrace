@@ -30,7 +30,7 @@
 
 
 import os
-#from PyQt4 import *
+from PyQt4 import *
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
@@ -295,7 +295,10 @@ class GeoTraceDialog(QDialog):
         self.run_trace_button.setText("Start Digitizing")
         return
     def updateCostName(self,string=None):
+        
         name = self.raster_layer_combo_box.currentLayer().name()
+        if not name:
+            return
         for c in self.costs:
             if c[1].isChecked():
                 name+=c[0]
