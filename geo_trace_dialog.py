@@ -30,7 +30,7 @@
 
 
 import os
-from PyQt4 import *
+#from PyQt4 import *
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
@@ -42,7 +42,7 @@ try:
     trace_imported  = True
 except ImportError:
     trace_imported = False
-class GeoTraceDialog(QtGui.QDialog):
+class GeoTraceDialog(QDialog):
     def __init__(self, iface,parent=None):
         """Constructor."""
         super(GeoTraceDialog, self).__init__(parent)
