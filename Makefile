@@ -38,8 +38,7 @@ LOCALES =
 # translation
 SOURCES = \
 	__init__.py \
-	geo_trace.py geo_trace_dialog.py tools/gtlinetool.py tools/gtrose.py tools/gtstereo.py  tools/gttracetool.py  tools/gttrace.py
-
+	geo_trace.py geo_trace_dialog.py tools/gtlinetool.py tools/gtrose.py tools/gtstereo.py  tools/gttracetool.py  tools/gttrace.py 
 PLUGINNAME = GeoTrace
 
 PY_FILES = \
@@ -48,7 +47,7 @@ PY_FILES = \
 
 UI_FILES = \ \ 
 
-EXTRAS = metadata.txt icon.png 
+EXTRAS = metadata.txt icon.png instructions.html about.html 
 
 COMPILED_RESOURCE_FILES = resources.py
 
