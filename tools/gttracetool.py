@@ -32,9 +32,9 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
 from qgis.gui import *
-from osgeo import gdal
-from osgeo.gdalnumeric import *
-from osgeo.gdalconst import *
+#from osgeo import gdal
+import osgeo 
+#from osgeo.gdalconst import *
 import numpy as np
 import time
 import gttrace as trace
@@ -73,7 +73,7 @@ class GtTraceBase(object):
         self.paths = self.trace.shortest_path()
     def rasterToNumpy(self,layer):
         filepath = layer.dataProvider().dataSourceUri()
-        ds = gdal.Open(filepath)
+        ds = osgeo.gdal.Open(filepath)
         array = np.array(ds.GetRasterBand(1).ReadAsArray()).astype('int')                     
         array = np.rot90(np.rot90(np.rot90(array)))
         min_ = np.min(array)
@@ -198,7 +198,7 @@ class GtTraceBase(object):
                 print "No DEM selected"
                 return
             filepath = self.dem.dataProvider().dataSourceUri()
-            dem_src = gdal.Open(filepath)
+            dem_src = osgeo.gdal.Open(filepath)
             dem_gt = dem_src.GetGeoTransform()
             dem_rb = dem_src.GetRasterBand(1)
         
@@ -445,7 +445,7 @@ class CostCalculator():
         self.layer = layer
     def layer_to_numpy(self,layer):
         filepath = layer.dataProvider().dataSourceUri()
-        ds = gdal.Open(filepath)
+        ds = osgeo.gdal.Open(filepath)
         self.transform = ds.GetGeoTransform()
         self.wkt = ds.GetProjection()
         if ds == None:
@@ -459,12 +459,12 @@ class CostCalculator():
         array = np.rot90(array)
         sy, sx = array.shape
         pathname = QgsProject.instance().readPath("./")+'/'+name
-        driver = gdal.GetDriverByName("GTiff")
-        dsOut = driver.Create(pathname, sx+1,sy+1,1,gdal.GDT_Float32 ,)
+        driver = osgeo.gdal.GetDriverByName("GTiff")
+        dsOut = driver.Create(pathname, sx+1,sy+1,1,osgeo.gdal.GDT_Float32 ,)
         dsOut.SetGeoTransform(self.transform)
         dsOut.SetProjection(self.wkt)
         bandOut=dsOut.GetRasterBand(1)
-        BandWriteArray(bandOut, array)
+        osgeo.gdalnumeric.BandWriteArray(bandOut, array)
         bandOut = None
         dsOut = None
         layer = QgsRasterLayer(pathname,name)
