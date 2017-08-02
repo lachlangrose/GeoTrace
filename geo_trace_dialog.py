@@ -241,6 +241,8 @@ class GeoTraceDialog(QDialog):
         self.cost_layer_combo_box = QgsMapLayerComboBox()
         self.cost_layer_combo_box.setCurrentIndex(-1)
         self.cost_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        #turn off trace if the cost function is changed
+        self.cost_layer_combo_box.currentIndexChanged.connect(self.deactivateTrace)
         cost_layout.addWidget(self.cost_layer_combo_box)
         cost_layout.addWidget(self.invert_cost)
         #cost_layout.addWidget(raster_calculator_button)
@@ -289,6 +291,14 @@ class GeoTraceDialog(QDialog):
     def deactivateTrace(self):
         if self.traceToolActive == False:
             return
+        #if there are points in the trace do you want to keep them?
+        if self.tracetool.paths > 0:
+            msg = "Save trace?"
+            reply = QMessageBox.question(self, 'Deactivating Trace Tool', 
+                     msg, QMessageBox.Yes, QMessageBox.No)
+
+            if reply == QMessageBox.Yes:
+                self.tracetool.addLine()
         self.tracetool.rubberBandLine.reset(QGis.Line)
         self.tracetool.rubberBand.reset(QGis.Point)
         self.tracetool.deactivate()

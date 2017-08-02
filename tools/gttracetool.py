@@ -260,7 +260,6 @@ class GtTraceBase(object):
 
 class GtMapToolEmitPoint(QgsMapToolEmitPoint):
     def __init__(self,*args):
-        print args
         #super(GtMapToolEmitPoint,self).__init__(args[0])
         canvas = args[0]#kwargs['canvas']
         QgsMapToolEmitPoint.__init__(self,canvas)
