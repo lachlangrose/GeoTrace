@@ -26,7 +26,7 @@ in most cases however:
 4. Download precompiled 32 bit python wheels for *cython* and *scikit-image* 2.7 (otherwise you need to install a c-compiler) from:
 	- http://www.lfd.uci.edu/~gohlke/pythonlibs/#cython (download the `Cython-0.26-cp27-cp27m-win32.whl` version )
 	- http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image (download the `scikit_image-0.13.0-cp27-cp27m-win32.whl` version)
-5. Navigate the console to the directory containing these downloaded wheels: `cd C:/DirectoryName/Wheels`
+5. Navigate the console to the directory containing these downloaded wheels (e.g. `cd C:/SOME_DIRECTORY_NAME/`)
 6. Install each package using pip: `python -m pip install Cython-0.26-cp27-cp27m-win32.whl` and `python -m pip install scikit_image-0.13.0-cp27-cp27m-win32.whl`
 7. Start/restart QGIS
 
