@@ -30,9 +30,11 @@
 
 
 import os
+
+#try importing gttracetool and associated dependencies, if an import error occurs trace_imported becomes false and we fail-friendly.
+trace_imported  = True
 try:
     import gttracetool
-    trace_imported  = True
 except ImportError:
     trace_imported = False
 from PyQt4.QtCore import *
@@ -40,8 +42,8 @@ from PyQt4.QtGui import *
 
 from qgis.core import *
 from qgis.gui import *
+
 _plugin_name_ = "GeoTrace"
-trace_imported  = True
 
 
 class GeoTraceDialog(QDialog):
