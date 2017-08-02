@@ -11,8 +11,8 @@ functions for quickly calculating such a cost function have been included in the
 The plugin can be in two ways.
 1. The prefered option is to use the QGIS plugin repository as this will retrieve the most recent stable version of the plugin. To do this use the plugin manager in QGIS and select experimental plugins. 
 2. Clone (or download and unzip) the GeoTrace directory into your QGIS plugin path.
-* On windows, this path will be something like `C:/Users/USERNAME/.qgs2/python/plugins`. Note that you may need to create the `plugins` folder.
-* On Linux the plugin can be cloned to any directory and then the relevant files are copied to the correct locations using the by running the command 'make deploy' 
+    * On windows, this path will be something like `C:/Users/USERNAME/.qgs2/python/plugins`. Note that you may need to create the `plugins` folder.
+    * On Linux the plugin can be cloned to any directory and then the relevant files are copied to the correct locations using the by running the command 'make deploy' 
 ## Dependencies
 GeoTrace uses `Numpy`, `Matplotlib`, `mplstereonet` and `scikit-image`, so you will need to make sure these are installed for your python distribution.
 QGis should come bundled with `Numpy` and `Matplotlib`. The other packages can be installed using pip. 
