@@ -72,6 +72,7 @@ class GtTraceBase(object):
     def runTrace(self):
         self.paths = self.trace.shortest_path()
     def rasterToNumpy(self,layer):
+        #TODO add in check for if raster has more than 1 badn here and ask which band to use
         filepath = layer.dataProvider().dataSourceUri()
         ds = osgeo.gdal.Open(filepath)
         array = np.array(ds.GetRasterBand(1).ReadAsArray()).astype('int')                     

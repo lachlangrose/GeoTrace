@@ -221,6 +221,7 @@ class GeoTraceDialog(QDialog):
         self.vector_layer_combo_box = QgsMapLayerComboBox()
         self.vector_layer_combo_box.setCurrentIndex(-1)
         self.vector_layer_combo_box.setFilters(QgsMapLayerProxyModel.LineLayer)
+        self.vector_layer_combo_box.currentIndexChanged.connect(self.deactivateTrace)
         vector_layout = QVBoxLayout()
         vector_layout.addWidget(self.vector_layer_combo_box)
         vector_group.setLayout(vector_layout)
