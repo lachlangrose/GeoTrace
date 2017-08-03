@@ -1,5 +1,5 @@
-# GeoTools
-GeoTools is a a QGIS plugin containing some helpful tools for extracting and analysing the orientations of geological structures. It can
+# GeoTrace
+GeoTrace is a a QGIS plugin containing some helpful tools for extracting and analysing the orientations of geological structures. It can
 be used to rapidly digitize structural traces in raster data, estimate their 3D orientations using an associated DEM, and then visualise
 the results on stereonets and rose diagrams.
 
@@ -10,11 +10,11 @@ functions for quickly calculating such a cost function have been included in the
 # Installation
 The plugin can be in two ways.
 1. The prefered option is to use the QGIS plugin repository as this will retrieve the most recent stable version of the plugin. To do this use the plugin manager in QGIS and select experimental plugins. 
-2. Clone (or download and unzip) the GeoTools directory into your QGIS plugin path.
->. - On windows, this path will be something like `C:/Users/USERNAME/.qgs2/python/plugins`.
->. - Linux the plugin can be cloned to any directory and then the relevant files are copied to the correct locations using the by running the command 'make deploy' 
+2. Clone (or download and unzip) the GeoTrace directory into your QGIS plugin path.
+    * On windows, this path will be something like `C:/Users/USERNAME/.qgs2/python/plugins`. Note that you may need to create the `plugins` folder.
+    * On Linux the plugin can be cloned to any directory and then the relevant files are copied to the correct locations using the by running the command 'make deploy' 
 ## Dependencies
-GeoTools uses `Numpy`, `Matplotlib`, `mplstereonet` and `scikit-image`, so you will need to make sure these are installed for your python distribution.
+GeoTrace uses `Numpy`, `Matplotlib`, `mplstereonet` and `scikit-image`, so you will need to make sure these are installed for your python distribution.
 QGis should come bundled with `Numpy` and `Matplotlib`. The other packages can be installed using pip. 
 
 ### Detailed instructions for MS Windows users
@@ -24,20 +24,22 @@ in most cases however:
 2. Check pip (a python package manager) is up to date with the following: `python -m pip install --upgrade setuptools`
 3. Install *mplstereonet* first, using the following command: `python -m pip install mplstereonet`
 4. Download precompiled 32 bit python wheels for *cython* and *scikit-image* 2.7 (otherwise you need to install a c-compiler) from:
-	- http://www.lfd.uci.edu/~gohlke/pythonlibs/#cython 
-	- http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image
-5. Navigate the console to the directory containing these downloaded wheels: `cd C:/DirectoryName/Wheels`
+	- http://www.lfd.uci.edu/~gohlke/pythonlibs/#cython (download the `Cython-0.26-cp27-cp27m-win32.whl` version )
+	- http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image (download the `scikit_image-0.13.0-cp27-cp27m-win32.whl` version)
+5. Navigate the console to the directory containing these downloaded wheels (e.g. `cd C:/SOME_DIRECTORY_NAME/`)
 6. Install each package using pip: `python -m pip install Cython-0.26-cp27-cp27m-win32.whl` and `python -m pip install scikit_image-0.13.0-cp27-cp27m-win32.whl`
+7. Start/restart QGIS
 
 Assuming these all installed correctly, you should now be set to use the plugin.
 ### Linux
 1. Open a terminal window 'ctrl+alt+t'
 2. Install *mplstereonet* first, using the following command: `sudo pip install mplstereonet` 
 3. Install *scikit-image* using the following command: 'sudo pip install sudo pip install scikit-image'  
-# Usage Instructions
+4. Start/restart QGIS
 
+# Usage Instructions
 On launching QGIS for the first time, the plugin needs to be activated using the QGIS plugin manager (*Plugins->Manage and Install Plugins...*). Providing the plugin has been
-installed to the correct directory (see above), `GeoTools` should appear in the list of available plugins. Make sure it's checked, and with some luck QGIS won't complain about it
+installed to the correct directory (see above), `GeoTrace` should appear in the list of available plugins. Make sure it's checked, and with some luck QGIS won't complain about it
 (throw errors).
 
 Assuming this worked, a friendly compass icon should appear in the toolbar somewhere. Click this to launch the plugin. A window-pane should then appear, containing plugin GUI. This
@@ -75,7 +77,7 @@ and associated fields containing the orientation estimates and then use the plot
 This tab works as above, but creates a rose diagram rather than a stereonet.
 
 # Licence
-GeoTools is free software licenced under the GNU licence v2
+GeoTrace is free software licenced under the GNU licence v2
 
 
 # Further Reading and Citation
