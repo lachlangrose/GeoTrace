@@ -34,7 +34,7 @@ Assuming these all installed correctly, you should now be set to use the plugin.
 ### Linux
 1. Open a terminal window 'ctrl+alt+t'
 2. Install *mplstereonet* first, using the following command: `sudo pip install mplstereonet` 
-3. Install *scikit-image* using the following command: 'sudo pip install sudo pip install scikit-image'  
+3. Install *scikit-image* using the following command: 'sudo pip install scikit-image'  
 4. Start/restart QGIS
 
 # Usage Instructions
