@@ -16,8 +16,8 @@ email=lachlan.grose@monash.edu
 
 about=GeoTrace contains some helpful tools for extracting and analysing the orientations of geological structures. It can be used to rapidly digitize structural traces in raster data, estimate their 3D orientations using an associated DEM, and then visualise the results on stereonets and rose diagrams.
 
-tracker=https://github.com/lachlangrose/GeoTools
-repository=https://github.com/lachlangrose/GeoTools
+tracker=https://github.com/lachlangrose/GeoTrace/issues
+repository=https://github.com/lachlangrose/GeoTrace
 # End of mandatory metadata
 
 # Recommended items:
@@ -28,7 +28,7 @@ repository=https://github.com/lachlangrose/GeoTools
 # Tags are comma separated with spaces allowed
 tags=geoscience stereonet
 
-homepage=https://github.com/lachlangrose/GeoTools
+homepage=https://github.com/lachlangrose/GeoTrace
 category=Plugins
 icon=icon.png
 # experimental flag
