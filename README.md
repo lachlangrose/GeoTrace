@@ -23,11 +23,12 @@ in most cases however:
 1. Open the start menu and search for *OSGeo4W Shell*. Right-click on it and select *Run as administrator*. This tool gives you access to the qGIS version of python
 2. Check pip (a python package manager) is up to date with the following: `python -m pip install --upgrade setuptools`
 3. Install *mplstereonet* first, using the following command: `python -m pip install mplstereonet`
-4. Download precompiled 32 bit python wheels for *cython* and *scikit-image* 2.7 (otherwise you need to install a c-compiler) from:
-	- http://www.lfd.uci.edu/~gohlke/pythonlibs/#cython (download the `Cython-0.26-cp27-cp27m-win32.whl` version )
-	- http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image (download the `scikit_image-0.13.0-cp27-cp27m-win32.whl` version)
+4. Download precompiled 32 or 64 bit (depending on your version of QGIS) python wheels for *cython* and *scikit-image* 2.7 (otherwise you need to install a c-compiler) from:
+	- http://www.lfd.uci.edu/~gohlke/pythonlibs/#cython (32 Bit: `Cython-0.26-cp27-cp27m-win32.whl`, 64 Bit: `Cython‑0.26.1‑cp27‑cp27m‑win_amd64.whl`)
+	- http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image (32 Bit: `scikit_image-0.13.0-cp27-cp27m-win32.whl`, 64 Bit: `scikit_image‑0.13.0‑cp27‑cp27m‑win_amd64.whl`)
+	
 5. Navigate the console to the directory containing these downloaded wheels (e.g. `cd C:/SOME_DIRECTORY_NAME/`)
-6. Install each package using pip: `python -m pip install Cython-0.26-cp27-cp27m-win32.whl` and `python -m pip install scikit_image-0.13.0-cp27-cp27m-win32.whl`
+6. Install each package using pip: `python -m pip install Cython-0.26-cp27-cp27m-win32.whl` and `python -m pip install scikit_image-0.13.0-cp27-cp27m-win32.whl` (n.b. if you downloaded the 64 bit files the filename will change from `-win32.whl` to `-win_amd64.whl`)
 7. Start/restart QGIS
 
 Assuming these all installed correctly, you should now be set to use the plugin.
