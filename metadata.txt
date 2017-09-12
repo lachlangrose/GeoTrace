@@ -14,7 +14,7 @@ version=1.0
 author=Lachlan Grose
 email=lachlan.grose@monash.edu
 
-about=GeoTrace contains some helpful tools for extracting and analysing the orientations of geological structures. It can be used to rapidly digitize structural traces in raster data, estimate their 3D orientations using an associated DEM, and then visualise the results on stereonets and rose diagrams.
+about=GeoTrace is a a QGIS plugin containing some helpful tools for extracting and analysing the orientations of geological structures. It can be used to rapidly digitize structural traces in raster data, estimate their 3D orientations using an associated DEM, and then visualise the results on stereonets and rose diagrams. There is a complementary plugin, Compass, for CloudCompare that provides similar functionalities for 3D point clouds. The trace extraction method (Trace tab) uses a least-cost path algorithm to "follow" linear features in the raster. This relies on a single-channel cost raster in which the structures of interest are represented by low values, and the background by high values. A variety of functions for quickly calculating such a cost function have been included in the Cost Calculator tab. See the about tab for more information and a quick guide on how to use the plugin
 
 tracker=https://github.com/lachlangrose/GeoTools
 repository=https://github.com/lachlangrose/GeoTools
