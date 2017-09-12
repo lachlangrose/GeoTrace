@@ -30,9 +30,11 @@
 
 
 import os
+
+#try importing gttracetool and associated dependencies, if an import error occurs trace_imported becomes false and we fail-friendly.
+trace_imported  = True
 try:
     import gttracetool
-    trace_imported  = True
 except ImportError:
     trace_imported = False
 from PyQt4.QtCore import *
@@ -40,8 +42,8 @@ from PyQt4.QtGui import *
 
 from qgis.core import *
 from qgis.gui import *
+
 _plugin_name_ = "GeoTrace"
-trace_imported  = True
 
 
 class GeoTraceDialog(QDialog):
@@ -219,15 +221,18 @@ class GeoTraceDialog(QDialog):
         self.vector_layer_combo_box = QgsMapLayerComboBox()
         self.vector_layer_combo_box.setCurrentIndex(-1)
         self.vector_layer_combo_box.setFilters(QgsMapLayerProxyModel.LineLayer)
+        self.vector_layer_combo_box.currentIndexChanged.connect(self.deactivateTrace)
         vector_layout = QVBoxLayout()
         vector_layout.addWidget(self.vector_layer_combo_box)
         vector_group.setLayout(vector_layout)
         create_memory_layer = QPushButton("Create Temporary Target Layer")
         self.save_control_points = QRadioButton("Store Control Points") 
+        self.save_control_points.toggled.connect(self.deactivateTrace)
         self.save_control_points.toggled.connect(self.show_control_point_combo_box)
         self.controlpoint_layer_combo_box = QgsMapLayerComboBox()
         self.controlpoint_layer_combo_box.setCurrentIndex(-1)
         self.controlpoint_layer_combo_box.setFilters(QgsMapLayerProxyModel.PointLayer)
+        self.controlpoint_layer_combo_box.currentIndexChanged.connect(self.deactivateTrace)
         self.controlpoint_layer_combo_box.setEnabled(False)
         vector_layout.addWidget(self.save_control_points)
         vector_layout.addWidget(self.controlpoint_layer_combo_box)
@@ -237,10 +242,13 @@ class GeoTraceDialog(QDialog):
         cost_group = QGroupBox('Cost Layer')
         raster_calculator_button = QPushButton('Raster Calculator')
         self.invert_cost = QCheckBox('Invert Cost')
+        self.invert_cost.toggled.connect(self.deactivateTrace)
         cost_layout = QVBoxLayout()
         self.cost_layer_combo_box = QgsMapLayerComboBox()
         self.cost_layer_combo_box.setCurrentIndex(-1)
         self.cost_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        #turn off trace if the cost function is changed
+        self.cost_layer_combo_box.currentIndexChanged.connect(self.deactivateTrace)
         cost_layout.addWidget(self.cost_layer_combo_box)
         cost_layout.addWidget(self.invert_cost)
         #cost_layout.addWidget(raster_calculator_button)
@@ -253,6 +261,7 @@ class GeoTraceDialog(QDialog):
         self.dem_layer_combo_box = QgsMapLayerComboBox()
         self.dem_layer_combo_box.setCurrentIndex(-1)
         self.dem_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        self.dem_layer_combo_box.currentIndexChanged.connect(self.deactivateTrace)
         self.dem_layer_combo_box.setEnabled(False)
         cost_layout.addWidget(self.dem_layer_combo_box)
         self.fit_plane.toggled.connect(self.show_plane_combo_box)
@@ -289,6 +298,14 @@ class GeoTraceDialog(QDialog):
     def deactivateTrace(self):
         if self.traceToolActive == False:
             return
+        #if there are points in the trace do you want to keep them?
+        if self.tracetool.paths > 0:
+            msg = "Save trace?"
+            reply = QMessageBox.question(self, 'Deactivating Trace Tool', 
+                     msg, QMessageBox.Yes, QMessageBox.No)
+
+            if reply == QMessageBox.Yes:
+                self.tracetool.addLine()
         self.tracetool.rubberBandLine.reset(QGis.Line)
         self.tracetool.rubberBand.reset(QGis.Point)
         self.tracetool.deactivate()
