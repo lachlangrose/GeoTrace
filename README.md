@@ -49,14 +49,16 @@ is organised into 5 tabs, each of which is described below.
 ## Trace tab
 
 The trace tab is used for computer-assisted digitization. Before starting, select:
-	- An output layer (polyline .shp file) to write digitized traces to
-	- mA point layer to store the control points in (optional)
-	- A cost layer. This must be a one-channel raster, in which traces will *follow* low values. (Though the *Invert Cost* check will make the trace follow high values). The 'Cost Calculator* tab can be used to assist creation of the single-channel cost raster.
-	- A DEM layer, used to estimate 3D orientations from the traces (optional)
+1. An output layer (polyline .shp file) to write digitized traces to
+2. A point layer to store the control points in (optional)
+3. A cost layer. This must be a one-channel raster, in which traces will *follow* low values. (Though the *Invert Cost* check will make the trace follow high values). Note that the *Cost Calculator* tab can be used to assist creation of the single-channel cost raster.
+4. A DEM layer, used to estimate 3D orientations from the traces (optional)
 
 Once the relevent information has been set, start interpreting by clicking the `Start Digitizing` button.
 Left-click adds control points to your trace and Right-Click completes a trace. Hit *Backspace* to undo.
 
+If a DEM layer has been included (see above), best-fit-planes for each trace will be computed using the trace eigenvectors. It is important to note that this will often produce poor results, especially in flat topography or where the traces have variable orientations. To help identify traces with poor orientation estimates, trace eigenvalues are recorded in the output, along with a "planarity" metric that approaches 1 as as plane orientation becomes well constrained (cf. Thiele et al., 2015). For convenience, orientation estimates are also classified as "Good" (planarity<0.75), "Average" (0.5<planarity<0.75), and "Poor" (planarity<0.5). Also be aware that well-constrained ("Good") orientation estimates sub-parallel to the DEM surface can be produced if the structures being digitised have variable orientations.
+  
 ## Advanced Trace
 
 The Advanced trace tab is used to generate traces from predefined control points. This uses a *Cost layer* and writes to an *Output layer*, as above, but rather than requiring manually 
@@ -87,3 +89,10 @@ If you found this tool useful, please cite *Thiele et al., 2017*. The publicatio
 
 Thiele, S. T., Grose, L., Samsu, A., Micklethwaite, S., Vollgger, S. A., and Cruden, A. R.: Rapid, semi-automatic fracture and contact mapping for point clouds, images and geophysical data, Solid Earth Discuss., https://doi.org/10.5194/se-2017-83, In Review, 2017 
 
+For further information on the plane-fitting approach and planarity metric please refer to:
+
+Thiele, S. T., Micklethwaite, S., Bourke, P., Verrall, M., and Kovesi, P.: Insights into the mechanics of en-échelon sigmoidal vein formation using ultra-high resolution photogrammetry and computed tomography, Journal of Structural Geology, 77, 27-44, https://doi.org/10.1016/j.jsg.2015.05.006, 2015
+
+Where the derived orientation estimates are of critical importance, the following will also be a useful reference:
+
+Seers, T. D. and Hodgetts, D.: Extraction of three-dimensional fracture trace maps from calibrated image sequences. Geosphere 12, 1323-1340, https://doi.org/10.1130/ges01276.1, 2016
