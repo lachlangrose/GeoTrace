@@ -87,12 +87,12 @@ GeoTrace is free software licenced under the GNU licence v2
 
 If you found this tool useful, please cite *Thiele et al., 2017*. The publication (currently under review) also contains a more detailed description of the methods employed by this plugin.
 
-Thiele, S. T., Grose, L., Samsu, A., Micklethwaite, S., Vollgger, S. A., and Cruden, A. R.: Rapid, semi-automatic fracture and contact mapping for point clouds, images and geophysical data, Solid Earth Discuss., https://doi.org/10.5194/se-2017-83, In Review, 2017 
+*Thiele, S. T., Grose, L., Samsu, A., Micklethwaite, S., Vollgger, S. A., and Cruden, A. R.: Rapid, semi-automatic fracture and contact mapping for point clouds, images and geophysical data, Solid Earth Discuss., https://doi.org/10.5194/se-2017-83, In Review, 2017*
 
 For further information on the plane-fitting approach and planarity metric please refer to:
 
-Thiele, S. T., Micklethwaite, S., Bourke, P., Verrall, M., and Kovesi, P.: Insights into the mechanics of en-échelon sigmoidal vein formation using ultra-high resolution photogrammetry and computed tomography, Journal of Structural Geology, 77, 27-44, https://doi.org/10.1016/j.jsg.2015.05.006, 2015
+*Thiele, S. T., Micklethwaite, S., Bourke, P., Verrall, M., and Kovesi, P.: Insights into the mechanics of en-échelon sigmoidal vein formation using ultra-high resolution photogrammetry and computed tomography, Journal of Structural Geology, 77, 27-44, https://doi.org/10.1016/j.jsg.2015.05.006, 2015*
 
 Where the derived orientation estimates are of critical importance, the following will also be a useful reference:
 
-Seers, T. D. and Hodgetts, D.: Extraction of three-dimensional fracture trace maps from calibrated image sequences. Geosphere 12, 1323-1340, https://doi.org/10.1130/ges01276.1, 2016
+*Seers, T. D. and Hodgetts, D.: Extraction of three-dimensional fracture trace maps from calibrated image sequences. Geosphere 12, 1323-1340, https://doi.org/10.1130/ges01276.1, 2016*
