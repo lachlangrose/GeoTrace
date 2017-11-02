@@ -51,6 +51,7 @@ class GtRose(QtGui.QDialog):
         self.figure = plt.Figure()
         self.ax = self.figure.add_subplot(1, 1, 1, projection = 'polar')
         self.canvas = FigureCanvas(self.figure)
+        self.ax.text(0.75,-0.04, "Rose diagram is \n number weighted",transform = self.ax.transAxes, ha='left', va='center')
 
         self.ax.set_theta_offset(0.5*np.pi) 
         self.ax.set_theta_direction(-1)
@@ -136,7 +137,6 @@ class GtRose(QtGui.QDialog):
         for f in features:
             d = f[strike_name]
             if d == NULL:
-                print d
                 continue
             data[i][0] = d
             if self.dip_dir.isChecked():
