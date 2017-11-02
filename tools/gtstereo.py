@@ -48,11 +48,7 @@ class GtStereo(QtGui.QDialog):
         self.canvas = canvas
         self.iface = iface
         self.figure, self.ax = mplstereonet.subplots()
-        self.ax.annotate('local max', xy=(3, 1),  xycoords='data',
-            xytext=(0.8, 0.95), textcoords='axes fraction',
-            arrowprops=dict(facecolor='black', shrink=0.05),
-            horizontalalignment='right', verticalalignment='top',
-            )
+        self.ax.text(0.75,-0.04, "lower-hemisphere \"schmitt\" \n(equal area) projection.",transform = self.ax.transAxes, ha='left', va='center')
         self.canvas = FigureCanvas(self.figure)
         self.polesbutton = QtGui.QPushButton('Plot Poles')
         self.polesbutton.clicked.connect(self.plotpoles)
@@ -67,6 +63,7 @@ class GtStereo(QtGui.QDialog):
         self.vector_layer_combo_box.setCurrentIndex(-1)
         self.vector_layer_combo_box.setFilters(QgsMapLayerProxyModel.VectorLayer)
         self.dip_dir = QCheckBox("Dip Direction")
+        self.dip_dir.setChecked(True)
         self.strike = QCheckBox("Strike")
         self.strike.stateChanged.connect(self.strikordirection)
         self.button_group = QButtonGroup()
@@ -146,11 +143,12 @@ class GtStereo(QtGui.QDialog):
         if self.selected_features.isChecked() == True:
             features = self.vector_layer_combo_box.currentLayer().selectedFeaturesIterator()
         for f in features:
-            dip.append(f[dip_name]) #self.dip_combo.currentText()])
-            if self.dip_dir.isChecked() == True:
-                strike.append(f[strike_name]+90)
-            else:
-                strike.append(f[strike_name])#self.strike_combo.currentText()]) 
+            if f[dip_name] and f[strike_name]:
+                dip.append(f[dip_name]) #self.dip_combo.currentText()])
+                if self.dip_dir.isChecked() == True:
+                    strike.append(f[strike_name]+90)
+                else:
+                    strike.append(f[strike_name])#self.strike_combo.currentText()]) 
         return strike, dip
     def plotdensity(self):
         strike, dip = self.get_strike_dip()

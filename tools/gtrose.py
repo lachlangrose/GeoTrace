@@ -68,7 +68,14 @@ class GtRose(QtGui.QDialog):
         self.vector_layer_combo_box = QgsMapLayerComboBox()
         self.vector_layer_combo_box.setCurrentIndex(-1)
         self.vector_layer_combo_box.setFilters(QgsMapLayerProxyModel.VectorLayer)
-        self.dip_dir = QCheckBox()
+        self.dip_dir = QCheckBox("Dip Direction")
+        self.strike = QCheckBox("Strike")
+        self.dip_dir.setChecked(True)
+        self.strike.stateChanged.connect(self.strikordirection)
+        self.button_group = QButtonGroup()
+        self.button_group.addButton(self.dip_dir)
+        self.button_group.addButton(self.strike)
+
         self.selected_features = QCheckBox()
         self.strike_combo_box = QgsFieldComboBox()
         #self.dip_combo_box = QgsFieldComboBox()
@@ -78,11 +85,13 @@ class GtRose(QtGui.QDialog):
         top_form_layout = QtGui.QFormLayout()
         layout = QtGui.QVBoxLayout()
         top_form_layout.addRow("Layer:",self.vector_layer_combo_box)
-        top_form_layout.addRow("Direction:",self.strike_combo_box)
+        top_form_layout.addRow("Dip Direction:",self.strike_combo_box)
         #top_form_layout.addRow("Dip:",self.dip_combo_box)
-        top_form_layout.addRow("Dip Direction:",self.dip_dir)
+        top_form_layout.addRow(self.strike,self.dip_dir)
         top_form_layout.addRow("Selected Features Only:",self.selected_features)
         self.vector_layer_combo_box.layerChanged.connect(self.strike_combo_box.setLayer)  # setLayer is a native slot function
+        self.vector_layer_combo_box.layerChanged.connect(self.layer_changed)
+
         #self.vector_layer_combo_box.layerChanged.connect(self.dip_combo_box.setLayer)  # setLayer is a native slot function
         layout.addLayout(top_form_layout)
         layout.addWidget(self.canvas)
@@ -97,6 +106,24 @@ class GtRose(QtGui.QDialog):
         self.setLayout(layout)
     def onclick(self,event):
         return
+    def layer_changed(self,layer):
+        if not self.dip_dir.isChecked():
+            indx = self.strike_combo_box.findText("strike",Qt.MatchContains)
+            self.strike_combo_box.setCurrentIndex(indx)
+        if self.dip_dir.isChecked():
+            indx = self.strike_combo_box.findText("dir",Qt.MatchContains)
+            self.strike_combo_box.setCurrentIndex(indx)
+    def strikordirection(self,*args,**kwargs):
+        if self.strike.isChecked():
+            self.direction_name.setText("Strike")
+            indx = self.strike_combo_box.findText("strike",Qt.MatchContains)
+            self.strike_combo_box.setCurrentIndex(indx)
+        if not self.strike.isChecked():
+            self.direction_name.setText("Dip Direction")
+            indx = self.strike_combo_box.findText("dir",Qt.MatchContains)
+            self.strike_combo_box.setCurrentIndex(indx)
+
+    
     def plot(self):
         angle = 20
         n = int(self.vector_layer_combo_box.currentLayer().featureCount())
