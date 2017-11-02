@@ -111,17 +111,17 @@ class ShortestPath():
             
             #Calculate local image to compute shortet path, including a buffer around the points of 100px (maybe this should be base?)
             buffer_v = 100
-            xmin = max(xmin-buffer_v, 0) #n.b. min/max args ensure bounds remain within the image...
-            ymin = max(ymin-buffer_v, 0)
-            xmax = min(xmax+buffer_v, self.imshape[0])
-            ymax = min(ymax+buffer_v, self.imshape[1])
+            xmin = int(max(xmin-buffer_v, 0)) #n.b. min/max args ensure bounds remain within the image...
+            ymin = int(max(ymin-buffer_v, 0))
+            xmax = int(min(xmax+buffer_v, self.imshape[0]))
+            ymax = int(min(ymax+buffer_v, self.imshape[1]))
             
             #extract local image
             im = self.im[xmin:xmax,ymin:ymax]
             
             #get start and end points in local-image coords
-            start = [s[0][0]-xmin,s[0][1]-ymin]
-            end = [s[1][0]-xmin,s[1][1]-ymin]
+            start = [int(s[0][0]-xmin),int(s[0][1]-ymin)]
+            end = [int(s[1][0]-xmin),int(s[1][1]-ymin)]
 
             #compute shortest path
             path, cost = route_through_array(im,start,end,fully_connected=True,geometric=True)

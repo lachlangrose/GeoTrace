@@ -8,10 +8,25 @@
 
 <h2>Useage Instructions</h2>
 <h3>Trace tab</h3>
-<p>The trace tab is used for computer-assisted digitization. Before starting, select: - An output layer (polyline .shp file) to write digitized traces to - mA point layer to store the control points in (optional) - A cost layer. This must be a one-channel raster, in which traces will follow low values. (Though the Invert Cost check will make the trace follow high values). The 'Cost Calculator* tab can be used to assist creation of the single-channel cost raster. - A DEM layer, used to estimate 3D orientations from the traces (optional)</p>
-
-<p>Once the relevent information has been set, start interpreting by clicking the Start Digitizing button. Left-click adds control points to your trace and Right-Click completes a trace. Hit Backspace to undo.</p>
-<h3>Advanced Trace</h3>
+<p>The trace tab is used for computer-assisted digitization. Before starting, select: 
+<ul>
+  <li> An output layer (polyline .shp file) to write digitized traces to </li>
+  <li> A point layer to store the control points in (optional) </li>
+  <li> A cost layer. This must be a one-channel raster, in which traces will follow low values (though the Invert Cost check will make the trace follow high values).
+    Note that the <b>Cost Calculator</b> tab can be used to assist creation of the single-channel cost raster.</li>
+  <li> A DEM layer, used to estimate 3D orientations from the traces (optional)</li>
+ </ul>
+  </p>
+<p>Once the relevent information has been set, start interpreting by clicking the Start Digitizing button. 
+Left-click adds control points to your trace and Right-Click completes a trace. Hit Backspace to undo.</p>
+<p>If a DEM layer has been included (see above), best-fit-planes for each trace will be computed using the trace eigenvectors. It is important 
+  to note that this will often produce poor results, especially in flat topography or where the traces have variable orientations. To help identify
+  traces with poor orientation estimates, trace eigenvalues are recorded in the output, along with a "planarity" metric that approaches 1 as as plane
+  orientation becomes well constrained (cf. Thiele et al., 2015). For convenience, orientation estimates are also classified as "Good" (planarity
+  &lt0.75), "Average" (0.5&ltplanarity&lt0.75), and "Poor" (planarity&lt0.5). Also be aware that well-constrained ("Good") orientation estimates sub-parallel to 
+  the DEM surface can be produced if the structures being digitised have variable orientations.</p>
+  
+  <h3>Advanced Trace</h3>
 <p>The Advanced trace tab is used to generate traces from predefined control points. This uses a Cost layer and writes to an Output layer, as above, but rather than requiring manually inserted control points it takes a point feature layer (Control Points) and ID field defining which trace each point belongs to (Unique ID Field), and will then automatically generate traces on clicking Run.</p>
 
 <h3>Cost Calculator</h3>
@@ -27,11 +42,20 @@
 <h2> Licence </h2>
 <p>GeoTrace was developed by Lachlan Grose and Sam Thiele and is free software licenced under the GNU licence v2</p>
 <h2>Further Reading and Citation</h2>
-<p>If you found this tool useful, please cite <i>Thiele et al., 2017</i>. The publication (currently in prep.) also contains a more detailed 
+<p>If you found this tool useful, please cite <i>Thiele et al., 2017</i>. The publication (currently under review) also contains a more detailed 
 description of the methods employed by this plugin.</p>
 <p>
-<i>Thiele, ST., Grose, L., Samsu, A., Micklethwaite, S., Vollgger, SA. &amp; Cruden, S., 2017, 'A computer-assisted approach to structural interpretation of point clouds and rasters', Journal TBA </i>
+<i>Thiele, S. T., Grose, L., Samsu, A., Micklethwaite, S., Vollgger, S. A., and Cruden, A. R.: Rapid, semi-automatic fracture and contact mapping for point clouds, images and geophysical data, Solid Earth Discuss., https://doi.org/10.5194/se-2017-83, in review, 2017.</i>
 </p>
+<p>For further information on the plane-fitting approach and planarity metric please refer to:<p>
+<p>
+<i>Thiele, S. T., Micklethwaite, S., Bourke, P., Verrall, M., and Kovesi, P.: Insights into the mechanics of en-échelon sigmoidal vein formation using ultra-high resolution photogrammetry and computed tomography, Journal of Structural Geology, 77, 27-44, 10.1016/j.jsg.2015.05.006, 2015.</i>
+</p>
+<p>Where the derived orientation estimates are of critical importance, the following will also be a useful reference:</p>
+<p>
+<i>Seers, T. D. and Hodgetts, D.: Extraction of three-dimensional fracture trace maps from calibrated image sequences. Geosphere 12, 1323-1340, 10.1130/ges01276.1, 2016</i>
+</p>
+  
 <p></p><p></p>
 </body>
 </html>

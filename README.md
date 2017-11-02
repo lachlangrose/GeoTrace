@@ -23,11 +23,12 @@ in most cases however:
 1. Open the start menu and search for *OSGeo4W Shell*. Right-click on it and select *Run as administrator*. This tool gives you access to the qGIS version of python
 2. Check pip (a python package manager) is up to date with the following: `python -m pip install --upgrade setuptools`
 3. Install *mplstereonet* first, using the following command: `python -m pip install mplstereonet`
-4. Download precompiled 32 bit python wheels for *cython* and *scikit-image* 2.7 (otherwise you need to install a c-compiler) from:
-	- http://www.lfd.uci.edu/~gohlke/pythonlibs/#cython (download the `Cython-0.26-cp27-cp27m-win32.whl` version )
-	- http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image (download the `scikit_image-0.13.0-cp27-cp27m-win32.whl` version)
+4. Download precompiled 32 or 64 bit (depending on your version of QGIS) python wheels for *cython* and *scikit-image* 2.7 (otherwise you need to install a c-compiler) from:
+	- http://www.lfd.uci.edu/~gohlke/pythonlibs/#cython (32 Bit: `Cython-0.26-cp27-cp27m-win32.whl`, 64 Bit: `Cython‑0.26.1‑cp27‑cp27m‑win_amd64.whl`)
+	- http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image (32 Bit: `scikit_image-0.13.0-cp27-cp27m-win32.whl`, 64 Bit: `scikit_image‑0.13.0‑cp27‑cp27m‑win_amd64.whl`)
+	
 5. Navigate the console to the directory containing these downloaded wheels (e.g. `cd C:/SOME_DIRECTORY_NAME/`)
-6. Install each package using pip: `python -m pip install Cython-0.26-cp27-cp27m-win32.whl` and `python -m pip install scikit_image-0.13.0-cp27-cp27m-win32.whl`
+6. Install each package using pip: `python -m pip install Cython-0.26-cp27-cp27m-win32.whl` and `python -m pip install scikit_image-0.13.0-cp27-cp27m-win32.whl` (n.b. if you downloaded the 64 bit files the filename will change from `-win32.whl` to `-win_amd64.whl`)
 7. Start/restart QGIS
 
 Assuming these all installed correctly, you should now be set to use the plugin.
@@ -48,14 +49,16 @@ is organised into 5 tabs, each of which is described below.
 ## Trace tab
 
 The trace tab is used for computer-assisted digitization. Before starting, select:
-	- An output layer (polyline .shp file) to write digitized traces to
-	- mA point layer to store the control points in (optional)
-	- A cost layer. This must be a one-channel raster, in which traces will *follow* low values. (Though the *Invert Cost* check will make the trace follow high values). The 'Cost Calculator* tab can be used to assist creation of the single-channel cost raster.
-	- A DEM layer, used to estimate 3D orientations from the traces (optional)
+1. An output layer (polyline .shp file) to write digitized traces to
+2. A point layer to store the control points in (optional)
+3. A cost layer. This must be a one-channel raster, in which traces will *follow* low values. (Though the *Invert Cost* check will make the trace follow high values). Note that the *Cost Calculator* tab can be used to assist creation of the single-channel cost raster.
+4. A DEM layer, used to estimate 3D orientations from the traces (optional)
 
 Once the relevent information has been set, start interpreting by clicking the `Start Digitizing` button.
 Left-click adds control points to your trace and Right-Click completes a trace. Hit *Backspace* to undo.
 
+If a DEM layer has been included (see above), best-fit-planes for each trace will be computed using the trace eigenvectors. It is important to note that this will often produce poor results, especially in flat topography or where the traces have variable orientations. To help identify traces with poor orientation estimates, trace eigenvalues are recorded in the output, along with a "planarity" metric that approaches 1 as as plane orientation becomes well constrained (cf. Thiele et al., 2015). For convenience, orientation estimates are also classified as "Good" (planarity<0.75), "Average" (0.5<planarity<0.75), and "Poor" (planarity<0.5). Also be aware that well-constrained ("Good") orientation estimates sub-parallel to the DEM surface can be produced if the structures being digitised have variable orientations.
+  
 ## Advanced Trace
 
 The Advanced trace tab is used to generate traces from predefined control points. This uses a *Cost layer* and writes to an *Output layer*, as above, but rather than requiring manually 
@@ -82,6 +85,14 @@ GeoTrace is free software licenced under the GNU licence v2
 
 # Further Reading and Citation
 
-If you found this tool useful, please cite *Thiele et al., 2017*. The publication (currently in prep.) also contains a more detailed description of the methods employed by this plugin.
+If you found this tool useful, please cite *Thiele et al., 2017*. The publication (currently under review) also contains a more detailed description of the methods employed by this plugin.
 
-Thiele, ST., Grose, L., Samsu, A., Micklethwaite, S., Vollgger, SA. & Cruden, S., 2017, 'Rapid, semi-automatic fracture and contact mapping for the digital age', (In prep.)
+*Thiele, S. T., Grose, L., Samsu, A., Micklethwaite, S., Vollgger, S. A., and Cruden, A. R.: Rapid, semi-automatic fracture and contact mapping for point clouds, images and geophysical data, Solid Earth Discuss., https://doi.org/10.5194/se-2017-83, In Review, 2017*
+
+For further information on the plane-fitting approach and planarity metric please refer to:
+
+*Thiele, S. T., Micklethwaite, S., Bourke, P., Verrall, M., and Kovesi, P.: Insights into the mechanics of en-échelon sigmoidal vein formation using ultra-high resolution photogrammetry and computed tomography, Journal of Structural Geology, 77, 27-44, https://doi.org/10.1016/j.jsg.2015.05.006, 2015*
+
+Where the derived orientation estimates are of critical importance, the following will also be a useful reference:
+
+*Seers, T. D. and Hodgetts, D.: Extraction of three-dimensional fracture trace maps from calibrated image sequences. Geosphere 12, 1323-1340, https://doi.org/10.1130/ges01276.1, 2016*
