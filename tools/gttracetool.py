@@ -73,14 +73,21 @@ class GtTraceBase(object):
         self.paths = self.trace.shortest_path()
     def rasterToNumpy(self,layer):
         #TODO add in check for if raster has more than 1 badn here and ask which band to use
-        filepath = layer.dataProvider().dataSourceUri()
-        ds = osgeo.gdal.Open(filepath)
-        array = np.array(ds.GetRasterBand(1).ReadAsArray()).astype('int')                     
-        array = np.rot90(np.rot90(np.rot90(array)))
-        min_ = np.min(array)
-        if min_<0: #we don't want negative or zero costs
-            array+=abs(min_)+1
-        return array
+        try:
+            filepath = layer.dataProvider().dataSourceUri()
+            ds = osgeo.gdal.Open(filepath)
+            array = np.array(ds.GetRasterBand(1).ReadAsArray()).astype('int')                     
+            array = np.rot90(np.rot90(np.rot90(array)))
+        except:
+            self.iface.messageBar().pushMessage(
+                "Error", "GDAL try another file",
+                 level=QgsMessageBar.ERROR)
+            return False
+        else:
+            min_ = np.min(array)
+            if min_<0: #we don't want negative or zero costs
+                array+=abs(min_)+1
+            return array
     def setDem(self,raster= None):
         if raster == None:
             print "no raster"
@@ -93,6 +100,8 @@ class GtTraceBase(object):
         e1 = False
         e2 = False
         e3 = False
+        planarity = False
+        qual = False
 
         attributes = []
         for f in fields:
@@ -104,6 +113,10 @@ class GtTraceBase(object):
                 e2 = True
             if f.name() == 'E_3':
                 e3 = True
+            if f.name() == 'Planarity':
+                planarity = True
+            if f.name() == 'Plane_Qual':
+                qual = True
             if f.name() == 'DIP':
                 dip = True
         if not dip:
@@ -121,7 +134,11 @@ class GtTraceBase(object):
         if not e3:
             attributes.append(QgsField("E_3",QVariant.Double))            
             print "Creating EIGENVALUE_3 attribute"
-            
+        if not planarity:
+            attributes.append(QgsField("Planarity",QVariant.Double))            
+        if not qual:
+            attributes.append(QgsField("Plane_Qual",QVariant.String))            
+
         if len(attributes) > 0:
             pr.addAttributes(attributes)
         self.use_dem_for_planes = True
@@ -243,6 +260,8 @@ class GtTraceBase(object):
             dip_dir = 90. - np.arctan2(n[1],n[0]) * 180.0 / np.pi
             if dip_dir > 360.:
                 dip_dir -= 360.
+            if dip_dir < 0:
+                dip_dir +=360
             point_type = np.sqrt(n[0]*n[0]+n[1]*n[1]+n[2]*n[2])
             dip = np.arccos(n[2])*180.0 / np.pi
             eigvals.sort()
@@ -251,6 +270,14 @@ class GtTraceBase(object):
             fet['E_1'] = float(eigvals[2])
             fet['E_2'] = float(eigvals[1])
             fet['E_3'] = float(eigvals[0])
+            fet['Planarity'] = float(1-eigvals[0]/eigvals[1])
+            if float(1-eigvals[0]/eigvals[1]) > 0.75:
+                fet['Plane_Qual'] = 'Good'
+            elif float(1-eigvals[0]/eigvals[1]) > 0.5:
+                fet['Plane_Qual'] = 'Average'
+            elif float(1-eigvals[0]/eigvals[1]) < 0.5:
+                fet['Plane_Qual'] = 'Bad'
+    
         if self.use_control_points:
             fet['UUID'] = str(lineuuid)
         vl.addFeature(fet)

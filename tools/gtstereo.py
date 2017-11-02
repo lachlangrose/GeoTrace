@@ -48,6 +48,11 @@ class GtStereo(QtGui.QDialog):
         self.canvas = canvas
         self.iface = iface
         self.figure, self.ax = mplstereonet.subplots()
+        self.ax.annotate('local max', xy=(3, 1),  xycoords='data',
+            xytext=(0.8, 0.95), textcoords='axes fraction',
+            arrowprops=dict(facecolor='black', shrink=0.05),
+            horizontalalignment='right', verticalalignment='top',
+            )
         self.canvas = FigureCanvas(self.figure)
         self.polesbutton = QtGui.QPushButton('Plot Poles')
         self.polesbutton.clicked.connect(self.plotpoles)
@@ -61,19 +66,26 @@ class GtStereo(QtGui.QDialog):
         self.vector_layer_combo_box = QgsMapLayerComboBox()
         self.vector_layer_combo_box.setCurrentIndex(-1)
         self.vector_layer_combo_box.setFilters(QgsMapLayerProxyModel.VectorLayer)
-        self.dip_dir = QCheckBox()
+        self.dip_dir = QCheckBox("Dip Direction")
+        self.strike = QCheckBox("Strike")
+        self.strike.stateChanged.connect(self.strikordirection)
+        self.button_group = QButtonGroup()
+        self.button_group.addButton(self.dip_dir)
+        self.button_group.addButton(self.strike)
         self.selected_features = QCheckBox()
         self.strike_combo_box = QgsFieldComboBox()
         self.dip_combo_box = QgsFieldComboBox()
         top_form_layout = QtGui.QFormLayout()
         layout = QtGui.QVBoxLayout()
+        self.direction_name = QLabel("Dip Direction") 
         top_form_layout.addRow("Layer:",self.vector_layer_combo_box)
-        top_form_layout.addRow("Direction:",self.strike_combo_box)
+        top_form_layout.addRow(self.direction_name,self.strike_combo_box)
+        top_form_layout.addRow(self.strike,self.dip_dir)
         top_form_layout.addRow("Dip:",self.dip_combo_box)
-        top_form_layout.addRow("Dip Direction:",self.dip_dir)
         top_form_layout.addRow("Selected Features Only:",self.selected_features)
         self.vector_layer_combo_box.layerChanged.connect(self.strike_combo_box.setLayer)  # setLayer is a native slot function
         self.vector_layer_combo_box.layerChanged.connect(self.dip_combo_box.setLayer)  # setLayer is a native slot function
+        self.vector_layer_combo_box.layerChanged.connect(self.layer_changed)
         layout.addLayout(top_form_layout)
         layout.addWidget(self.canvas)
         #layout.addWidget(self.strike_combo)
@@ -85,6 +97,25 @@ class GtStereo(QtGui.QDialog):
         bottom_form_layout.addWidget(self.resetbutton)
         layout.addLayout(bottom_form_layout)
         self.setLayout(layout)
+    def layer_changed(self,layer):
+        if not self.dip_dir.isChecked():
+            indx = self.strike_combo_box.findText("strike",Qt.MatchContains)
+            self.strike_combo_box.setCurrentIndex(indx)
+        if self.dip_dir.isChecked():
+            indx = self.strike_combo_box.findText("dir",Qt.MatchContains)
+            self.strike_combo_box.setCurrentIndex(indx)
+        indx = self.dip_combo_box.findText("dip",Qt.MatchContains) 
+        self.dip_combo_box.setCurrentIndex(indx)
+    def strikordirection(self,*args,**kwargs):
+        if self.strike.isChecked():
+            self.direction_name.setText("Strike")
+            indx = self.strike_combo_box.findText("strike",Qt.MatchContains)
+            self.strike_combo_box.setCurrentIndex(indx)
+        if not self.strike.isChecked():
+            self.direction_name.setText("Dip Direction")
+            indx = self.strike_combo_box.findText("dir",Qt.MatchContains)
+            self.strike_combo_box.setCurrentIndex(indx)
+
     def onclick(self,event):
         strike, dip = mplstereonet.stereonet_math.geographic2pole(event.xdata,event.ydata)
         self.ax.plane(strike,dip)
