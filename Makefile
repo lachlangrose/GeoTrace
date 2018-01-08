@@ -38,16 +38,16 @@ LOCALES =
 # translation
 SOURCES = \
 	__init__.py \
-	geo_trace.py geo_trace_dialog.py tools/gtlinetool.py tools/gtrose.py tools/gtstereo.py  tools/gttracetool.py  tools/gttrace.py 
+	geo_trace.py geo_trace_dialog.py tools#/gtlinetool.py tools/gtrose.py tools/gtstereo.py  tools/gttracetool.py  tools/gttrace.py tools/install_dependencies.py
 PLUGINNAME = GeoTrace
 
 PY_FILES = \
 	__init__.py \
-	geo_trace.py geo_trace_dialog.py tools/gtlinetool.py  tools/gtrose.py tools/gtstereo.py tools/gttracetool.py tools/gttrace.py
+	geo_trace.py geo_trace_dialog.py tools#/gtlinetool.py  tools/gtrose.py tools/gtstereo.py tools/gttracetool.py tools/gttrace.py tools/install_dependencies.py
 
 UI_FILES = \ \ 
 
-EXTRAS = metadata.txt icon.png instructions.html about.html 
+EXTRAS = metadata.txt icon.png instructions.html about.html install.sh install.vbs deps.bat installers#/Cython-0.27.2-cp27-cp27m-win32.whl installers/Cython-0.27.2-cp27-cp27m-win_amd64.whl installers/scikit_image-0.13.1-cp27-cp27m-win32.whl installers/scikit_image-0.13.1-cp27-cp27m-win_amd64.whl
 
 COMPILED_RESOURCE_FILES = resources.py
 
@@ -103,9 +103,9 @@ deploy: compile doc transcompile
 	# the Python plugin directory is located at:
 	# $HOME/$(QGISDIR)/python/plugins
 	mkdir -p $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
-	cp -vf $(PY_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
+	cp -vfr $(PY_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vf $(COMPILED_RESOURCE_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
-	cp -vf $(EXTRAS) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
+	cp -vfr $(EXTRAS) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vfr i18n $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vfr $(HELP) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/help
 

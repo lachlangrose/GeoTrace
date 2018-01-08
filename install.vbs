@@ -10,7 +10,15 @@ if bElevate Or WScript.Arguments.Count = 0 Then ElevateUAC
 '******************
 dim shell
 set shell=createobject("wscript.shell")
-shell.run "C:\Users\lgrose\Documents\GeoTraceInstall\deps.bat"
+dim x, fso, vbpath
+Set x = WScript.CreateObject("WScript.Shell")
+Set fso = CreateObject("Scripting.FileSystemObject")
+vbpath = fso.GetParentFolderName(WScript.ScriptFullName)
+WScript.Echo vbpath
+location = vbpath & "\deps.bat"
+WScript.Echo location
+shell.run location 
+
 set shell=nothing
 '-----------------------------------------
 'Run this script under elevated privileges

@@ -66,15 +66,19 @@ class GeoTraceDialog(QDialog):
         self.setLayout(self.dialog_layout)
         self.setWindowTitle('GeoTrace')
         tab_layout = QTabWidget()
+        global trace_imported
+        if not trace_imported:
+            import install_dependencies as installer
+            install = installer.Installer()
+            success = install.install()
+            import gttracetool
+            trace_imported = True
         if trace_imported:
             tab_layout.addTab(self.setup_trace(),"Trace")
             tab_layout.addTab(self.setup_advanced_trace(),"Advanced Trace")
             tab_layout.addTab(self.setup_cost_calculator(),"Cost Calculator")
 
-        else:
-            tab_layout.addTab(self.setup_error(),"Trace")
-            tab_layout.addTab(self.setup_error(),"Advanced Trace")
-            tab_layout.addTab(self.setup_error(),"Cost Calculator")
+        
         try:
             tab_layout.addTab(self.setup_stereonet(),"Steronet")
         except ImportError:
@@ -88,17 +92,27 @@ class GeoTraceDialog(QDialog):
     def setup_error(self):
         error_widget= QWidget()
         main_layout = QGridLayout()
-        missing = QGroupBox("Missing Dependencies")
-        error = QTextBrowser()
-        info = QFile(":/plugins/GeoTrace/instructions.html")
-        info.open(QFile.ReadOnly)
-        text = QTextStream(info)
-        error.setHtml(text.readAll())
-        main_layout.addWidget(missing)
-        error.setOpenExternalLinks(True)
-        main_layout.addWidget(error)
+        #missing = QGroupBox("Install Missing Dependencies")
+        install_button = QPushButton('Install')
+        main_layout.addWidget(install_button)
+        install_button.clicked.connect(lambda: self.install_deps())#lambda: install.install())
         error_widget.setLayout(main_layout)
         return error_widget
+    def install_deps(self):
+        import install_dependencies as installer
+        install = installer.Installer()
+        success = install.install()
+        self.setup_gui()
+		
+        if success:
+			QMessageBox.information(self, _plugin_name_, 'Dependencies installed')
+			import gttracetool
+			self.setup_gui()
+			trace_imported = True
+			print "test"
+        if not success:
+            QMessageBox.warning(self, _plugin_name_, 'Installing dependencies failed')
+
     def setup_histogram(self):
         histogram_widget = QWidget()
         histogram_layout = QVBoxLayout()
