@@ -71,6 +71,10 @@ class GeoTraceDialog(QDialog):
             import install_dependencies as installer
             install = installer.Installer()
             success = install.install()
+            if not success:
+                QMessageBox.warning(self, _plugin_name_, 'Installing dependencies failed \
+                \n try running install_dependencies.bat as admin')
+                return False
             import gttracetool
             trace_imported = True
         if trace_imported:

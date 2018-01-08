@@ -32,6 +32,7 @@ import os
 import platform
 import inspect
 import struct
+import time
 #check to see what operating system if being used
 class Installer():
     def __init__(self):
@@ -43,13 +44,19 @@ class Installer():
         if platform.system() == 'Windows':
             process = subprocess.call('cscript install.vbs')
             trace_imported  = False
+            #vbs script calls bat script so keep checking if install has worked
+            count = 0 
             while trace_imported == False:
                 try:
                     import gttracetool
                     trace_imported = True
+                    time.sleep(10)
                 except ImportError:
+                    count+=1
                     trace_imported = False
-			
+                    #try for three minutes, if not successful quit
+                    if count > 18:
+                        return False
             #process.wait()
             return True
         return False

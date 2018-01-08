@@ -35,7 +35,7 @@ call python -m pip install mplstereonet
 
 REM change back to the directory with the python wheels
 cd /D %UserProfile%
-cd .qgis2\python\plugins\GeoTrace
+cd .qgis2\python\plugins\GeoTrace\windows_installers
 
 echo %platform%
 
