@@ -51,12 +51,12 @@ class Installer():
                 try:
                     import gttracetool
                     trace_imported = True
-                    time.sleep(10)
                 except ImportError:
+                    time.sleep(1)
                     count+=1
                     trace_imported = False
                     #try for three minutes, if not successful quit
-                    if count > 18:
+                    if count > 180:
                         return False
             #process.wait()
             return True

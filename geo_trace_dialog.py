@@ -36,7 +36,10 @@ trace_imported  = True
 try:
     import gttracetool
 except ImportError:
-    trace_imported = False
+    import install_dependencies as installer
+    install = installer.Installer()
+    success = install.install()
+    trace_imported = success
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
@@ -68,15 +71,9 @@ class GeoTraceDialog(QDialog):
         tab_layout = QTabWidget()
         global trace_imported
         if not trace_imported:
-            import install_dependencies as installer
-            install = installer.Installer()
-            success = install.install()
-            if not success:
-                QMessageBox.warning(self, _plugin_name_, 'Installing dependencies failed \
-                \n try running install_dependencies.bat as admin')
-                return False
-            import gttracetool
-            trace_imported = True
+            QMessageBox.warning(self, _plugin_name_, 'Installing dependencies failed \
+            \n try running install_dependencies.bat as admin')
+            return False
         if trace_imported:
             tab_layout.addTab(self.setup_trace(),"Trace")
             tab_layout.addTab(self.setup_advanced_trace(),"Advanced Trace")
