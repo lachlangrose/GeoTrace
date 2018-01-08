@@ -40,6 +40,10 @@ except ImportError:
     install = installer.Installer()
     success = install.install()
     trace_imported = success
+try:
+    import gttracetool
+except ImportError:
+    trace_imported = False
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
