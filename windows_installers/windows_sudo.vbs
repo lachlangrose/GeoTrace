@@ -15,7 +15,7 @@ Set x = WScript.CreateObject("WScript.Shell")
 Set fso = CreateObject("Scripting.FileSystemObject")
 vbpath = fso.GetParentFolderName(WScript.ScriptFullName)
 WScript.Echo vbpath
-location = vbpath & "\deps.bat"
+location = vbpath & "\install_dependencies.bat"
 WScript.Echo location
 shell.run location 
 
