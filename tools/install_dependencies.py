@@ -42,6 +42,7 @@ class Installer():
         os.chdir(os.path.dirname(filepath))
         os.chdir('../')
         if platform.system() == 'Windows':
+            os.chdir('windows_installers')
             process = subprocess.call('cscript windows_sudo.vbs')
             trace_imported  = False
             #vbs script calls bat script so keep checking if install has worked
