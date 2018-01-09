@@ -33,13 +33,10 @@ import os
 
 #try importing gttracetool and associated dependencies, if an import error occurs trace_imported becomes false and we fail-friendly.
 trace_imported  = True
-try:
-    import gttracetool
-except ImportError:
-    import install_dependencies as installer
-    install = installer.Installer()
-    success = install.install()
-    trace_imported = success
+#try:
+#    import gttracetool
+#except ImportError:
+#    
 try:
     import gttracetool
 except ImportError:
@@ -75,9 +72,17 @@ class GeoTraceDialog(QDialog):
         tab_layout = QTabWidget()
         global trace_imported
         if not trace_imported:
-            QMessageBox.warning(self, _plugin_name_, 'Installing dependencies failed \
-            \n try running install_dependencies.bat as admin')
-            return False
+            import install_dependencies as installer
+            install = installer.Installer()
+            success = install.install()
+            trace_imported = success
+            if not success:
+                QMessageBox.warning(self, _plugin_name_, 'Installing dependencies failed \
+                \n try running install_dependencies.bat as admin')
+                return False
+            if success:
+                global gttracetool
+                import gttracetool
         if trace_imported:
             tab_layout.addTab(self.setup_trace(),"Trace")
             tab_layout.addTab(self.setup_advanced_trace(),"Advanced Trace")
@@ -114,7 +119,6 @@ class GeoTraceDialog(QDialog):
 			import gttracetool
 			self.setup_gui()
 			trace_imported = True
-			print "test"
         if not success:
             QMessageBox.warning(self, _plugin_name_, 'Installing dependencies failed')
 

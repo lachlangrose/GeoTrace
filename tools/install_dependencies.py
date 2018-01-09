@@ -49,7 +49,6 @@ class Installer():
             count = 0 
             while trace_imported == False:
                 try:
-                    import gttracetool
                     trace_imported = True
                 except ImportError:
                     time.sleep(1)
@@ -60,5 +59,23 @@ class Installer():
                         return False
             #process.wait()
             return True
+        if platform.system() == 'Linux':
+            #os.chdir('linux_installers')
+            #linux is easy because it has c compiler
+            subprocess.call('pip install --user scikit_image',shell=True)
+            subprocess.call('pip install --user mplstereonet',shell=True)
+
+            trace_imported = False
+            count = 0
+            while not trace_imported:
+                try:
+                    trace_imported = True
+                except ImportError:
+                    time.sleep(1)
+                    count+=1
+                    trace_imported = False
+                    if count > 180:
+                        return False
+                return True
         return False
 
