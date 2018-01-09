@@ -85,9 +85,9 @@ GeoTrace is free software licenced under the GNU licence v2
 
 # Further Reading and Citation
 
-If you found this tool useful, please cite *Thiele et al., 2017*. The publication (currently under review) also contains a more detailed description of the methods employed by this plugin.
+If you found this tool useful, please cite *Thiele et al., 2017*. The publication also contains a more detailed description of the methods employed by this plugin.
 
-*Thiele, S. T., Grose, L., Samsu, A., Micklethwaite, S., Vollgger, S. A., and Cruden, A. R.: Rapid, semi-automatic fracture and contact mapping for point clouds, images and geophysical data, Solid Earth Discuss., https://doi.org/10.5194/se-2017-83, In Review, 2017*
+*Thiele, S. T., Grose, L., Samsu, A., Micklethwaite, S., Vollgger, S. A., and Cruden, A. R.: Rapid, semi-automatic fracture and contact mapping for point clouds, images and geophysical data, Solid Earth, 8, 1241-1253, https://doi.org/10.5194/se-8-1241-2017, 2017*
 
 For further information on the plane-fitting approach and planarity metric please refer to:
 
