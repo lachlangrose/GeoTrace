@@ -64,18 +64,10 @@ class Installer():
             #linux is easy because it has c compiler
             subprocess.call('pip install --user scikit_image',shell=True)
             subprocess.call('pip install --user mplstereonet',shell=True)
-
-            trace_imported = False
-            count = 0
-            while not trace_imported:
-                try:
-                    trace_imported = True
-                except ImportError:
-                    time.sleep(1)
-                    count+=1
-                    trace_imported = False
-                    if count > 180:
-                        return False
+            try:
+                import gttracetool
                 return True
+            except ImportError:
+                return False
         return False
 
