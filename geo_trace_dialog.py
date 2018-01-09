@@ -70,16 +70,22 @@ class GeoTraceDialog(QDialog):
         self.setLayout(self.dialog_layout)
         self.setWindowTitle('GeoTrace')
         tab_layout = QTabWidget()
+        
+        #try and get access to gttrace tool, installing the necessary (bundled) libraries if need be
         global trace_imported
         if not trace_imported:
             import install_dependencies as installer
             install = installer.Installer()
             success = install.install()
             trace_imported = success
+            
+            #dependencies did not install properly 
             if not success:
-                QMessageBox.warning(self, _plugin_name_, 'Installing dependencies failed \
-                \n try running install_dependencies.bat as admin')
+                QMessageBox.warning(self, _plugin_name_, 'Installing dependencies failed. \
+                \n Please ensure you are connected to the internet, and try running windows_installers/install_dependencies.bat as admin')
                 return False
+            
+            #dependencies did install properly
             if success:
                 global gttracetool
                 import gttracetool

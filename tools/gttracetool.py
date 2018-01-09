@@ -32,9 +32,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from qgis.core import *
 from qgis.gui import *
-#from osgeo import gdal
 import osgeo 
-#from osgeo.gdalconst import *
 import numpy as np
 import time
 import gttrace as trace

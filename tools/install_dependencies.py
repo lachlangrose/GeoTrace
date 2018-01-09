@@ -49,6 +49,7 @@ class Installer():
             count = 0 
             while trace_imported == False:
                 try:
+                    import gttracetool
                     trace_imported = True
                 except ImportError:
                     time.sleep(1)
