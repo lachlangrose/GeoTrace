@@ -157,7 +157,7 @@ class GtStereo(QtGui.QDialog):
         self.ax.hold(True)
 
         self.ax.density_contourf(strike,dip,measurement='poles')
-        self.ax.pole(strike, dip)
+        #self.ax.pole(strike, dip)
         self.ax.grid(True)
         # refresh canvas
         self.canvas.draw()
