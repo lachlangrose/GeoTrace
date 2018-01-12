@@ -82,7 +82,7 @@ class GeoTraceDialog(QDialog):
             #dependencies did not install properly 
             if not success:
                 QMessageBox.warning(self, _plugin_name_, 'Installing dependencies failed. \
-                \n Please ensure you are connected to the internet, and try running windows_installers/install_dependencies.bat as admin')
+                \n Please ensure you are connected to the internet')
                 return False
             
             #dependencies did install properly
@@ -121,10 +121,10 @@ class GeoTraceDialog(QDialog):
         self.setup_gui()
 		
         if success:
-			QMessageBox.information(self, _plugin_name_, 'Dependencies installed')
-			import gttracetool
-			self.setup_gui()
-			trace_imported = True
+            QMessageBox.information(self, _plugin_name_, 'Dependencies installed')
+            import gttracetool
+            self.setup_gui()
+            trace_imported = True
         if not success:
             QMessageBox.warning(self, _plugin_name_, 'Installing dependencies failed')
 
