@@ -32,11 +32,7 @@
 import os
 
 #try importing gttracetool and associated dependencies, if an import error occurs trace_imported becomes false and we fail-friendly.
-trace_imported  = True
-#try:
-#    import gttracetool
-#except ImportError:
-#    
+trace_imported  = True 
 try:
     import gttracetool
 except ImportError:
@@ -75,14 +71,20 @@ class GeoTraceDialog(QDialog):
         global trace_imported
         if not trace_imported:
             import install_dependencies as installer
+            QMessageBox.information(self, _plugin_name_, 'Installing dependencies. \
+                \nPlease ensure you are connected to the internet\
+                \nThis may take a few minutes')
+            #self.iface.messageBar().pushMessage(
+            #    "Warning", "Installing dependencies, this may take a few minutes.",
+            #     level=QgsMessageBar.WARNING)
+
             install = installer.Installer()
             success = install.install()
             trace_imported = success
             
             #dependencies did not install properly 
             if not success:
-                QMessageBox.warning(self, _plugin_name_, 'Installing dependencies failed. \
-                \n Please ensure you are connected to the internet')
+                QMessageBox.information(self, _plugin_name_, 'Installing dependencies failed.\nPlease ensure you are connected to the internet')
                 return False
             
             #dependencies did install properly
