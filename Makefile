@@ -47,7 +47,7 @@ PY_FILES = \
 
 UI_FILES = \ \ 
 
-EXTRAS = metadata.txt icon.png instructions.html about.html install.sh windows_installers#/Cython-0.27.2-cp27-cp27m-win32.whl installers/Cython-0.27.2-cp27-cp27m-win_amd64.whl installers/scikit_image-0.13.1-cp27-cp27m-win32.whl installers/scikit_image-0.13.1-cp27-cp27m-win_amd64.whl
+EXTRAS = metadata.txt icon.png instructions.html about.html windows_installers#/Cython-0.27.2-cp27-cp27m-win32.whl installers/Cython-0.27.2-cp27-cp27m-win_amd64.whl installers/scikit_image-0.13.1-cp27-cp27m-win32.whl installers/scikit_image-0.13.1-cp27-cp27m-win_amd64.whl
 
 COMPILED_RESOURCE_FILES = resources.py
 
@@ -57,10 +57,6 @@ PEP8EXCLUDE=pydev,resources.py,conf.py,third_party,ui
 #################################################
 # Normally you would not need to edit below here
 #################################################
-
-HELP = help/build/html
-
-PLUGIN_UPLOAD = $(c)/plugin_upload.py
 
 RESOURCE_SRC=$(shell grep '^ *<file' resources.qrc | sed 's@</file>@@g;s/.*>//g' | tr '\n' ' ')
 
@@ -106,8 +102,6 @@ deploy: compile doc transcompile
 	cp -vfr $(PY_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vf $(COMPILED_RESOURCE_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vfr $(EXTRAS) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
-	cp -vfr i18n $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
-	cp -vfr $(HELP) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/help
 
 # The dclean target removes compiled python files from plugin directory
 # also deletes any .git entry
@@ -179,7 +173,6 @@ transclean:
 	@echo "------------------------------------"
 	@echo "Removing compiled translation files."
 	@echo "------------------------------------"
-	rm -f i18n/*.qm
 
 clean:
 	@echo
@@ -193,7 +186,6 @@ doc:
 	@echo "------------------------------------"
 	@echo "Building documentation using sphinx."
 	@echo "------------------------------------"
-	cd help; make html
 
 pylint:
 	@echo
