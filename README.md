@@ -95,4 +95,4 @@ For further information on the plane-fitting approach and planarity metric pleas
 
 Where the derived orientation estimates are of critical importance, the following will also be a useful reference:
 
-*Seers, T. D. and Hodgetts, D.: Extraction of three-dimensional fracture trace maps from calibrated image sequences. Geosphere 12, 1323-1340, https://doi.org/10.1130/ges01276.1, 2016*
+*Seers, T. D. and D. Hodgetts., Probabilistic constraints on structural lineament best fit plane precision obtained through numerical analysis Journal of Structural Geology 82: 37-47, https://doi.org/10.1016/j.jsg.2015.11.004   2016*
