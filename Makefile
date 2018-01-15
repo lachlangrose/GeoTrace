@@ -47,7 +47,7 @@ PY_FILES = \
 
 UI_FILES = \ \ 
 
-EXTRAS = metadata.txt icon.png instructions.html about.html windows_installers#/Cython-0.27.2-cp27-cp27m-win32.whl installers/Cython-0.27.2-cp27-cp27m-win_amd64.whl installers/scikit_image-0.13.1-cp27-cp27m-win32.whl installers/scikit_image-0.13.1-cp27-cp27m-win_amd64.whl
+EXTRAS = metadata.txt icon.png instructions.html about.html #/Cython-0.27.2-cp27-cp27m-win32.whl installers/Cython-0.27.2-cp27-cp27m-win_amd64.whl installers/scikit_image-0.13.1-cp27-cp27m-win32.whl installers/scikit_image-0.13.1-cp27-cp27m-win_amd64.whl
 
 COMPILED_RESOURCE_FILES = resources.py
 
