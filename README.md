@@ -14,10 +14,11 @@ The plugin can be in two ways.
     * On windows, this path will be something like `C:/Users/USERNAME/.qgs2/python/plugins`. Note that you may need to create the `plugins` folder.
     * On Linux the plugin can be cloned to any directory and then the relevant files are copied to the correct locations using the by running the command 'make deploy' 
 ## Dependencies
-GeoTrace uses `Numpy`, `Matplotlib`, `mplstereonet` and `scikit-image`, so you will need to make sure these are installed for your python distribution.
-QGis should come bundled with `Numpy` and `Matplotlib`. The other packages can be installed using pip. 
+GeoTrace uses `Numpy`, `Matplotlib`, `mplstereonet` and `scikit-image`. QGis should come bundled with `Numpy` and `Matplotlib`. 
 
-### Detailed instructions for MS Windows users
+The other dependencies should be automatically downloaded and installed the first time GeoTrace is run (at least on Windows and Linux). If this automatic install doesn't work then the plugin can be installed in by following the manual install instructions below.
+
+### Manual install instructions for MS Windows users
 Installing `mplstereonet` and `scikit-image` on Windows can be a little tricky, as *skimage* contains uncompiled c-code. The following instructions should work
 in most cases however:
 1. Open the start menu and search for *OSGeo4W Shell*. Right-click on it and select *Run as administrator*. This tool gives you access to the qGIS version of python
@@ -32,7 +33,8 @@ in most cases however:
 7. Start/restart QGIS
 
 Assuming these all installed correctly, you should now be set to use the plugin.
-### Linux
+
+### Manual install instructions for Linux users
 1. Open a terminal window 'ctrl+alt+t'
 2. Install *mplstereonet* first, using the following command: `sudo pip install mplstereonet` 
 3. Install *scikit-image* using the following command: 'sudo pip install scikit-image'  
