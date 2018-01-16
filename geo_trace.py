@@ -28,21 +28,17 @@
  ***************************************************************************/
 """
 
-from PyQt4.QtCore import *#QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import *#QAction, QIcon
-
+from PyQt5.QtCore import *#QSettings, QTranslator, qVersion, QCoreApplication
+from PyQt5.QtGui import *#QAction, QIcon
+from PyQt5.QtWidgets import *#QAction, QIcon
 # Initialize Qt resources from file resources.py
-import resources
+#import resources
 
-# Ensure matplotlib uses the right backend
-import matplotlib
-matplotlib.use('agg')
 
 # Import the code for the dialog
-from geo_trace_dialog import GeoTraceDialog
+from .geo_trace_dialog import GeoTraceDialog
 import os.path,  sys
 import gtlinetool
-import gtrose
 
 class GeoTrace:
     """QGIS Plugin Implementation."""

@@ -28,10 +28,10 @@
  ***************************************************************************/
 """
 
-from PyQt4.QtCore import *
-from PyQt4 import QtGui
+from PyQt5.QtCore import *
+from PyQt5 import QtGui
 
-from PyQt4.QtGui import *
+from PyQt5.QtGui import *
 from qgis.core import *
 from qgis.gui import *
 import numpy as np
@@ -42,7 +42,7 @@ class GtLineTool(QgsMapToolEmitPoint):
       self.canvas = canvas
       self.iface = iface
       QgsMapToolEmitPoint.__init__(self, self.canvas)
-      self.rubberBand = QgsRubberBand(self.canvas, QGis.Polygon)
+      self.rubberBand = QgsRubberBand(self.canvas, QgsWkbTypes.PolygonGeometry)
       self.rubberBand.setColor(Qt.red)
       self.rubberBand.setWidth(1)
       self.reset()
@@ -50,7 +50,7 @@ class GtLineTool(QgsMapToolEmitPoint):
   def reset(self):
       self.startPoint = self.endPoint = None
       self.isEmittingPoint = False
-      self.rubberBand.reset(QGis.Line)
+      self.rubberBand.reset(QgsWkbTypes.LineGeometry)
 
   def canvasPressEvent(self, e):
       self.startPoint = self.toMapCoordinates(e.pos())
@@ -64,8 +64,8 @@ class GtLineTool(QgsMapToolEmitPoint):
       azimuth  = self.point1.azimuth(self.point2)
       newx = (self.point1.x() + self.point2.x()) /  2
       newy = (self.point1.y() + self.point2.y()) / 2
-      print self.point1.x(), self.point2.x(), self.point1.y(), self.point2.y()
-      print newx, newy
+      #print self.point1.x(), self.point2.x(), self.point1.y(), self.point2.y()
+      #print newx, newy
       point = QgsPoint(newx , newy)
       self.addPoint(point, azimuth) 
                
@@ -93,7 +93,7 @@ class GtLineTool(QgsMapToolEmitPoint):
                                                   -90)
       if not ok:
             return
-      print strike, dip
+      #print strike, dip
       if strike < 0:
           strike = 360 + strike
       if dip < 0:
@@ -119,7 +119,7 @@ class GtLineTool(QgsMapToolEmitPoint):
       f['dip'] = np.abs(dip)
       # this is the preferred way of adding features in QGIS >= 2.4
       # it respects default values, suppression of attribute form, reuse of recent values etc.
-      if QGis.QGIS_VERSION_INT >= 20400:
+      if Qgis.QGIS_VERSION_INT >= 20400:
         if self.iface.vectorLayerTools().addFeature(layer, {strikein:strike, dipin:dip}, geom):
             self.canvas.refresh()
             return True
@@ -142,7 +142,7 @@ class GtLineTool(QgsMapToolEmitPoint):
       self.showRect(self.startPoint, self.endPoint)
 
   def showRect(self, startPoint, endPoint):
-      self.rubberBand.reset(QGis.Line)
+      self.rubberBand.reset(Qgis.Line)
       if startPoint.x() == endPoint.x() or startPoint.y() == endPoint.y():
         return
 
