@@ -67,7 +67,7 @@ default: compile
 compile: $(COMPILED_RESOURCE_FILES)
 
 %.py : %.qrc $(RESOURCES_SRC)
-	pyrcc4 -o $*.py  $<
+	pyrcc5 -o $*.py  $<
 
 %.qm : %.ts
 	$(LRELEASE) $<
