@@ -145,8 +145,6 @@ class GtRose(QtWidgets.QDialog):
                 data[i][0]+=90.
             if data[i][0] >= 360:
                 data[i][0] -=360
-            #data[i][0] = float()
-            #data[i][1] = f[weight_prop]
             i = i + 1
         weighted = False
         nsection = 360 / angle
