@@ -8,7 +8,8 @@
 
 [general]
 name=GeoTrace
-qgisMinimumVersion=3.0
+qgisMinimumVersion=2.99
+qgisMaximumVersion=3.99
 description=Collection of tools extracting trace data from commonly used geoscience rasters such as imagery, topography and geophysics.
 version=1.2
 author=Lachlan Grose

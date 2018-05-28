@@ -32,7 +32,7 @@ from PyQt5.QtCore import *#QSettings, QTranslator, qVersion, QCoreApplication
 from PyQt5.QtGui import *#QAction, QIcon
 from PyQt5.QtWidgets import *#QAction, QIcon
 # Initialize Qt resources from file resources.py
-#import resources
+import resources_rc
 
 
 # Import the code for the dialog
@@ -172,7 +172,8 @@ class GeoTrace:
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
-        icon_path = ':/plugins/GeoTrace/icon.png'
+        icon_path = os.path.join(os.path.dirname(__file__), "icon.png")
+        #icon_path = ':/plugins/GeoTrace/icon.png'
         self.add_action(
             icon_path,
             text=self.tr(u'GeoTrace'),

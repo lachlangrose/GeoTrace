@@ -144,12 +144,12 @@ class GeoTraceDialog(QDialog):
         about_widget = QWidget()
         main_layout = QGridLayout()
         text_box = QTextBrowser()
-        about = QFile(":/plugins/GeoTrace/about.html")
-        about.open(QFile.ReadOnly)
-        text = QTextStream(about)
-        text_box.setHtml(text.readAll())
-        text_box.setOpenExternalLinks(True)
-        main_layout.addWidget(text_box)
+        #about = QFile(":/plugins/GeoTrace/about.html")
+        #about.open(QFile.ReadOnly)
+        #text = QTextStream(about)
+        #text_box.setHtml(text.readAll())
+        #text_box.setOpenExternalLinks(True)
+        #main_layout.addWidget(text_box)
         about_widget.setLayout(main_layout)
 
         return  about_widget
