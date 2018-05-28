@@ -47,7 +47,7 @@ PY_FILES = \
 
 UI_FILES = \ \ 
 
-EXTRAS = metadata.txt icon.png instructions.html about.html windows_installers#/Cython-0.27.2-cp27-cp27m-win32.whl installers/Cython-0.27.2-cp27-cp27m-win_amd64.whl installers/scikit_image-0.13.1-cp27-cp27m-win32.whl installers/scikit_image-0.13.1-cp27-cp27m-win_amd64.whl
+EXTRAS = metadata.txt icon.png instructions.html about.html #/Cython-0.27.2-cp27-cp27m-win32.whl installers/Cython-0.27.2-cp27-cp27m-win_amd64.whl installers/scikit_image-0.13.1-cp27-cp27m-win32.whl installers/scikit_image-0.13.1-cp27-cp27m-win_amd64.whl
 
 COMPILED_RESOURCE_FILES = resources.py
 
@@ -60,14 +60,14 @@ PEP8EXCLUDE=pydev,resources.py,conf.py,third_party,ui
 
 RESOURCE_SRC=$(shell grep '^ *<file' resources.qrc | sed 's@</file>@@g;s/.*>//g' | tr '\n' ' ')
 
-QGISDIR=.qgis2
+QGISDIR=.local/share/QGIS/QGIS3/profiles/default
 
 default: compile
 
 compile: $(COMPILED_RESOURCE_FILES)
 
 %.py : %.qrc $(RESOURCES_SRC)
-	pyrcc4 -o $*.py  $<
+	pyrcc5 -o $*.py  $<
 
 %.qm : %.ts
 	$(LRELEASE) $<

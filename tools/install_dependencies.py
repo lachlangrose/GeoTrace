@@ -68,8 +68,8 @@ class Installer():
         if platform.system() == 'Linux':
             #os.chdir('linux_installers')
             #linux is easy because it has c compiler
-            subprocess.call('pip install --user scikit_image',shell=True)
-            subprocess.call('pip install --user mplstereonet',shell=True)
+            subprocess.call('pip3 install --user scikit_image',shell=True)
+            subprocess.call('pip3 install --user mplstereonet',shell=True)
         try:
             import gttracetool
             return True

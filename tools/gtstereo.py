@@ -30,19 +30,20 @@
 
 import os.path,  sys
 import numpy as np
-from PyQt4 import *
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt5 import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 from qgis.core import *
 from qgis.gui import *
 
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
 import mplstereonet
 import random
 
-class GtStereo(QtGui.QDialog):
+class GtStereo(QtWidgets.QDialog):
     def __init__(self, canvas, iface, parent=None):
         super(GtStereo, self).__init__(parent)
         self.canvas = canvas
@@ -50,13 +51,13 @@ class GtStereo(QtGui.QDialog):
         self.figure, self.ax = mplstereonet.subplots()
         self.ax.text(0.75,-0.04, "lower-hemisphere \"schmitt\" \n(equal area) projection.",transform = self.ax.transAxes, ha='left', va='center')
         self.canvas = FigureCanvas(self.figure)
-        self.polesbutton = QtGui.QPushButton('Plot Poles')
+        self.polesbutton = QtWidgets.QPushButton('Plot Poles')
         self.polesbutton.clicked.connect(self.plotpoles)
-        self.circlebutton = QtGui.QPushButton('Fit Fold')
+        self.circlebutton = QtWidgets.QPushButton('Fit Fold')
         self.circlebutton.clicked.connect(self.fitfold)
-        self.densitybutton = QtGui.QPushButton('Plot Density')
+        self.densitybutton = QtWidgets.QPushButton('Plot Density')
         self.densitybutton.clicked.connect(self.plotdensity)
-        self.resetbutton = QtGui.QPushButton('Clear Plot')
+        self.resetbutton = QtWidgets.QPushButton('Clear Plot')
         self.resetbutton.clicked.connect(self.reset)
 
         self.vector_layer_combo_box = QgsMapLayerComboBox()
@@ -72,8 +73,8 @@ class GtStereo(QtGui.QDialog):
         self.selected_features = QCheckBox()
         self.strike_combo_box = QgsFieldComboBox()
         self.dip_combo_box = QgsFieldComboBox()
-        top_form_layout = QtGui.QFormLayout()
-        layout = QtGui.QVBoxLayout()
+        top_form_layout = QtWidgets.QFormLayout()
+        layout = QtWidgets.QVBoxLayout()
         self.direction_name = QLabel("Dip Direction") 
         top_form_layout.addRow("Layer:",self.vector_layer_combo_box)
         top_form_layout.addRow(self.direction_name,self.strike_combo_box)
@@ -87,7 +88,7 @@ class GtStereo(QtGui.QDialog):
         layout.addWidget(self.canvas)
         #layout.addWidget(self.strike_combo)
         #layout.addWidget(self.dip_combo)
-        bottom_form_layout = QtGui.QFormLayout()
+        bottom_form_layout = QtWidgets.QFormLayout()
         bottom_form_layout.addWidget(self.polesbutton)
         bottom_form_layout.addWidget(self.circlebutton)
         bottom_form_layout.addWidget(self.densitybutton)

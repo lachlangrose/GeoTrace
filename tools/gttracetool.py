@@ -28,16 +28,17 @@
  ***************************************************************************/
 """
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 from qgis.core import *
 from qgis.gui import *
-import osgeo 
+#import osgeo 
+import gdal
+import gdalnumeric
 import numpy as np
 import time
 import gttrace as trace
 import uuid
-import matplotlib.pyplot as plt
 from skimage import filters
 #import phasepack
 class GtTraceBase(object):
@@ -53,8 +54,8 @@ class GtTraceBase(object):
         self.costlayerCRSSrsid = self.cost.crs().srsid()
         #self.renderer = self.canvas.mapRenderer()
         self.projectCRSSrsid = self.canvas.mapSettings().destinationCrs().srsid()
-        if self.targetlayerCRSSrsid != self.costlayerCRSSrsid:
-            print "Target and cost have different CRS"
+        #if self.targetlayerCRSSrsid != self.costlayerCRSSrsid:
+            #print "Target and cost have different CRS"
         self.use_control_points = False
         self.use_dem_for_planes = False
         self.xmin = self.cost.extent().xMinimum()
@@ -73,7 +74,7 @@ class GtTraceBase(object):
         #TODO add in check for if raster has more than 1 badn here and ask which band to use
         try:
             filepath = layer.dataProvider().dataSourceUri()
-            ds = osgeo.gdal.Open(filepath)
+            ds = gdal.Open(filepath)
             array = np.array(ds.GetRasterBand(1).ReadAsArray()).astype('int')                     
             array = np.rot90(np.rot90(np.rot90(array)))
         except:
@@ -88,7 +89,7 @@ class GtTraceBase(object):
             return array
     def setDem(self,raster= None):
         if raster == None:
-            print "no raster"
+            #print "no raster"
             self.use_dem_for_planes = False
             return
         pr = self.target.dataProvider()
@@ -119,19 +120,19 @@ class GtTraceBase(object):
                 dip = True
         if not dip:
             attributes.append(QgsField("DIP",QVariant.Double))
-            print "Creating DIP attribute"
+            #print "Creating DIP attribute"
         if not strike:
             attributes.append(QgsField("DIP_DIR",QVariant.Double))           
-            print "Creating DIP_DIR attribute"
+            #print "Creating DIP_DIR attribute"
         if not e1:
             attributes.append(QgsField("E_1",QVariant.Double))            
-            print "Creating EIGENVALUE_1 attribute"
+            #print "Creating EIGENVALUE_1 attribute"
         if not e2:
             attributes.append(QgsField("E_2",QVariant.Double))            
-            print "Creating EIGENVALUE_2 attribute"
+            #print "Creating EIGENVALUE_2 attribute"
         if not e3:
             attributes.append(QgsField("E_3",QVariant.Double))            
-            print "Creating EIGENVALUE_3 attribute"
+            #print "Creating EIGENVALUE_3 attribute"
         if not planarity:
             attributes.append(QgsField("Planarity",QVariant.Double))            
         if not qual:
@@ -158,7 +159,7 @@ class GtTraceBase(object):
         pr.addAttributes([QgsField(fieldname,fieldtype)])
         layer.updateFields()
 
-        print "Creating and adding "+fieldname+" attribute"
+        #print "Creating and adding "+fieldname+" attribute"
         return True
 
     def invertCost(self,flag):
@@ -194,7 +195,7 @@ class GtTraceBase(object):
                 fet = QgsFeature(point_fields)
                 x_ = (float(p[0]))*self.xsize+self.xmin
                 y_ = (float(p[1]))*self.ysize+self.ymin
-                geom = QgsGeometry.fromPoint(QgsPoint(x_,y_))
+                geom = QgsGeometry.fromPoint(QgsPointXY(x_,y_))
                 if pointlayerCRSSrsid != self.costlayerCRSSrsid:
                     geom.transform(QgsCoordinateTransform(self.costlayerCRSSrsid,
                                                       pointlayerCRSSrsid))
@@ -211,10 +212,10 @@ class GtTraceBase(object):
         xyz = []
         if self.use_dem_for_planes:
             if self.dem == None:
-                print "No DEM selected"
+                #print "No DEM selected"
                 return
             filepath = self.dem.dataProvider().dataSourceUri()
-            dem_src = osgeo.gdal.Open(filepath)
+            dem_src = gdal.Open(filepath)
             dem_gt = dem_src.GetGeoTransform()
             dem_rb = dem_src.GetRasterBand(1)
         
@@ -224,7 +225,7 @@ class GtTraceBase(object):
             j = (c[1])
             x_ = (float(i))*self.xsize+self.xmin + self.xsize*.5
             y_ = (float(j))*self.ysize+self.ymin + self.ysize*.5
-            points.append(QgsPoint(x_, y_))
+            points.append(QgsPointXY(x_, y_))
             if self.use_dem_for_planes:
                 px = int((x_ - dem_gt[0]) / dem_gt[1])
                 py = int((y_ - dem_gt[3]) / dem_gt[5])
@@ -242,7 +243,7 @@ class GtTraceBase(object):
                 n[2] = -n[2] 
 
         fet = QgsFeature(fields)
-        geom = QgsGeometry.fromPolyline(points)
+        geom = QgsGeometry.fromPolylineXY(points)
         if self.targetlayerCRSSrsid != self.costlayerCRSSrsid:
             geom.transform(QgsCoordinateTransform(self.costlayerCRSSrsid,
                                               self.targetlayerCRSSrsid))
@@ -298,9 +299,9 @@ class GtTraceTool(GtTraceBase,GtMapToolEmitPoint):
         #super(GtTraceTool,self).__init__(canvas_,cost_,target_,iface_,canvas_)
         #    super(GtMapToolEmitPoint,self).__init__(canvas_)
         self.iface = iface_
-        self.rubberBand = QgsRubberBand(self.canvas, QGis.Point)
+        self.rubberBand = QgsRubberBand(self.canvas, QgsWkbTypes.PointGeometry)
         self.rubberBand.setColor(Qt.red)
-        self.rubberBandLine = QgsRubberBand(self.canvas,QGis.Line)
+        self.rubberBandLine = QgsRubberBand(self.canvas,QgsWkbTypes.LineGeometry)
         self.rubberBandLine.setColor(Qt.red)
         self.rubberBandLine.setWidth(1)
 
@@ -309,18 +310,18 @@ class GtTraceTool(GtTraceBase,GtMapToolEmitPoint):
         self.isEmittingPoint = False
         self.trace.remove_control_points()
         self.clearRubberBand()
-        #self.rubberBandLine.reset(QGis.Line)
-        #self.rubberBand.reset(QGis.Point)
+        #self.rubberBandLine.reset(QgsWkbTypes.LineGeometry)
+        #self.rubberBand.reset(QgsWkbTypes.PointGeometry)
     def clearRubberBand(self):
         if self.rubberBandLine:
-            self.rubberBandLine.reset(QGis.Line)
-            self.rubberBand.reset(QGis.Point)
+            self.rubberBandLine.reset(QgsWkbTypes.LineGeometry)
+            self.rubberBand.reset(QgsWkbTypes.PointGeometry)
     def delete_control_points(self):
         if self.rubberBand:
-            self.rubberBand.reset(QGis.Point)
+            self.rubberBand.reset(QgsWkbTypes.PointGeometry)
         self.trace.remove_control_points()
     def addPoint(self,p):
-        #self.rubberBand.reset(QGis.Line)
+        #self.rubberBand.reset(QgsWkbTypes.LineGeometry)
         if self.costlayerCRSSrsid != self.projectCRSSrsid:
             transform = QgsCoordinateTransform(self.costlayerCRSSrsid, 
                                             self.projectCRSSrsid)
@@ -329,10 +330,10 @@ class GtTraceTool(GtTraceBase,GtMapToolEmitPoint):
         self.rubberBand.show()     
     def removeLastPoint(self):
         if self.trace.remove_last_node() == False:
-            self.rubberBandLine.reset(QGis.Line)
+            self.rubberBandLine.reset(QgsWkbTypes.LineGeometry)
         self.rubberBand.removeLastPoint()
     def runInteractiveTrace(self):
-        self.rubberBandLine.reset(QGis.Line)
+        self.rubberBandLine.reset(QgsWkbTypes.LineGeometry)
         self.runTrace()
         s = 0
         if len(self.paths) == 0:
@@ -342,7 +343,7 @@ class GtTraceTool(GtTraceBase,GtMapToolEmitPoint):
             j = (c[1])
             x_ = (float(i))*self.xsize+self.xmin+self.xsize*.5
             y_ = (float(j))*self.ysize+self.ymin+self.ysize*.5
-            p = QgsPoint(x_,y_)
+            p = QgsPointXY(x_,y_)
             if self.costlayerCRSSrsid != self.projectCRSSrsid:
                 transform = QgsCoordinateTransform(self.costlayerCRSSrsid, 
                                         self.projectCRSSrsid)
@@ -393,7 +394,7 @@ class GtTraceTool(GtTraceBase,GtMapToolEmitPoint):
             if i < 0 or i>self.columns or j <0 or j > self.rows:
                 self.iface.messageBar().pushMessage(
                 "Warning", "Selected point is not within raster and cannot be used",
-                 level=QgsMessageBar.WARNING)#print "out of bounds"
+                 level=QgsMessageBar.WARNING)##print "out of bounds"
                 return 
             self.trace.add_node([i1,j1])
             self.addPoint(point)
@@ -439,17 +440,17 @@ class GtBatchTrace(GtTraceBase):
                 if fet[self.fieldname] == v:
                     point = fet.geometry().asPoint()
                     if self.cpCRSSrsid != self.costlayerCRSSrsid:
-                        #print "transforming"
-                        #print point
+                        ##print "transforming"
+                        ##print point
                         transform = QgsCoordinateTransform(self.cpCRSSrsid,
                                                   self.costlayerCRSSrsid)
                         point = transform.transform(point)
-                        #print point
-                    #print point[0], self.xmin, self.xsize
-                    #print point[1], self.ymin, self.ysize
+                        ##print point
+                    ##print point[0], self.xmin, self.xsize
+                    ##print point[1], self.ymin, self.ysize
                     i = int((point[0] - self.xmin) / self.xsize)
                     j = int((point[1] - self.ymin) / self.ysize)
-                    #print point, i, j
+                    ##print point, i, j
                     self.rows = self.cost.height()
                     self.columns = self.cost.width()
                     j1 = j
@@ -457,7 +458,7 @@ class GtBatchTrace(GtTraceBase):
                     if i < 0 or i>self.columns or j <0 or j > self.rows:
                         self.iface.messageBar().pushMessage(
                         "Warning", "Selected point is not within raster and cannot be used",
-                         level=QgsMessageBar.WARNING)#print "out of bounds"
+                         level=QgsMessageBar.WARNING)##print "out of bounds"
                         continue
                     self.trace.add_node([i1,j1])
             self.runTrace()
@@ -470,7 +471,7 @@ class CostCalculator():
         self.layer = layer
     def layer_to_numpy(self,layer):
         filepath = layer.dataProvider().dataSourceUri()
-        ds = osgeo.gdal.Open(filepath)
+        ds = gdal.Open(filepath)
         self.transform = ds.GetGeoTransform()
         self.wkt = ds.GetProjection()
         if ds == None:
@@ -484,16 +485,16 @@ class CostCalculator():
         array = np.rot90(array)
         sy, sx = array.shape
         pathname = QgsProject.instance().readPath("./")+'/'+name
-        driver = osgeo.gdal.GetDriverByName("GTiff")
-        dsOut = driver.Create(pathname, sx+1,sy+1,1,osgeo.gdal.GDT_Float32 ,)
+        driver = gdal.GetDriverByName("GTiff")
+        dsOut = driver.Create(pathname, sx+1,sy+1,1,gdal.GDT_Float32 ,)
         dsOut.SetGeoTransform(self.transform)
         dsOut.SetProjection(self.wkt)
         bandOut=dsOut.GetRasterBand(1)
-        osgeo.gdalnumeric.BandWriteArray(bandOut, array)
+        gdalnumeric.BandWriteArray(bandOut, array)
         bandOut = None
         dsOut = None
         layer = QgsRasterLayer(pathname,name)
-        QgsMapLayerRegistry.instance().addMapLayer(layer)
+        QgsProject.instance().addMapLayer(layer)
     def run_calculator(self,string,name):
         if 'sobel' in string:
             array = self.calc_edges(0)
@@ -535,12 +536,12 @@ class CostCalculator():
             cost+=self.arrays[i]
         cost /= len(self.arrays)
         return cost
-        #print cost.shape
+        ##print cost.shape
  
     def calc_edges(self,t):
         self.layer_to_numpy(self.layer)    
         if self.layer.bandCount() > 1:
-            print "returning false"
+            #print "returning false"
             return False
         if t == 0:
             return filters.sobel(self.arrays[0].astype(float))

@@ -32,18 +32,20 @@ import numpy as np
 #currentPath = os.path.dirname( __file__ )
 #sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/../'))
 
-from PyQt4 import *
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt5 import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+
 from qgis.core import *
 from qgis.gui import *
 
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
 from matplotlib.projections import register_projection
 import random
-class GtRose(QtGui.QDialog):
+class GtRose(QtWidgets.QDialog):
     def __init__(self, canvas, iface, parent=None):
         super(GtRose, self).__init__(parent)
         self.canvas = canvas
@@ -57,13 +59,13 @@ class GtRose(QtGui.QDialog):
         self.ax.set_theta_direction(-1)
 
         # Just some button connected to `plot` method
-        self.polesbutton = QtGui.QPushButton('Plot')
+        self.polesbutton = QtWidgets.QPushButton('Plot')
         self.polesbutton.clicked.connect(self.plot)
-        #self.circlebutton = QtGui.QPushButton('Fit Fold')
+        #self.circlebutton = QtWidgets.QPushButton('Fit Fold')
         #self.circlebutton.clicked.connect(self.fitfold)
-        #self.densitybutton = QtGui.QPushButton('Plot Density')
+        #self.densitybutton = QtWidgets.QPushButton('Plot Density')
         #self.densitybutton.clicked.connect(self.plotdensity)
-        self.resetbutton = QtGui.QPushButton('Clear Plot')
+        self.resetbutton = QtWidgets.QPushButton('Clear Plot')
         self.resetbutton.clicked.connect(self.reset)
 
         self.vector_layer_combo_box = QgsMapLayerComboBox()
@@ -83,8 +85,8 @@ class GtRose(QtGui.QDialog):
     
         ##self.figure.canvas.mpl_connect('button_press_event',self.onclick)
         ## set the layout
-        top_form_layout = QtGui.QFormLayout()
-        layout = QtGui.QVBoxLayout()
+        top_form_layout = QtWidgets.QFormLayout()
+        layout = QtWidgets.QVBoxLayout()
         top_form_layout.addRow("Layer:",self.vector_layer_combo_box)
         top_form_layout.addRow("Dip Direction:",self.strike_combo_box)
         #top_form_layout.addRow("Dip:",self.dip_combo_box)
@@ -98,7 +100,7 @@ class GtRose(QtGui.QDialog):
         layout.addWidget(self.canvas)
         ##layout.addWidget(self.strike_combo)
         ##layout.addWidget(self.dip_combo)
-        bottom_form_layout = QtGui.QFormLayout()
+        bottom_form_layout = QtWidgets.QFormLayout()
         bottom_form_layout.addWidget(self.polesbutton)
         #bottom_form_layout.addWidget(self.circlebutton)
         #bottom_form_layout.addWidget(self.densitybutton)
@@ -148,6 +150,7 @@ class GtRose(QtGui.QDialog):
             i = i + 1
         weighted = False
         nsection = 360 / angle
+        nsection = int(round(nsection)) #round to nearest int
         sectionadd = 180/angle
         direction = np.linspace(0, 360, nsection, False) / 180 * np.pi
         frequency = [0] * (nsection)
@@ -157,15 +160,17 @@ class GtRose(QtGui.QDialog):
             tmp = int((data[i][0] - data[i][0] % angle) / angle)
             if tmp >= sectionadd:
                 tmp2 = tmp - sectionadd
+                tmp2 = int(tmp2)
             if tmp < sectionadd:
                 tmp2 = tmp + sectionadd
+                tmp2 = int(tmp2)
             #column 3 is the weight column number - 1
-            if weighted:		
+            if weighted:
                 frequency[tmp2] = frequency[tmp2] + 1 * data[i][1]
                 frequency[tmp] = frequency[tmp] + 1 * data[i][1]
             else:
-                frequency[tmp2] = frequency[tmp2] + 1# * data[i][2]
-                frequency[tmp] = frequency[tmp] + 1 # data[i][2]
+                frequency[tmp2] = frequency[tmp2] + 1
+                frequency[tmp] = frequency[tmp] + 1 
         width = angle / 180.0 * np.pi * np.ones(nsection)
         frequency = np.array(frequency) / float(n)
         bars = self.ax.bar(direction, frequency, width=width, bottom=0.0)

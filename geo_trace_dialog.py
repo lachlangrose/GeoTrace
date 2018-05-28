@@ -37,8 +37,9 @@ try:
     import gttracetool
 except ImportError:
     trace_imported = False
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 from qgis.core import *
 from qgis.gui import *
@@ -96,15 +97,17 @@ class GeoTraceDialog(QDialog):
             tab_layout.addTab(self.setup_advanced_trace(),"Advanced Trace")
             tab_layout.addTab(self.setup_cost_calculator(),"Cost Calculator")
 
+        tab_layout.addTab(self.setup_stereonet(),"Steronet")
+        tab_layout.addTab(self.setup_rose(),"Rose")
         
-        try:
-            tab_layout.addTab(self.setup_stereonet(),"Steronet")
-        except ImportError:
-            tab_layout.addTab(self.setup_error(),"Steronet")
-        try:
-            tab_layout.addTab(self.setup_rose(),"Rose")
-        except ImportError:
-            tab_layout.addTab(self.setup_error(),"Rose")
+        #try:
+        #    tab_layout.addTab(self.setup_stereonet(),"Steronet")
+        #except ImportError:
+        #    tab_layout.addTab(self.setup_error(),"Steronet")
+        #try:
+        #    tab_layout.addTab(self.setup_rose(),"Rose")
+        #except ImportError:
+        #    tab_layout.addTab(self.setup_error(),"Rose")
         tab_layout.addTab(self.setup_about(),"About")
         self.dialog_layout.addWidget(tab_layout)
     def setup_error(self):
@@ -330,15 +333,15 @@ class GeoTraceDialog(QDialog):
         if self.traceToolActive == False:
             return
         #if there are points in the trace do you want to keep them?
-        if self.tracetool.paths > 0:
+        if len(self.tracetool.paths) > 0:
             msg = "Save trace?"
             reply = QMessageBox.question(self, 'Deactivating Trace Tool', 
                      msg, QMessageBox.Yes, QMessageBox.No)
 
             if reply == QMessageBox.Yes:
                 self.tracetool.addLine()
-        self.tracetool.rubberBandLine.reset(QGis.Line)
-        self.tracetool.rubberBand.reset(QGis.Point)
+        self.tracetool.rubberBandLine.reset(QgsWkbTypes.LineGeometry)
+        self.tracetool.rubberBand.reset(QgsWkbTypes.PointGeometry)
         self.tracetool.deactivate()
         self.traceToolActive = False
         self.canvas.setMapTool(QgsMapToolPan(self.canvas))
@@ -382,10 +385,10 @@ class GeoTraceDialog(QDialog):
         if cost.bandCount() != 1:
             self.error("Cost Raster has too many bands")
             return
-        if target.geometryType() != QGis.Line:
+        if target.geometryType() != QgsWkbTypes.LineGeometry:
             self.error("Target has wrong geometry type")
             return 
-        if ctrl_pt.geometryType() != QGis.Point:
+        if ctrl_pt.geometryType() != QgsWkbTypes.PointGeometry:
             self.error("Target has wrong geometry type")
 
 
@@ -410,7 +413,7 @@ class GeoTraceDialog(QDialog):
         if cost.bandCount() != 1:
             self.error("Cost Raster has too many bands")
             return
-        if target.geometryType() != QGis.Line:
+        if target.geometryType() != QgsWkbTypes.LineGeometry:
             self.error("Target has wrong geometry type")
             return 
         self.tracetool = gttracetool.GtTraceTool(self.canvas,self.iface,target,cost)
@@ -422,7 +425,7 @@ class GeoTraceDialog(QDialog):
             if not ctrl_pt:
                 self.error("No control point layer selected")
                 return
-            if ctrl_pt.geometryType() != QGis.Point:
+            if ctrl_pt.geometryType() != QgsWkbTypes.PointGeometry:
                 self.error("Control points are not points!")
                 return
             self.tracetool.setControlPoints(self.controlpoint_layer_combo_box.currentLayer())
@@ -457,13 +460,13 @@ class GeoTraceDialog(QDialog):
             if not self.fit_plane.isChecked():
                 self.dem_layer_combo_box.setEnabled(False)
     def info(self, msg):
-        print "Info: "+ msg
+        #print "Info: "+ msg
         QMessageBox.information(self, _plugin_name_, msg)
 
     def warn(self, msg):
-        print "Warning: "+ msg
+        #print "Warning: "+ msg
         QMessageBox.warning(self, _plugin_name_, msg)
 
     def error(self, msg):
-        print "Error: "+ msg
+        #print "Error: "+ msg
         QMessageBox.critical(self, _plugin_name_, msg)

@@ -8,9 +8,9 @@
 
 [general]
 name=GeoTrace
-qgisMinimumVersion=2.8
+qgisMinimumVersion=3.0
 description=Collection of tools extracting trace data from commonly used geoscience rasters such as imagery, topography and geophysics.
-version=1.0
+version=1.2
 author=Lachlan Grose
 email=lachlan.grose@monash.edu
 
@@ -23,7 +23,7 @@ repository=https://github.com/lachlangrose/GeoTrace
 # Recommended items:
 
 # Uncomment the following line and add your changelog:
-# changelog=
+changelog=Plugin dependencies are automatically downloaded and installed for windows and linux
 
 # Tags are comma separated with spaces allowed
 tags=geoscience stereonet
