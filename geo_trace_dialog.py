@@ -370,26 +370,26 @@ class GeoTraceDialog(QDialog):
         cost = self.at_cost_layer_combo_box.currentLayer() 
         ctrl_pt = self.at_controlpoint_layer_combo_box.currentLayer()
         field= self.unique_field.currentField()
-        if not target:
-            self.error("No target layer selected")
+        if target is None:
+            self.error("No output layer selected")
             return
-        if not cost:
+        if cost is None:
             self.error("No cost layer selected")
             return
-        if not ctrl_pt:
+        if ctrl_pt is None:
             self.error("No control points layer selected")
             return
-        if not field:
+        if field is None:
             self.error("No unique field iD selected")
             return
         if cost.bandCount() != 1:
             self.error("Cost Raster has too many bands")
             return
         if target.geometryType() != QgsWkbTypes.LineGeometry:
-            self.error("Target has wrong geometry type")
+            self.error("Output layer has wrong geometry type")
             return 
         if ctrl_pt.geometryType() != QgsWkbTypes.PointGeometry:
-            self.error("Target has wrong geometry type")
+            self.error("Control point layer has wrong geometry type")
 
 
         batch_trace = gttracetool.GtBatchTrace(self.canvas,target,self.iface,cost,ctrl_pt,field)
@@ -403,10 +403,10 @@ class GeoTraceDialog(QDialog):
             return
         target = self.vector_layer_combo_box.currentLayer()
         cost = self.cost_layer_combo_box.currentLayer() 
-        if not target:
-            self.error("No target layer selected")
+        if target is None:
+            self.error("No output layer selected")
             return
-        if not cost:
+        if cost is None:
             self.error("No cost layer selected")
             return
 
@@ -414,15 +414,15 @@ class GeoTraceDialog(QDialog):
             self.error("Cost Raster has too many bands")
             return
         if target.geometryType() != QgsWkbTypes.LineGeometry:
-            self.error("Target has wrong geometry type")
+            self.error("Output layer has wrong geometry type")
             return 
         self.tracetool = gttracetool.GtTraceTool(self.canvas,self.iface,target,cost)
-        if not self.tracetool:
+        if self.tracetool is None:
             self.error("Failed to create TraceTool.")
         #self.tracetool.deactivatedt.connect(self.deactivateTrace)
         if self.save_control_points.isChecked():
             ctrl_pt = self.controlpoint_layer_combo_box.currentLayer()
-            if not ctrl_pt:
+            if ctrl_pt is None:
                 self.error("No control point layer selected")
                 return
             if ctrl_pt.geometryType() != QgsWkbTypes.PointGeometry:
@@ -431,7 +431,7 @@ class GeoTraceDialog(QDialog):
             self.tracetool.setControlPoints(self.controlpoint_layer_combo_box.currentLayer())
         if self.fit_plane.isChecked():
             dem = self.dem_layer_combo_box.currentLayer()
-            if not dem:
+            if dem is None:
                 self.error("DEM layer not selected")
                 return
             if dem.bandCount() != 1:
