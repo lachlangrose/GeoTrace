@@ -34,6 +34,13 @@ def classFactory(iface):  # pylint: disable=invalid-name
     :param iface: A QGIS interface instance.
     :type iface: QgsInterface
     """
-    #
+    #setup matplotlib to use 'agg' backend to avoid import errors related to tkinter (not installed on windows OsGeo4w)
+    import matplotlib as mpl
+    mpl.use('agg')
+    try:
+        import matplotlib.pyplot as plt
+    except:
+        assert(False, "Error - incorrect matplotlib backend. Please use 'Agg'.")
+   
     from .geo_trace import GeoTrace
     return GeoTrace(iface)
