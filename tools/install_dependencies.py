@@ -37,8 +37,8 @@ import sys
 import pip
 #check to see what operating system if being used
 def pip_install(package):
-    pip.main(['install','--user',package])
-
+    #pip.main(['install','--user',package])
+    return subprocess.call(["python3","-m","pip","install",package])
 class Installer():
     def __init__(self):
         self.name = 'Installer'
@@ -46,30 +46,48 @@ class Installer():
         filepath = inspect.getfile(inspect.currentframe())
         os.chdir(os.path.dirname(filepath))
         os.chdir('../')
+        success = True
         if platform.system() == 'Windows':
             if os.path.isdir('windows_installers') == False:
                 os.mkdir('windows_installers')
             os.chdir('windows_installers')
-            pip_install('mplstereonet')
+            success &= pip_install('mplstereonet')
+            if not success:
+                return False
             if struct.calcsize("P")*8 == 64:
-                urllib.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/Cython‑0.28.3‑cp36‑cp36m‑win_amd64.whl','Cython‑0.28.3‑cp36‑cp36m‑win_amd64.whl')
-                urllib.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/scikit_image‑0.14.0‑cp36‑cp36m‑win_amd64.whl','scikit_image‑0.14.0‑cp36‑cp36m‑win_amd64.whl')
-                pip_install('Cython‑0.28.3‑cp36‑cp36m‑win_amd64.whl')
-                pip_install('scikit_image‑0.14.0‑cp36‑cp36m‑win_amd64.whl')
+                urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/Cython-0.28.3-cp36-cp36m-win_amd64.whl',
+                'Cython-0.28.3-cp36-cp36m-win_amd64.whl')
+                urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/scikit_image-0.14.0-cp36-cp36m-win_amd64.whl',
+                'scikit_image-0.14.0-cp36-cp36m-win_amd64.whl')
+                success &= pip_install('Cython-0.28.3-cp36-cp36m-win_amd64.whl')
+                if not success:
+                    return False
+                success &= pip_install('scikit_image-0.14.0-cp36-cp36m-win_amd64.whl')
+                if not success:
+                    return False
             if struct.calcsize("P")*8==32:
-                urllib.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/Cython‑0.28.3‑cp36‑cp36m‑win32.whl','Cython‑0.28.3‑cp36‑cp36m‑win32.whl')
-                urllib.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/scikit_image‑0.14.0‑cp36‑cp36m‑win32.whl','scikit_image‑0.14.0‑cp36‑cp36m‑win32.whl')
-                pip_install('Cython‑0.28.3‑cp36‑cp36m‑win32.whl')
-                pip_install('scikit_image‑0.14.0‑cp36‑cp36m‑win32.whl')
+                urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/Cython-0.28.3-cp36-cp36m-win32.whl','Cython-0.28.3-cp36-cp36m-win32.whl')
+                urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/scikit_image-0.14.0-cp36-cp36m-win32.whl','scikit_image-0.14.0-cp36-cp36m-win32.whl')
+                success &=  pip_install('Cython-0.28.3-cp36-cp36m-win32.whl')
+                if not success:
+                    return False
+                success &=  pip_install('scikit_image-0.14.0-cp36-cp36m-win32.whl')
+                if not success:
+                    return False                
             home_folder = os.path.expanduser("~")
-            user_site_packages_folder = "{}\AppData\\Roaming\\Python\\Python27\\site-packages".format(home_folder)
+            user_site_packages_folder = "{}\AppData\\Roaming\\Python\\Python36\\site-packages".format(home_folder)
             if user_site_packages_folder not in sys.path:
                  sys.path.append(user_site_packages_folder)
         if platform.system() == 'Linux':
             #os.chdir('linux_installers')
             #linux is easy because it has c compiler
-            subprocess.call('pip3 install --user scikit_image',shell=True)
-            subprocess.call('pip3 install --user mplstereonet',shell=True)
+            success &= pip_install('scikit_image')
+            if not success:
+                return false
+            success &= pip_install('mplstereonet')
+            if not success:
+                return false
+
         try:
             import gttracetool
             return True
