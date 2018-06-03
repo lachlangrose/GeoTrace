@@ -30,6 +30,7 @@
 
 
 import os
+import inspect
 
 #try importing gttracetool and associated dependencies, if an import error occurs trace_imported becomes false and we fail-friendly.
 trace_imported  = True 
@@ -68,6 +69,7 @@ class GeoTraceDialog(QDialog):
         self.setWindowTitle('GeoTrace')
         tab_layout = QTabWidget()
         
+        
         #try and get access to gttrace tool, installing the necessary (bundled) libraries if need be
         global trace_imported
         if not trace_imported:
@@ -79,37 +81,24 @@ class GeoTraceDialog(QDialog):
             #    "Warning", "Installing dependencies, this may take a few minutes.",
             #     level=QgsMessageBar.WARNING)
 
-            install = installer.Installer()
-            success = install.install()
-            trace_imported = success
+            #install dependencies. This will throw an assertion error if anything fails. 
+            installer.Installer().install() #lol
+            global gttracetool
+            import gttracetool
+            trace_imported = True
             
-            #dependencies did not install properly 
-            if not success:
-                QMessageBox.information(self, _plugin_name_, 'Installing dependencies failed.\nPlease ensure you are connected to the internet')
-                return False
-            
-            #dependencies did install properly
-            if success:
-                global gttracetool
-                import gttracetool
+        #trace imported succesfully - install either succesfull or not needed
         if trace_imported:
             tab_layout.addTab(self.setup_trace(),"Trace")
             tab_layout.addTab(self.setup_advanced_trace(),"Advanced Trace")
             tab_layout.addTab(self.setup_cost_calculator(),"Cost Calculator")
-
-        tab_layout.addTab(self.setup_stereonet(),"Steronet")
-        tab_layout.addTab(self.setup_rose(),"Rose")
-        
-        #try:
-        #    tab_layout.addTab(self.setup_stereonet(),"Steronet")
-        #except ImportError:
-        #    tab_layout.addTab(self.setup_error(),"Steronet")
-        #try:
-        #    tab_layout.addTab(self.setup_rose(),"Rose")
-        #except ImportError:
-        #    tab_layout.addTab(self.setup_error(),"Rose")
+            tab_layout.addTab(self.setup_stereonet(),"Steronet")
+            tab_layout.addTab(self.setup_rose(),"Rose")
+            
+        #create tabs that don't have dependencies
         tab_layout.addTab(self.setup_about(),"About")
         self.dialog_layout.addWidget(tab_layout)
+        
     def setup_error(self):
         error_widget= QWidget()
         main_layout = QGridLayout()
@@ -144,7 +133,11 @@ class GeoTraceDialog(QDialog):
         about_widget = QWidget()
         main_layout = QGridLayout()
         text_box = QTextBrowser()
-        about = QFile(":/plugins/GeoTrace/about.html")
+        
+        #load html file - N.B. - this should really be in the qrc file?
+        filepath = inspect.getfile(inspect.currentframe())
+        os.chdir(os.path.dirname(filepath))
+        about = QFile("about.html")
         about.open(QFile.ReadOnly)
         text = QTextStream(about)
         text_box.setHtml(text.readAll())
@@ -370,16 +363,16 @@ class GeoTraceDialog(QDialog):
         cost = self.at_cost_layer_combo_box.currentLayer() 
         ctrl_pt = self.at_controlpoint_layer_combo_box.currentLayer()
         field= self.unique_field.currentField()
-        if not target:
+        if target is None:
             self.error("No target layer selected")
             return
-        if not cost:
+        if cost is None:
             self.error("No cost layer selected")
             return
-        if not ctrl_pt:
+        if ctrl_pt is None:
             self.error("No control points layer selected")
             return
-        if not field:
+        if field is None:
             self.error("No unique field iD selected")
             return
         if cost.bandCount() != 1:
@@ -403,10 +396,10 @@ class GeoTraceDialog(QDialog):
             return
         target = self.vector_layer_combo_box.currentLayer()
         cost = self.cost_layer_combo_box.currentLayer() 
-        if not target:
+        if target is None:
             self.error("No target layer selected")
             return
-        if not cost:
+        if cost is None:
             self.error("No cost layer selected")
             return
 
@@ -417,12 +410,12 @@ class GeoTraceDialog(QDialog):
             self.error("Target has wrong geometry type")
             return 
         self.tracetool = gttracetool.GtTraceTool(self.canvas,self.iface,target,cost)
-        if not self.tracetool:
+        if self.tracetool is None:
             self.error("Failed to create TraceTool.")
         #self.tracetool.deactivatedt.connect(self.deactivateTrace)
         if self.save_control_points.isChecked():
             ctrl_pt = self.controlpoint_layer_combo_box.currentLayer()
-            if not ctrl_pt:
+            if ctrl_pt is None:
                 self.error("No control point layer selected")
                 return
             if ctrl_pt.geometryType() != QgsWkbTypes.PointGeometry:
@@ -431,7 +424,7 @@ class GeoTraceDialog(QDialog):
             self.tracetool.setControlPoints(self.controlpoint_layer_combo_box.currentLayer())
         if self.fit_plane.isChecked():
             dem = self.dem_layer_combo_box.currentLayer()
-            if not dem:
+            if dem is None:
                 self.error("DEM layer not selected")
                 return
             if dem.bandCount() != 1:

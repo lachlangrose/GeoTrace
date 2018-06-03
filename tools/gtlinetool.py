@@ -70,7 +70,7 @@ class GtLineTool(QgsMapToolEmitPoint):
       self.addPoint(point, azimuth) 
                
   def addPoint(self,point,strike):
-      geom = QgsGeometry.fromPoint(point)
+      geom = QgsGeometry.fromPointXY(point)
       layer = self.canvas.currentLayer()
       layerCRSSrsid = layer.crs().srsid()
       renderer = self.canvas.mapRenderer()
