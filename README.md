@@ -11,7 +11,7 @@ functions for quickly calculating such a cost function have been included in the
 The plugin can be in two ways.
 1. The prefered option is to use the QGIS plugin repository as this will retrieve the most recent stable version of the plugin. To do this use the plugin manager in QGIS and select experimental plugins. 
 2. Clone (or download and unzip) the GeoTrace directory into your QGIS plugin path.
-    * On windows, this path will be something like `C:/Users/USERNAME/.qgs2/python/plugins`. Note that you may need to create the `plugins` folder.
+    * On windows, this path will be something like `C:/Users/USERNAME/AppData/Roaming/QGIS/QGIS3/profiles/default/python/plugins`. Note that you may need to create the `plugins` folder.
     * On Linux the plugin can be cloned to any directory and then the relevant files are copied to the correct locations using the by running the command 'make deploy' 
 ## Dependencies
 GeoTrace uses `Numpy`, `Matplotlib`, `mplstereonet` and `scikit-image`, so you will need to make sure these are installed for your python distribution.
@@ -23,9 +23,9 @@ in most cases however:
 1. Open the start menu and search for *OSGeo4W Shell*. Right-click on it and select *Run as administrator*. This tool gives you access to the qGIS version of python
 2. Check pip (a python package manager) is up to date with the following: `python -m pip install --upgrade setuptools`
 3. Install *mplstereonet* first, using the following command: `python -m pip install mplstereonet`
-4. Download precompiled 32 or 64 bit (depending on your version of QGIS) python wheels for *cython* and *scikit-image* 2.7 (otherwise you need to install a c-compiler) from:
-	- http://www.lfd.uci.edu/~gohlke/pythonlibs/#cython (32 Bit: `Cython-0.26-cp27-cp27m-win32.whl`, 64 Bit: `Cython‑0.26.1‑cp27‑cp27m‑win_amd64.whl`)
-	- http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image (32 Bit: `scikit_image-0.13.0-cp27-cp27m-win32.whl`, 64 Bit: `scikit_image‑0.13.0‑cp27‑cp27m‑win_amd64.whl`)
+4. Download precompiled 32 or 64 bit (depending on your version of QGIS) python wheels for *cython* and *scikit-image* 3.6 (otherwise you need to install a c-compiler) from:
+	- http://www.lfd.uci.edu/~gohlke/pythonlibs/#cython (32 Bit: `Cython-0.26-cp36-cp36m-win32.whl`, 64 Bit: `Cython‑0.26.1‑cp36‑cp36m‑win_amd64.whl`)
+	- http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image (32 Bit: `scikit_image-0.13.0-cp36-cp36m-win32.whl`, 64 Bit: `scikit_image‑0.13.0‑cp36‑cp36m‑win_amd64.whl`)
 	
 5. Navigate the console to the directory containing these downloaded wheels (e.g. `cd C:/SOME_DIRECTORY_NAME/`)
 6. Install each package using pip: `python -m pip install Cython-0.26-cp27-cp27m-win32.whl` and `python -m pip install scikit_image-0.13.0-cp27-cp27m-win32.whl` (n.b. if you downloaded the 64 bit files the filename will change from `-win32.whl` to `-win_amd64.whl`)
