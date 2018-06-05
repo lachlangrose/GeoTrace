@@ -28,7 +28,7 @@ in most cases however:
 	- http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikit-image (32 Bit: `scikit_image-0.13.0-cp36-cp36m-win32.whl`, 64 Bit: `scikit_image‑0.13.0‑cp36‑cp36m‑win_amd64.whl`)
 	
 5. Navigate the console to the directory containing these downloaded wheels (e.g. `cd C:/SOME_DIRECTORY_NAME/`)
-6. Install each package using pip: `python -m pip install Cython-0.26-cp27-cp27m-win32.whl` and `python -m pip install scikit_image-0.13.0-cp27-cp27m-win32.whl` (n.b. if you downloaded the 64 bit files the filename will change from `-win32.whl` to `-win_amd64.whl`)
+6. Install each package using pip: `python -m pip install Cython-0.26-cp36-cp36m-win32.whl` and `python -m pip install scikit_image-0.13.0-cp36-cp36m-win32.whl` (n.b. if you downloaded the 64 bit files the filename will change from `-win32.whl` to `-win_amd64.whl`)
 7. Start/restart QGIS
 
 Assuming these all installed correctly, you should now be set to use the plugin.
