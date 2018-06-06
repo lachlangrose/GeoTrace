@@ -82,6 +82,7 @@ class GtRose(QtWidgets.QDialog):
         self.selected_features = QCheckBox()
         self.strike_combo_box = QgsFieldComboBox()
         #self.dip_combo_box = QgsFieldComboBox()
+        self.toolbar = NavigationToolbar(self.canvas, self)
     
         ##self.figure.canvas.mpl_connect('button_press_event',self.onclick)
         ## set the layout
@@ -98,6 +99,8 @@ class GtRose(QtWidgets.QDialog):
         #self.vector_layer_combo_box.layerChanged.connect(self.dip_combo_box.setLayer)  # setLayer is a native slot function
         layout.addLayout(top_form_layout)
         layout.addWidget(self.canvas)
+        layout.addWidget(self.toolbar)
+        
         ##layout.addWidget(self.strike_combo)
         ##layout.addWidget(self.dip_combo)
         bottom_form_layout = QtWidgets.QFormLayout()
