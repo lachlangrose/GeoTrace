@@ -40,7 +40,7 @@ import time
 import gttrace as trace
 import uuid
 from skimage import filters
-#import phasepack
+import phasepack
 class GtTraceBase(object):
     def __init__(self,*args):
         self.canvas = args[0]
@@ -496,6 +496,7 @@ class CostCalculator():
         layer = QgsRasterLayer(pathname,name)
         QgsProject.instance().addMapLayer(layer)
     def run_calculator(self,string,name):
+        print(string,name)
         if 'sobel' in string:
             array = self.calc_edges(0)
             self.numpy_to_layer(array,name) 
@@ -520,10 +521,10 @@ class CostCalculator():
             array = self.calc_edges(5)
             self.numpy_to_layer(array,name) 
             return             
-        #if 'phase' in string:
-        #    array = self.calc_edges(6)
-        #    self.numpy_to_layer(array,name) 
-        #    return
+        if 'phase' in string:
+            array = self.calc_edges(6)
+            self.numpy_to_layer(array,name) 
+            return
         if 'darkness' in string:
             array = self.calc_darkness()
             self.numpy_to_layer(array,name) 
@@ -555,7 +556,7 @@ class CostCalculator():
             return filters.roberts(self.arrays[0].astype(float))    
         if t == 5:
             return filters.scharr(self.arrays[0].astype(float))  
-        #if t == 6:
-        #    M, ori, ft, T = phasepack.phasecongmono(self.arrays[0].astype(float))
-        #    return M
+        if t == 6:
+            out = phasepack.phasecong(self.arrays[0].astype(float))
+            return out[0]
               

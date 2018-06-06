@@ -144,12 +144,12 @@ class GeoTraceDialog(QDialog):
         about_widget = QWidget()
         main_layout = QGridLayout()
         text_box = QTextBrowser()
-        #about = QFile(":/plugins/GeoTrace/about.html")
-        #about.open(QFile.ReadOnly)
-        #text = QTextStream(about)
-        #text_box.setHtml(text.readAll())
-        #text_box.setOpenExternalLinks(True)
-        #main_layout.addWidget(text_box)
+        about = QFile(":/plugins/GeoTrace/about.html")
+        about.open(QFile.ReadOnly)
+        text = QTextStream(about)
+        text_box.setHtml(text.readAll())
+        text_box.setOpenExternalLinks(True)
+        main_layout.addWidget(text_box)
         about_widget.setLayout(main_layout)
 
         return  about_widget
@@ -198,15 +198,6 @@ class GeoTraceDialog(QDialog):
         vector_layout.addRow('Cost layer',self.at_cost_layer_combo_box)
         vector_layout.addRow('Invert Cost',self.at_invert_cost )
 
-        #self.at_fit_plane = QCheckBox()
-        #self.at_dem_layer_combo_box = QgsMapLayerComboBox()
-        #self.at_dem_layer_combo_box.setCurrentIndex(-1)
-        #self.at_dem_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
-        #self.at_dem_layer_combo_box.setEnabled(False)
-        #self.at_fit_plane.toggled.connect(self.show_plane_combo_box)
-        #vector_layout.addRow("Find orientation using DEM",self.fit_plane)
-        #vector_layout.addRow('DEM',self.dem_layer_combo_box)
-
         self.run_advanced_trace_button = QPushButton("Run")
         vector_layout.addRow(self.run_advanced_trace_button)
         #vector_layout.addWidget(create_memory_layer)
@@ -234,7 +225,7 @@ class GeoTraceDialog(QDialog):
         self.addCost('_roberts','Roberts\' cross opperator')
         self.addCost('_prewitt','Prewitt Transform')
         self.addCost('_scharr','Scharr transform')
-        #self.addCost('_phase','Phase Congruency')
+        self.addCost('_phase','Phase Congruency')
         self.cost_name = QLineEdit()
         self.cost_calc_layout.addRow("Cost Layer Name",self.cost_name)
         cost_calculator_run = QPushButton("Run")
@@ -297,6 +288,7 @@ class GeoTraceDialog(QDialog):
         self.dem_layer_combo_box.setEnabled(False)
         main_layout.addRow("DEM layer",self.dem_layer_combo_box)
         self.run_trace_button = QPushButton("Start Digitizing")
+        self.run_trace_button.clicked.connect(self.toggle_trace_tool)
         main_layout.addRow(self.run_trace_button)
 
         self.traceToolActive = False
@@ -395,7 +387,6 @@ class GeoTraceDialog(QDialog):
         self.tracetool = gttracetool.GtTraceTool(self.canvas,self.iface,target,cost)
         if self.tracetool is None:
             self.error("Failed to create TraceTool.")
-        #self.tracetool.deactivatedt.connect(self.deactivateTrace)
         if self.save_control_points.isChecked():
             ctrl_pt = self.controlpoint_layer_combo_box.currentLayer()
             if ctrl_pt is None:
@@ -414,12 +405,10 @@ class GeoTraceDialog(QDialog):
                 self.error("DEM must be single band")
                 return
             self.tracetool.setDem(dem)
-            #self.info("Using DEM for planes")
         self.tracetool.invertCost(self.invert_cost.isChecked())
         self.run_trace_button.setText("Stop Digitizing")
         self.traceToolActive = True
         self.canvas.setMapTool(self.tracetool)
-        #self.dialog_layout.addWidget(self.dlg.)
     def delete_control_points(self):
         if self.tracetool:
             self.tracetool.delete_control_points()
@@ -440,9 +429,9 @@ class GeoTraceDialog(QDialog):
         QMessageBox.information(self, _plugin_name_, msg)
 
     def warn(self, msg):
-        #print "Warning: "+ msg
+        print("Warning: "+ msg)
         QMessageBox.warning(self, _plugin_name_, msg)
 
     def error(self, msg):
-        #print "Error: "+ msg
+        print("Error: "+ msg)
         QMessageBox.critical(self, _plugin_name_, msg)
