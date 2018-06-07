@@ -60,6 +60,7 @@ class GtStereo(QtWidgets.QDialog):
         self.resetbutton = QtWidgets.QPushButton('Clear Plot')
         self.resetbutton.clicked.connect(self.reset)
 
+        self.toolbar = NavigationToolbar(self.canvas, self)
         self.vector_layer_combo_box = QgsMapLayerComboBox()
         self.vector_layer_combo_box.setCurrentIndex(-1)
         self.vector_layer_combo_box.setFilters(QgsMapLayerProxyModel.VectorLayer)
@@ -86,6 +87,7 @@ class GtStereo(QtWidgets.QDialog):
         self.vector_layer_combo_box.layerChanged.connect(self.layer_changed)
         layout.addLayout(top_form_layout)
         layout.addWidget(self.canvas)
+        layout.addWidget(self.toolbar)
         #layout.addWidget(self.strike_combo)
         #layout.addWidget(self.dip_combo)
         bottom_form_layout = QtWidgets.QFormLayout()

@@ -191,15 +191,6 @@ class GeoTraceDialog(QDialog):
         vector_layout.addRow('Cost layer',self.at_cost_layer_combo_box)
         vector_layout.addRow('Invert Cost',self.at_invert_cost )
 
-        #self.at_fit_plane = QCheckBox()
-        #self.at_dem_layer_combo_box = QgsMapLayerComboBox()
-        #self.at_dem_layer_combo_box.setCurrentIndex(-1)
-        #self.at_dem_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
-        #self.at_dem_layer_combo_box.setEnabled(False)
-        #self.at_fit_plane.toggled.connect(self.show_plane_combo_box)
-        #vector_layout.addRow("Find orientation using DEM",self.fit_plane)
-        #vector_layout.addRow('DEM',self.dem_layer_combo_box)
-
         self.run_advanced_trace_button = QPushButton("Run")
         vector_layout.addRow(self.run_advanced_trace_button)
         #vector_layout.addWidget(create_memory_layer)
@@ -227,7 +218,7 @@ class GeoTraceDialog(QDialog):
         self.addCost('_roberts','Roberts\' cross opperator')
         self.addCost('_prewitt','Prewitt Transform')
         self.addCost('_scharr','Scharr transform')
-        #self.addCost('_phase','Phase Congruency')
+        self.addCost('_phase','Phase Congruency')
         self.cost_name = QLineEdit()
         self.cost_calc_layout.addRow("Cost Layer Name",self.cost_name)
         cost_calculator_run = QPushButton("Run")
@@ -244,81 +235,58 @@ class GeoTraceDialog(QDialog):
     def setup_trace(self):
         trace_widget = QWidget()
         trace_main_layout = QVBoxLayout()
-        vector_group = QGroupBox('Output Layer')
+        main_group = QGroupBox()
+        main_layout = QFormLayout()
+
+        #get current polylines in project
         self.vector_layer_combo_box = QgsMapLayerComboBox()
         self.vector_layer_combo_box.setCurrentIndex(-1)
         self.vector_layer_combo_box.setFilters(QgsMapLayerProxyModel.LineLayer)
         self.vector_layer_combo_box.currentIndexChanged.connect(self.deactivateTrace)
-        vector_layout = QVBoxLayout()
-        vector_layout.addWidget(self.vector_layer_combo_box)
-        vector_group.setLayout(vector_layout)
-        create_memory_layer = QPushButton("Create Temporary Target Layer")
+        main_layout.addRow("Output Polyline Trace Layer",self.vector_layer_combo_box)
+
+        #save control points used in trace
         self.save_control_points = QRadioButton("Store Control Points") 
-        self.save_control_points.toggled.connect(self.deactivateTrace)
         self.save_control_points.toggled.connect(self.show_control_point_combo_box)
+        self.save_control_points.toggled.connect(self.deactivateTrace) #activate comb when ticked
+        main_layout.addRow("Save Control Points",self.save_control_points )
+        #get point layers for control points
         self.controlpoint_layer_combo_box = QgsMapLayerComboBox()
         self.controlpoint_layer_combo_box.setCurrentIndex(-1)
         self.controlpoint_layer_combo_box.setFilters(QgsMapLayerProxyModel.PointLayer)
         self.controlpoint_layer_combo_box.currentIndexChanged.connect(self.deactivateTrace)
         self.controlpoint_layer_combo_box.setEnabled(False)
-        vector_layout.addWidget(self.save_control_points)
-        vector_layout.addWidget(self.controlpoint_layer_combo_box)
-        #vector_layout.addWidget(create_memory_layer)
-        
+        main_layout.addRow("Control Point Layer",self.controlpoint_layer_combo_box)
 
-        cost_group = QGroupBox('Cost Layer')
-        raster_calculator_button = QPushButton('Raster Calculator')
-        self.invert_cost = QCheckBox('Invert Cost')
-        self.invert_cost.toggled.connect(self.deactivateTrace)
-        cost_layout = QVBoxLayout()
+        #get single band raster layers for cost function
         self.cost_layer_combo_box = QgsMapLayerComboBox()
         self.cost_layer_combo_box.setCurrentIndex(-1)
         self.cost_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
-        #turn off trace if the cost function is changed
-        self.cost_layer_combo_box.currentIndexChanged.connect(self.deactivateTrace)
-        cost_layout.addWidget(self.cost_layer_combo_box)
-        cost_layout.addWidget(self.invert_cost)
-        #cost_layout.addWidget(raster_calculator_button)
-        cost_group.setLayout(cost_layout)
-        self.fit_plane = QCheckBox("Fit planes")
-        dem_label = QLabel("Find fracture orientation using DEM")
-        #TODO filter list to only show single band rasters
-        cost_layout.addWidget(dem_label)
-        cost_layout.addWidget(self.fit_plane)
+        main_layout.addRow("Cost Layer",self.cost_layer_combo_box)
+    
+        #invert cost button
+        self.invert_cost = QCheckBox()
+        self.invert_cost.toggled.connect(self.deactivateTrace)
+        main_layout.addRow("Invert Cost", self.invert_cost)
+        
+        #fit planes using dem?
+        self.fit_plane = QCheckBox()
+        main_layout.addRow("Fit planes using DEM",self.fit_plane)
+        self.fit_plane.toggled.connect(self.show_plane_combo_box)
+        #choose dem layer
         self.dem_layer_combo_box = QgsMapLayerComboBox()
         self.dem_layer_combo_box.setCurrentIndex(-1)
         self.dem_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
         self.dem_layer_combo_box.currentIndexChanged.connect(self.deactivateTrace)
         self.dem_layer_combo_box.setEnabled(False)
-        cost_layout.addWidget(self.dem_layer_combo_box)
-        self.fit_plane.toggled.connect(self.show_plane_combo_box)
-
-        trace_group = QGroupBox("Find Trace")
-        trace_layout = QFormLayout()
-        self.traceToolActive = False
+        main_layout.addRow("DEM layer",self.dem_layer_combo_box)
         self.run_trace_button = QPushButton("Start Digitizing")
-        clear_points_button = QPushButton("Finish Line")
-        undo_button = QPushButton("Undo")
-        
         self.run_trace_button.clicked.connect(self.toggle_trace_tool)
-        trace_layout.addWidget(self.run_trace_button) 
-        #trace_layout.addWidget(clear_points_button) 
-        clear_points_button.clicked.connect(self.delete_control_points)
-        trace_group.setLayout(trace_layout)
-        
-        cost_calculator_group = QGroupBox("Cost Calculator")
-        cost_calculator_layout = QFormLayout()
-        build_cost_layer_button = QPushButton("Calculate Cost Layer")
-        cost_calculator_layout.addWidget(build_cost_layer_button) 
-        cost_calculator_group.setLayout(cost_calculator_layout)
-        raster_layer_combo_box = QgsMapLayerComboBox()
-        raster_layer_combo_box.setCurrentIndex(-1)
-        raster_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
-        cost_calculator_layout.addWidget(raster_layer_combo_box)
-        trace_main_layout.addWidget(vector_group)
-        trace_main_layout.addWidget(cost_group)
-        #trace_main_layout.addWidget(cost_calculator_group)
-        trace_main_layout.addWidget(trace_group)
+        main_layout.addRow(self.run_trace_button)
+
+        self.traceToolActive = False
+        main_group.setLayout(main_layout)
+        trace_main_layout.addWidget(main_group)
         trace_widget.setLayout(trace_main_layout)
          
         return trace_widget
@@ -364,7 +332,8 @@ class GeoTraceDialog(QDialog):
         ctrl_pt = self.at_controlpoint_layer_combo_box.currentLayer()
         field= self.unique_field.currentField()
         if target is None:
-            self.error("No target layer selected")
+            self.error("No output layer selected")
+
             return
         if cost is None:
             self.error("No cost layer selected")
@@ -379,10 +348,10 @@ class GeoTraceDialog(QDialog):
             self.error("Cost Raster has too many bands")
             return
         if target.geometryType() != QgsWkbTypes.LineGeometry:
-            self.error("Target has wrong geometry type")
+            self.error("Output layer has wrong geometry type")
             return 
         if ctrl_pt.geometryType() != QgsWkbTypes.PointGeometry:
-            self.error("Target has wrong geometry type")
+            self.error("Control point layer has wrong geometry type")
 
 
         batch_trace = gttracetool.GtBatchTrace(self.canvas,target,self.iface,cost,ctrl_pt,field)
@@ -397,7 +366,7 @@ class GeoTraceDialog(QDialog):
         target = self.vector_layer_combo_box.currentLayer()
         cost = self.cost_layer_combo_box.currentLayer() 
         if target is None:
-            self.error("No target layer selected")
+            self.error("No output layer selected")
             return
         if cost is None:
             self.error("No cost layer selected")
@@ -407,12 +376,11 @@ class GeoTraceDialog(QDialog):
             self.error("Cost Raster has too many bands")
             return
         if target.geometryType() != QgsWkbTypes.LineGeometry:
-            self.error("Target has wrong geometry type")
+            self.error("Output layer has wrong geometry type")
             return 
         self.tracetool = gttracetool.GtTraceTool(self.canvas,self.iface,target,cost)
         if self.tracetool is None:
             self.error("Failed to create TraceTool.")
-        #self.tracetool.deactivatedt.connect(self.deactivateTrace)
         if self.save_control_points.isChecked():
             ctrl_pt = self.controlpoint_layer_combo_box.currentLayer()
             if ctrl_pt is None:
@@ -431,12 +399,10 @@ class GeoTraceDialog(QDialog):
                 self.error("DEM must be single band")
                 return
             self.tracetool.setDem(dem)
-            #self.info("Using DEM for planes")
         self.tracetool.invertCost(self.invert_cost.isChecked())
         self.run_trace_button.setText("Stop Digitizing")
         self.traceToolActive = True
         self.canvas.setMapTool(self.tracetool)
-        #self.dialog_layout.addWidget(self.dlg.)
     def delete_control_points(self):
         if self.tracetool:
             self.tracetool.delete_control_points()
@@ -457,9 +423,9 @@ class GeoTraceDialog(QDialog):
         QMessageBox.information(self, _plugin_name_, msg)
 
     def warn(self, msg):
-        #print "Warning: "+ msg
+        print("Warning: "+ msg)
         QMessageBox.warning(self, _plugin_name_, msg)
 
     def error(self, msg):
-        #print "Error: "+ msg
+        print("Error: "+ msg)
         QMessageBox.critical(self, _plugin_name_, msg)

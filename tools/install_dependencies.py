@@ -116,5 +116,5 @@ class Installer():
             import gttracetool
             return True
         except ImportError:
-            assert False, "An unexpected import error occurred... shit's fucked?"
+            assert False, "An unexpected import error occurred"
 
