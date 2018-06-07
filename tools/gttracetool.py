@@ -54,10 +54,11 @@ class GtTraceBase(object):
         #self.cost = kwargs['cost']
         #self.target = kwargs['target']
         #crs reprojection stuff
-        self.targetlayerCRSSrsid = self.target.crs().srsid()
-        self.costlayerCRSSrsid = self.cost.crs().srsid()
+        self.targetlayerCRSSrsid = self.target.crs()
+        self.costlayerCRSSrsid = self.cost.crs()
         #self.renderer = self.canvas.mapRenderer()
-        self.projectCRSSrsid = self.canvas.mapSettings().destinationCrs().srsid()
+        self.projectCRSSrsid =  self.canvas.mapSettings().destinationCrs()
+
         #if self.targetlayerCRSSrsid != self.costlayerCRSSrsid:
             #print "Target and cost have different CRS"
         self.use_control_points = False
@@ -192,7 +193,7 @@ class GtTraceBase(object):
             point_pr = self.control_points.dataProvider()
             point_fields = point_pr.fields()
             self.control_points.startEditing()
-            pointlayerCRSSrsid = self.control_points.crs().srsid()
+            pointlayerCRSSrsid = self.control_points.crs()
             
             for p in self.trace.nodes:
 
@@ -202,7 +203,8 @@ class GtTraceBase(object):
                 geom = QgsGeometry.fromPointXY(QgsPointXY(x_,y_))
                 if pointlayerCRSSrsid != self.costlayerCRSSrsid:
                     geom.transform(QgsCoordinateTransform(self.costlayerCRSSrsid,
-                                                      pointlayerCRSSrsid))
+                                                      pointlayerCRSSrsid,
+                                                      QgsProject.instance()))
                 fet.setGeometry(geom)
                 fet['UUID'] = str(lineuuid)
                 point_pr.addFeatures([fet])
@@ -250,7 +252,7 @@ class GtTraceBase(object):
         geom = QgsGeometry.fromPolylineXY(points)
         if self.targetlayerCRSSrsid != self.costlayerCRSSrsid:
             geom.transform(QgsCoordinateTransform(self.costlayerCRSSrsid,
-                                              self.targetlayerCRSSrsid))
+                                              self.targetlayerCRSSrsid,QgsProject.instance()))
 
 
         fet.setGeometry( geom  )
@@ -328,7 +330,8 @@ class GtTraceTool(GtTraceBase,GtMapToolEmitPoint):
         #self.rubberBand.reset(QgsWkbTypes.LineGeometry)
         if self.costlayerCRSSrsid != self.projectCRSSrsid:
             transform = QgsCoordinateTransform(self.costlayerCRSSrsid, 
-                                            self.projectCRSSrsid)
+                                            self.projectCRSSrsid,
+                                            QgsProject.instance())
             p = transform.transform(p)
         self.rubberBand.addPoint(p, True)
         self.rubberBand.show()     
@@ -350,7 +353,8 @@ class GtTraceTool(GtTraceBase,GtMapToolEmitPoint):
             p = QgsPointXY(x_,y_)
             if self.costlayerCRSSrsid != self.projectCRSSrsid:
                 transform = QgsCoordinateTransform(self.costlayerCRSSrsid, 
-                                        self.projectCRSSrsid)
+                                        self.projectCRSSrsid,
+                                        QgsProject.instance())
                 p = transform.transform(p)
 
             self.rubberBandLine.addPoint(p,True)
@@ -387,7 +391,8 @@ class GtTraceTool(GtTraceBase,GtMapToolEmitPoint):
         if e.button() == Qt.LeftButton:
             if self.projectCRSSrsid != self.costlayerCRSSrsid:
                 transform = QgsCoordinateTransform(self.projectCRSSrsid,
-                                                  self.costlayerCRSSrsid)
+                                                  self.costlayerCRSSrsid,
+                                                  QgsProject.instance())
                 point = transform.transform(point)
             i = int((point[0] - self.xmin) / self.xsize)
             j = int((point[1] - self.ymin) / self.ysize)
@@ -428,7 +433,7 @@ class GtBatchTrace(GtTraceBase):
         #super(GtBatchTrace,self).__init__(canvas,cost,target)
         self.controlpoints = controlpoints
         self.fieldname = fieldname
-        self.cpCRSSrsid = self.controlpoints.crs().srsid()
+        self.cpCRSSrsid = self.controlpoints.crs()
         self.iface = iface
     def runBatchTrace(self):
         points = []
@@ -447,7 +452,8 @@ class GtBatchTrace(GtTraceBase):
                         ##print "transforming"
                         ##print point
                         transform = QgsCoordinateTransform(self.cpCRSSrsid,
-                                                  self.costlayerCRSSrsid)
+                                                  self.costlayerCRSSrsid,
+                                                  QgsProject.instance())
                         point = transform.transform(point)
                         ##print point
                     ##print point[0], self.xmin, self.xsize
