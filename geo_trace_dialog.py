@@ -30,6 +30,7 @@
 
 
 import os
+import inspect
 
 #try importing gttracetool and associated dependencies, if an import error occurs trace_imported becomes false and we fail-friendly.
 trace_imported  = True 
@@ -68,6 +69,7 @@ class GeoTraceDialog(QDialog):
         self.setWindowTitle('GeoTrace')
         tab_layout = QTabWidget()
         
+        
         #try and get access to gttrace tool, installing the necessary (bundled) libraries if need be
         global trace_imported
         if not trace_imported:
@@ -79,37 +81,24 @@ class GeoTraceDialog(QDialog):
             #    "Warning", "Installing dependencies, this may take a few minutes.",
             #     level=QgsMessageBar.WARNING)
 
-            install = installer.Installer()
-            success = install.install()
-            trace_imported = success
+            #install dependencies. This will throw an assertion error if anything fails. 
+            installer.Installer().install() #lol
+            global gttracetool
+            import gttracetool
+            trace_imported = True
             
-            #dependencies did not install properly 
-            if not success:
-                QMessageBox.information(self, _plugin_name_, 'Installing dependencies failed.\nPlease ensure you are connected to the internet')
-                return False
-            
-            #dependencies did install properly
-            if success:
-                global gttracetool
-                import gttracetool
+        #trace imported succesfully - install either succesfull or not needed
         if trace_imported:
             tab_layout.addTab(self.setup_trace(),"Trace")
             tab_layout.addTab(self.setup_advanced_trace(),"Advanced Trace")
             tab_layout.addTab(self.setup_cost_calculator(),"Cost Calculator")
-
-        tab_layout.addTab(self.setup_stereonet(),"Steronet")
-        tab_layout.addTab(self.setup_rose(),"Rose")
-        
-        #try:
-        #    tab_layout.addTab(self.setup_stereonet(),"Steronet")
-        #except ImportError:
-        #    tab_layout.addTab(self.setup_error(),"Steronet")
-        #try:
-        #    tab_layout.addTab(self.setup_rose(),"Rose")
-        #except ImportError:
-        #    tab_layout.addTab(self.setup_error(),"Rose")
+            tab_layout.addTab(self.setup_stereonet(),"Steronet")
+            tab_layout.addTab(self.setup_rose(),"Rose")
+            
+        #create tabs that don't have dependencies
         tab_layout.addTab(self.setup_about(),"About")
         self.dialog_layout.addWidget(tab_layout)
+        
     def setup_error(self):
         error_widget= QWidget()
         main_layout = QGridLayout()
@@ -144,7 +133,11 @@ class GeoTraceDialog(QDialog):
         about_widget = QWidget()
         main_layout = QGridLayout()
         text_box = QTextBrowser()
-        about = QFile(":/plugins/GeoTrace/about.html")
+        
+        #load html file - N.B. - this should really be in the qrc file?
+        filepath = inspect.getfile(inspect.currentframe())
+        os.chdir(os.path.dirname(filepath))
+        about = QFile("about.html")
         about.open(QFile.ReadOnly)
         text = QTextStream(about)
         text_box.setHtml(text.readAll())
@@ -340,6 +333,7 @@ class GeoTraceDialog(QDialog):
         field= self.unique_field.currentField()
         if target is None:
             self.error("No output layer selected")
+
             return
         if cost is None:
             self.error("No cost layer selected")

@@ -41,6 +41,5 @@ def classFactory(iface):  # pylint: disable=invalid-name
         import matplotlib.pyplot as plt
     except:
         assert(False, "Error - incorrect matplotlib backend. Please use 'Agg'.")
-   
     from .geo_trace import GeoTrace
     return GeoTrace(iface)

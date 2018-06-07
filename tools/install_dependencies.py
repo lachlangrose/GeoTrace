@@ -35,45 +35,86 @@ import struct
 import time
 import sys
 import pip
+import importlib
+
 #check to see what operating system if being used
 def pip_install(package):
-    pip.main(['install','--user',package])
-
+    proc = subprocess.run(["python3","-m","pip","install",package],stdout=subprocess.PIPE)
+    return proc.stdout #return output (n.b. return codes from pip don't seem to change for success/failure... hence we don't check...)
 class Installer():
     def __init__(self):
         self.name = 'Installer'
     def install(self):
+        #get directory plugin is installed in 
         filepath = inspect.getfile(inspect.currentframe())
         os.chdir(os.path.dirname(filepath))
         os.chdir('../')
+        success = True
+        
+        #are we running windows (things get difficult here...)
         if platform.system() == 'Windows':
+            #create directory to download installers into
             if os.path.isdir('windows_installers') == False:
                 os.mkdir('windows_installers')
-            os.chdir('windows_installers')
-            pip_install('mplstereonet')
-            if struct.calcsize("P")*8 == 64:
-                urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/Cython-0.27.2-cp27-cp27m-win_amd64.whl','Cython-0.27.2-cp27-cp27m-win_amd64.whl')
-                urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/scikit_image-0.13.1-cp27-cp27m-win_amd64.whl','scikit_image-0.13.1-cp27-cp27m-win_amd64.whl')
+            os.chdir('windows_installers') #move into this dir
+
+            if importlib.find_loader('mplstereonet') is None:
+                out = pip_install('mplstereonet')
+                assert not importlib.find_loader('mplstereonet') is None, "Could not install mplstereonet. Pip output is as follows:\n%s" % out
                 
-                pip_install('Cython-0.27.2-cp27-cp27m-win_amd64.whl')
-                pip_install('scikit_image-0.13.1-cp27-cp27m-win_amd64.whl')
-            if struct.calcsize("P")*8==32:
-                urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/Cython-0.27.2-cp27-cp27m-win32.whl','Cython-0.27.2-cp27-cp27m-win32.whl')
-                urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/scikit_image-0.13.1-cp27-cp27m-win32.whl','scikit_image-0.13.1-cp27-cp27m-win32.whl')
-                pip_install('Cython-0.27.2-cp27-cp27m-win_amd64.whl')
-                pip_install('scikit_image-0.13.1-cp27-cp27m-win_amd64.whl')
-            home_folder = os.path.expanduser("~")
-            user_site_packages_folder = "{}\AppData\\Roaming\\Python\\Python27\\site-packages".format(home_folder)
-            if user_site_packages_folder not in sys.path:
-                 sys.path.append(user_site_packages_folder)
-        if platform.system() == 'Linux':
-            #os.chdir('linux_installers')
-            #linux is easy because it has c compiler
-            subprocess.call('pip3 install --user scikit_image',shell=True)
-            subprocess.call('pip3 install --user mplstereonet',shell=True)
+            #try downloading cython and scikit-image binaries from github
+            if struct.calcsize("P")*8 == 64: #64-bit OS
+                urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/Cython-0.28.3-cp36-cp36m-win_amd64.whl',
+                'Cython-0.28.3-cp36-cp36m-win_amd64.whl')
+                urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/scikit_image-0.14.0-cp36-cp36m-win_amd64.whl',
+                'scikit_image-0.14.0-cp36-cp36m-win_amd64.whl')
+                
+                #install cython
+                if importlib.find_loader('cython') is None:
+                    out = pip_install('Cython-0.28.3-cp36-cp36m-win_amd64.whl')
+                    assert not importlib.find_loader('cython') is None, "Could not install cython. Pip output is as follows:\n%s" % out
+
+                #install scikit image
+                if importlib.find_loader('skimage') is None:
+                    pip_install('scikit_image-0.14.0-cp36-cp36m-win_amd64.whl')
+                    assert not importlib.find_loader('skimage') is None, "Could not install scikit-image. Pip output is as follows:\n%s" % out
+                    
+                    
+            if struct.calcsize("P")*8==32: #as above, but 32-bit
+                urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/Cython-0.28.3-cp36-cp36m-win32.whl','Cython-0.28.3-cp36-cp36m-win32.whl')
+                urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/scikit_image-0.14.0-cp36-cp36m-win32.whl','scikit_image-0.14.0-cp36-cp36m-win32.whl')
+                
+                #install cython
+                if importlib.find_loader('cython') is None:
+                    out = pip_install('Cython-0.28.3-cp36-cp36m-win32.whl')
+                    assert not importlib.find_loader('cython') is None, "Could not install cython. Pip output is as follows:\n%s" % out
+
+                #install scikit image
+                if importlib.find_loader('skimage') is None:
+                    pip_install('scikit_image-0.14.0-cp36-cp36m-win32.whl')
+                    assert not importlib.find_loader('skimage') is None, "Could not install scikit-image. Pip output is as follows:\n%s" % out
+                    
+            #not sure what this does?
+            #home_folder = os.path.expanduser("~")
+            #user_site_packages_folder = "{}\AppData\\Roaming\\Python\\Python36\\site-packages".format(home_folder)
+            #if user_site_packages_folder not in sys.path:
+            #     sys.path.append(user_site_packages_folder)
+                 
+        if platform.system() == 'Linux': #linux is easy because it has c compiler
+            #install mplstereonet
+            if importlib.find_loader('mplstereonet') is None:
+                out = pip_install('mplstereonet')
+                assert not importlib.find_loader('mplstereonet') is None, "Could not install mplstereonet. Pip output is as follows:\n%s" % out
+
+            #install scikit image
+            if importlib.find_loader('skimage') is None:
+                pip_install('scikit_image')
+                assert not importlib.find_loader('skimage') is None, "Could not install scikit-image. Pip output is as follows:\n%s" % out
+
+        #finally, check that import works for gttracetool
         try:
             import gttracetool
             return True
         except ImportError:
-            return False
+            assert False, "An unexpected import error occurred"
 

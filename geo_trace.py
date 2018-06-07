@@ -34,7 +34,6 @@ from PyQt5.QtWidgets import *#QAction, QIcon
 # Initialize Qt resources from file resources.py
 from .resources_rc import *
 
-
 # Import the code for the dialog
 from .geo_trace_dialog import GeoTraceDialog
 import os.path,  sys

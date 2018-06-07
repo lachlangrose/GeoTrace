@@ -195,7 +195,7 @@ class GtTraceBase(object):
                 fet = QgsFeature(point_fields)
                 x_ = (float(p[0]))*self.xsize+self.xmin
                 y_ = (float(p[1]))*self.ysize+self.ymin
-                geom = QgsGeometry.fromPoint(QgsPointXY(x_,y_))
+                geom = QgsGeometry.fromPointXY(QgsPointXY(x_,y_))
                 if pointlayerCRSSrsid != self.costlayerCRSSrsid:
                     geom.transform(QgsCoordinateTransform(self.costlayerCRSSrsid,
                                                       pointlayerCRSSrsid))
