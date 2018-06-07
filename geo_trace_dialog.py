@@ -62,6 +62,7 @@ class GeoTraceDialog(QDialog):
         self.setup_gui()
     def closeEvent(self,event):
         self.deactivateTrace()
+        print('closeevent')
         return
     def setup_gui(self):
         self.dialog_layout = QVBoxLayout()

@@ -51,6 +51,7 @@ class GeoTrace:
         :type iface: QgsInterface
         """
         # Save reference to the QGIS interface
+        print("constructor")
         self.iface = iface
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
@@ -184,18 +185,19 @@ class GeoTrace:
         #    callback=self.line,
         #    parent=self.iface.mainWindow())
     def open_trace(self):
-        self.dlg = GeoTraceDialog(self.iface)
-        self.trace_dockWidget = QDockWidget('GeoTrace', self.iface.mainWindow())
-        #for some reason dockwidget wasn't given a name and then the main qgis
-        #save state was throwing an error - causing minidump??
-        self.trace_dockWidget.setObjectName("GeoTraceDock")
-        self.trace_dockWidget.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
-        #self.qProf_QWidget = qprof_QWidget(self.canvas)
-        self.trace_dockWidget.setWidget(self.dlg)
-        self.trace_dockWidget.destroyed.connect(self.dlg.closeEvent)
-        self.iface.addDockWidget(Qt.RightDockWidgetArea, self.trace_dockWidget)
-
-        self.trace_dockWidget.visibilityChanged.connect(self.dlg.close)
+        if self.trace_dockWidget is None:
+            self.dlg = GeoTraceDialog(self.iface)
+            self.trace_dockWidget = QDockWidget('GeoTrace', self.iface.mainWindow())
+            #for some reason dockwidget wasn't given a name and then the main qgis
+            #save state was throwing an error - causing minidump??
+            self.trace_dockWidget.setObjectName("GeoTraceDock")
+            self.trace_dockWidget.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+            self.trace_dockWidget.setWidget(self.dlg)
+            self.trace_dockWidget.destroyed.connect(self.dlg.closeEvent)
+            self.iface.addDockWidget(Qt.RightDockWidgetArea, self.trace_dockWidget)
+        else:
+            self.trace_dockWidget.toggleViewAction().activate(QAction.Trigger)
+        #self.trace_dockWidget.visibilityChanged.connect(self.dlg.close)
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
