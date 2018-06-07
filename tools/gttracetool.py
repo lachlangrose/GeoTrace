@@ -40,7 +40,11 @@ import time
 import gttrace as trace
 import uuid
 from skimage import filters
-import phasepack
+phasepack_ = True
+try:
+    import phasepack
+except:
+    phasepack_ = False
 class GtTraceBase(object):
     def __init__(self,*args):
         self.canvas = args[0]
@@ -521,7 +525,7 @@ class CostCalculator():
             array = self.calc_edges(5)
             self.numpy_to_layer(array,name) 
             return             
-        if 'phase' in string:
+        if 'phase' in string and phasepack_:
             array = self.calc_edges(6)
             self.numpy_to_layer(array,name) 
             return
@@ -556,7 +560,7 @@ class CostCalculator():
             return filters.roberts(self.arrays[0].astype(float))    
         if t == 5:
             return filters.scharr(self.arrays[0].astype(float))  
-        if t == 6:
+        if t == 6 and phasepack_:
             out = phasepack.phasecong(self.arrays[0].astype(float))
             return out[0]
               

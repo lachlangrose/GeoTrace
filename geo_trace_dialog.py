@@ -31,7 +31,7 @@
 
 import os
 import inspect
-
+import importlib
 #try importing gttracetool and associated dependencies, if an import error occurs trace_imported becomes false and we fail-friendly.
 trace_imported  = True 
 try:
@@ -219,6 +219,8 @@ class GeoTraceDialog(QDialog):
         self.addCost('_prewitt','Prewitt Transform')
         self.addCost('_scharr','Scharr transform')
         self.addCost('_phase','Phase Congruency')
+        if importlib.find_loader('phasepack') is None:
+            self.costs[-1][1].setEnabled(False)
         self.cost_name = QLineEdit()
         self.cost_calc_layout.addRow("Cost Layer Name",self.cost_name)
         cost_calculator_run = QPushButton("Run")
@@ -309,7 +311,11 @@ class GeoTraceDialog(QDialog):
         self.run_trace_button.setText("Start Digitizing")
         return
     def updateCostName(self,string=None):
-        name = self.raster_layer_combo_box.currentLayer().name()
+        layer = self.raster_layer_combo_box.currentLayer()
+        if layer is None:
+            return
+
+        name = layer.name()
         for c in self.costs:
             if c[1].isChecked():
                 name+=c[0]
