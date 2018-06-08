@@ -83,9 +83,8 @@ class GtTraceBase(object):
             array = np.array(ds.GetRasterBand(1).ReadAsArray()).astype('int')                     
             array = np.rot90(np.rot90(np.rot90(array)))
         except:
-            self.iface.messageBar().pushMessage(
-                "Error", "GDAL try another file",
-                 level=QgsMessageBar.ERROR)
+            self.iface.messageBar().pushCritical(
+                "Error", "GDAL try another file")
             return False
         else:
             min_ = np.min(array)
@@ -401,9 +400,8 @@ class GtTraceTool(GtTraceBase,GtMapToolEmitPoint):
             j1 = j
             i1 = i
             if i < 0 or i>self.columns or j <0 or j > self.rows:
-                self.iface.messageBar().pushMessage(
-                "Warning", "Selected point is not within raster and cannot be used",
-                 level=QgsMessageBar.WARNING)##print "out of bounds"
+                self.iface.messageBar().pushWarning(
+                "Warning", "Selected point is not within raster and cannot be used")
                 return 
             self.trace.add_node([i1,j1])
             self.addPoint(point)
@@ -466,9 +464,8 @@ class GtBatchTrace(GtTraceBase):
                     j1 = j
                     i1 = i
                     if i < 0 or i>self.columns or j <0 or j > self.rows:
-                        self.iface.messageBar().pushMessage(
-                        "Warning", "Selected point is not within raster and cannot be used",
-                         level=QgsMessageBar.WARNING)##print "out of bounds"
+                        self.iface.messageBar().pushWarning(
+                        "Warning", "Selected point is not within raster and cannot be used")
                         continue
                     self.trace.add_node([i1,j1])
             self.runTrace()
