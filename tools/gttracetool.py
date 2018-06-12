@@ -503,7 +503,6 @@ class CostCalculator():
         layer = QgsRasterLayer(pathname,name)
         QgsProject.instance().addMapLayer(layer)
     def run_calculator(self,string,name):
-        print(string,name)
         if 'sobel' in string:
             array = self.calc_edges(0)
             self.numpy_to_layer(array,name) 
@@ -542,7 +541,7 @@ class CostCalculator():
         cost.fill(0)
         for i in range(len(self.arrays)):
             cost+=self.arrays[i]
-        cost /= len(self.arrays)
+        cost /= float(len(self.arrays))
         return cost
         ##print cost.shape
  
