@@ -39,7 +39,7 @@ import importlib
 
 #check to see what operating system if being used
 def pip_install(package):
-    proc = subprocess.run(["python3","-m","pip","install",package],stdout=subprocess.PIPE)
+    proc = subprocess.run(["python3","-m","pip","install","--user",package],stdout=subprocess.PIPE)
     return proc.stdout #return output (n.b. return codes from pip don't seem to change for success/failure... hence we don't check...)
 class Installer():
     def __init__(self):
