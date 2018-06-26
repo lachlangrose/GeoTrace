@@ -570,3 +570,108 @@ class CostCalculator():
             out = phasepack.phasecong(self.arrays[0].astype(float))
             return out[0]
               
+class GtLineTools():
+    """
+    A base class for working with polyline shapefiles
+    """
+    def __init__(self,layer):
+        self.layer = layer
+    def calculate_planes(self,dem):
+        if dem == None:
+            return False
+        attributes = []
+        pr = self.layer.dataProvider()
+        fields = pr.fields()
+        strike = False
+        dip = False
+        e1 = False
+        e2 = False
+        e3 = False
+        planarity = False
+        qual = False
+
+        for f in fields:
+            if f.name() == 'DIP_DIR':
+                strike = True
+            if f.name() == 'E_1':
+                e1 = True
+            if f.name() == 'E_2':
+                e2 = True
+            if f.name() == 'E_3':
+                e3 = True
+            if f.name() == 'Planarity':
+                planarity = True
+            if f.name() == 'Plane_Qual':
+                qual = True
+            if f.name() == 'DIP':
+                dip = True
+        if not dip:
+            attributes.append(QgsField("DIP",QVariant.Double))
+            #print "Creating DIP attribute"
+        if not strike:
+            attributes.append(QgsField("DIP_DIR",QVariant.Double))           
+            #print "Creating DIP_DIR attribute"
+        if not e1:
+            attributes.append(QgsField("E_1",QVariant.Double))            
+            #print "Creating EIGENVALUE_1 attribute"
+        if not e2:
+            attributes.append(QgsField("E_2",QVariant.Double))            
+            #print "Creating EIGENVALUE_2 attribute"
+        if not e3:
+            attributes.append(QgsField("E_3",QVariant.Double))            
+            #print "Creating EIGENVALUE_3 attribute"
+        if not planarity:
+            attributes.append(QgsField("Planarity",QVariant.Double))            
+        if not qual:
+            attributes.append(QgsField("Plane_Qual",QVariant.String))            
+
+        if len(attributes) > 0:
+            pr.addAttributes(attributes)
+        
+        for f in self.layer.getFeatures():
+            for p in f.geometry().asMultiPolyline(): #points in line geo
+                #code adapted from valutool plugin/profiletool
+                print(p)
+                ident = dem.dataProvider().identify(
+                    QgsPointXY(p), QgsRaster.IdentifyFormatValue )
+                if ident is not None and (1 in ident.results()):
+                    attr = ident.results()[1]
+                else:
+                    attr = 0
+                    print('not good')
+                xyz.append([p[0],p[1],attr])
+
+            M = np.array(xyz)
+            M -=  np.mean(M,axis=0)
+            C = M.T.dot(M)
+            eigvals, eigvec = np.linalg.eig(C)
+            n = eigvec[np.argmin(eigvals)]
+            if n[2] < 0:
+                n[0] = -n[0]
+                n[1] = -n[1]
+                n[2] = -n[2]
+            dip_dir = 90. - np.arctan2(n[1],n[0]) * 180.0 / np.pi
+            if dip_dir > 360.:
+                dip_dir -= 360.
+            if dip_dir < 0:
+                dip_dir +=360
+            point_type = np.sqrt(n[0]*n[0]+n[1]*n[1]+n[2]*n[2])
+            dip = np.arccos(n[2])*180.0 / np.pi
+            eigvals.sort()
+            fet['DIP_DIR']= float(dip_dir)
+            fet['DIP']= float(dip)
+            fet['E_1'] = float(eigvals[2])
+            fet['E_2'] = float(eigvals[1])
+            fet['E_3'] = float(eigvals[0])
+            fet['Planarity'] = float(1-eigvals[0]/eigvals[1])
+            if float(1-eigvals[0]/eigvals[1]) > 0.75:
+                fet['Plane_Qual'] = 'Good'
+            elif float(1-eigvals[0]/eigvals[1]) > 0.5:
+                fet['Plane_Qual'] = 'Average'
+            elif float(1-eigvals[0]/eigvals[1]) < 0.5:
+                fet['Plane_Qual'] = 'Bad'
+            self.layer.addFeature(fet)
+            self.layer.commitChanges()
+            self.layer.updateFields()
+            self.layer.dataProvider().forceReload()
+
