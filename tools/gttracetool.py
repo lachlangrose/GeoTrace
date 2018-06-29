@@ -622,22 +622,24 @@ class GtLineTools():
             attributes.append(QgsField("Plane_Qual",QVariant.String))            
 
         if len(attributes) > 0:
+            print('adding attr')
             pr.addAttributes(attributes)
-        
-        for f in self.layer.getFeatures():
-            for p in f.geometry().asMultiPolyline(): #points in line geo
+        for fet in self.layer.getFeatures():
+            xyz = []
+            for l in fet.geometry().asMultiPolyline(): #points in line geo
                 #code adapted from valutool plugin/profiletool
-                print(p)
-                ident = dem.dataProvider().identify(
-                    QgsPointXY(p), QgsRaster.IdentifyFormatValue )
-                if ident is not None and (1 in ident.results()):
-                    attr = ident.results()[1]
-                else:
-                    attr = 0
-                    print('not good')
-                xyz.append([p[0],p[1],attr])
+                for p in l:
+                    ident = dem.dataProvider().identify(
+                        QgsPointXY(p), QgsRaster.IdentifyFormatValue )
+                    if ident is not None and (1 in ident.results()):
+                        attr = ident.results()[1]
+                    else:
+                        attr = 0
+                        print('not good')
+                    xyz.append([p[0],p[1],attr])
 
             M = np.array(xyz)
+            print(M)
             M -=  np.mean(M,axis=0)
             C = M.T.dot(M)
             eigvals, eigvec = np.linalg.eig(C)
@@ -654,20 +656,19 @@ class GtLineTools():
             point_type = np.sqrt(n[0]*n[0]+n[1]*n[1]+n[2]*n[2])
             dip = np.arccos(n[2])*180.0 / np.pi
             eigvals.sort()
-            fet['DIP_DIR']= float(dip_dir)
-            fet['DIP']= float(dip)
-            fet['E_1'] = float(eigvals[2])
-            fet['E_2'] = float(eigvals[1])
-            fet['E_3'] = float(eigvals[0])
-            fet['Planarity'] = float(1-eigvals[0]/eigvals[1])
+            fet.setAttribute('DIP_DIR',float(dip_dir))
+            fet.setAttribute('DIP', float(dip))
+            fet.setAttribute('E_1', float(eigvals[2]))
+            fet.setAttribute('E_2', float(eigvals[1]))
+            fet.setAttribute('E_3', float(eigvals[0]))
+            fet.setAttribute('Planarity', float(1-eigvals[0]/eigvals[1]))
             if float(1-eigvals[0]/eigvals[1]) > 0.75:
-                fet['Plane_Qual'] = 'Good'
+                fet.setAttribute('Plane_Qual','Good')
             elif float(1-eigvals[0]/eigvals[1]) > 0.5:
-                fet['Plane_Qual'] = 'Average'
+                fet.setAttribute('Plane_Qual','Average')
             elif float(1-eigvals[0]/eigvals[1]) < 0.5:
-                fet['Plane_Qual'] = 'Bad'
-            self.layer.addFeature(fet)
-            self.layer.commitChanges()
-            self.layer.updateFields()
-            self.layer.dataProvider().forceReload()
+                fet.setAttribute('Plane_Qual','Bad')
+        self.layer.commitChanges()
+        self.layer.updateFields()
+        self.layer.dataProvider().forceReload()
 
