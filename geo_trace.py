@@ -51,7 +51,6 @@ class GeoTrace:
         :type iface: QgsInterface
         """
         # Save reference to the QGIS interface
-        print("constructor")
         self.iface = iface
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)

@@ -1,4 +1,4 @@
-*.py[cod]
-
+syntax: glob
+*.pyc
 help/build/*
 test/testproject*
