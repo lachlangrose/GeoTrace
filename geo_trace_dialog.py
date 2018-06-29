@@ -169,7 +169,7 @@ class GeoTraceDialog(QDialog):
     def setup_advanced_trace(self):
         trace_widget = QWidget()
         trace_main_layout = QVBoxLayout()
-        vector_group = QGroupBox()
+        vector_group = QGroupBox("Batch Trace Mode")
         self.at_vector_layer_combo_box = QgsMapLayerComboBox()
         self.at_vector_layer_combo_box.setCurrentIndex(-1)
         self.at_vector_layer_combo_box.setFilters(QgsMapLayerProxyModel.LineLayer)
@@ -194,7 +194,27 @@ class GeoTraceDialog(QDialog):
         self.run_advanced_trace_button = QPushButton("Run")
         vector_layout.addRow(self.run_advanced_trace_button)
         #vector_layout.addWidget(create_memory_layer)
+
+        batch_line = QGroupBox("Batch Line Tools")
+        batch_line_form = QFormLayout()
+        self.linetools_vector_layer_combo_box = QgsMapLayerComboBox()
+        self.linetools_vector_layer_combo_box.setCurrentIndex(-1)
+        self.linetools_vector_layer_combo_box.setFilters(QgsMapLayerProxyModel.LineLayer)
+        self.linetools_dem_layer_combo_box = QgsMapLayerComboBox()
+        self.linetools_dem_layer_combo_box.setCurrentIndex(-1)
+        self.linetools_dem_layer_combo_box.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        self.run_line_tools = QPushButton("Calculate Plane for Trace using DEM")
+        
+        batch_line_form.addRow("Lines",self.linetools_vector_layer_combo_box)
+        batch_line_form.addRow("DEM",self.linetools_dem_layer_combo_box)
+        batch_line_form.addRow(self.run_line_tools)
+
+        batch_line.setLayout(batch_line_form)
+
+        self.run_line_tools.clicked.connect(self.run_batch_line)
+
         trace_main_layout.addWidget(vector_group)
+        trace_main_layout.addWidget(batch_line)
         trace_widget.setLayout(trace_main_layout)
         self.run_advanced_trace_button.clicked.connect(self.run_advanced_trace_tool)
 
@@ -331,7 +351,11 @@ class GeoTraceDialog(QDialog):
                     calc.run_calculator(c[0],self.cost_name.text())
                 
         return 
-
+    def run_batch_line(self):
+        line = self.linetools_vector_layer_combo_box.currentLayer()
+        dem = self.linetools_dem_layer_combo_box.currentLayer()
+        line_tool = gttracetool.GtLineTools(line)
+        line_tool.calculate_planes(dem)
     def run_advanced_trace_tool(self):
         target = self.at_vector_layer_combo_box.currentLayer()
         cost = self.at_cost_layer_combo_box.currentLayer() 
