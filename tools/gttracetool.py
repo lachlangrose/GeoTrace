@@ -575,6 +575,13 @@ class GtLineTools():
     def calculate_planes(self,dem):
         if dem == None:
             return False
+        if dem.crs().srsid() != self.layer.crs().srsid():
+            print('Coordinate systems different')
+            return False
+        if self.layer.crs().isGeographic():
+            print('Geographic')
+            return False
+
         attributes = []
         pr = self.layer.dataProvider()
         fields = pr.fields()
@@ -585,7 +592,7 @@ class GtLineTools():
         e3 = False
         planarity = False
         qual = False
-
+        self.layer.startEditing()
         for f in fields:
             if f.name() == 'DIP_DIR':
                 strike = True
@@ -624,6 +631,10 @@ class GtLineTools():
         if len(attributes) > 0:
             print('adding attr')
             pr.addAttributes(attributes)
+        
+
+        self.layer.commitChanges()
+        self.layer.startEditing()
         for fet in self.layer.getFeatures():
             xyz = []
             for l in fet.geometry().asMultiPolyline(): #points in line geo
@@ -637,13 +648,14 @@ class GtLineTools():
                         attr = 0
                         print('not good')
                     xyz.append([p[0],p[1],attr])
-
-            M = np.array(xyz)
-            print(M)
-            M -=  np.mean(M,axis=0)
-            C = M.T.dot(M)
-            eigvals, eigvec = np.linalg.eig(C)
-            n = eigvec[np.argmin(eigvals)]
+            try:
+                M = np.array(xyz)
+                M -=  np.mean(M,axis=0)
+                C = M.T.dot(M)
+                eigvals, eigvec = np.linalg.eig(C)
+                n = eigvec[np.argmin(eigvals)]
+            except:
+                return False
             if n[2] < 0:
                 n[0] = -n[0]
                 n[1] = -n[1]
@@ -656,19 +668,23 @@ class GtLineTools():
             point_type = np.sqrt(n[0]*n[0]+n[1]*n[1]+n[2]*n[2])
             dip = np.arccos(n[2])*180.0 / np.pi
             eigvals.sort()
-            fet.setAttribute('DIP_DIR',float(dip_dir))
-            fet.setAttribute('DIP', float(dip))
-            fet.setAttribute('E_1', float(eigvals[2]))
-            fet.setAttribute('E_2', float(eigvals[1]))
-            fet.setAttribute('E_3', float(eigvals[0]))
-            fet.setAttribute('Planarity', float(1-eigvals[0]/eigvals[1]))
+            attributes = {}
+            attributes['DIP_DIR'] = float(dip_dir)
+            attributes['DIP'] = float(dip)
+            attributes['E_1']= float(eigvals[2])
+            attributes['E_2']= float(eigvals[1])
+            attributes['E_3']= float(eigvals[0])
+            attributes['Planarity'] = float(1-eigvals[0]/eigvals[1])
             if float(1-eigvals[0]/eigvals[1]) > 0.75:
-                fet.setAttribute('Plane_Qual','Good')
+                attributes['Plane_Qual'] = 'Good'
             elif float(1-eigvals[0]/eigvals[1]) > 0.5:
-                fet.setAttribute('Plane_Qual','Average')
+                attributes['Plane_Qual'] = 'Average'
             elif float(1-eigvals[0]/eigvals[1]) < 0.5:
-                fet.setAttribute('Plane_Qual','Bad')
+                attributes['Plane_Qual'] = 'Bad'
+            for a in fet.fields().names():
+                self.layer.changeAttributeValue(fet.id(),fet.fields().indexFromName(a),attributes[a])
         self.layer.commitChanges()
         self.layer.updateFields()
         self.layer.dataProvider().forceReload()
+        return True
 

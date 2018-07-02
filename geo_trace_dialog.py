@@ -355,7 +355,13 @@ class GeoTraceDialog(QDialog):
         line = self.linetools_vector_layer_combo_box.currentLayer()
         dem = self.linetools_dem_layer_combo_box.currentLayer()
         line_tool = gttracetool.GtLineTools(line)
-        line_tool.calculate_planes(dem)
+        result = line_tool.calculate_planes(dem)
+        if not result:
+            self.iface.messageBar().pushWarning(
+                "Warning", "Cannot calculate planes, check you are using projected coordinates and DEM and lines are in the same CRS")
+        if result:
+            self.iface.messageBar().pushInfo(
+                "Information", "Planes calculated using DEM and Lines")
     def run_advanced_trace_tool(self):
         target = self.at_vector_layer_combo_box.currentLayer()
         cost = self.at_cost_layer_combo_box.currentLayer() 
