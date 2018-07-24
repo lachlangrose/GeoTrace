@@ -537,11 +537,12 @@ class CostCalculator():
             return            
     def calc_darkness(self):
         self.layer_to_numpy(self.layer)
-        cost=np.array(self.arrays[0])
+        cost=np.array(self.arrays[0],dtype='float')
         cost.fill(0)
         for i in range(len(self.arrays)):
             cost+=self.arrays[i]
-        cost /= float(len(self.arrays))
+        arr_len = len(self.arrays)
+        cost /= float(arr_len)
         return cost
         ##print cost.shape
  

@@ -179,7 +179,7 @@ class GeoTrace:
             callback=self.open_trace,
             parent=self.iface.mainWindow())
         #self.add_action(
-        #    icon_path,
+        #    icon_path,print((self.arrays))
         #    text=self.tr(u'Digitize'),
         #    callback=self.line,
         #    parent=self.iface.mainWindow())
