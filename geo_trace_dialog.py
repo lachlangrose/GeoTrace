@@ -349,6 +349,7 @@ class GeoTraceDialog(QDialog):
             for c in self.costs:
                 if c[1].isChecked():
                     calc.run_calculator(c[0],self.cost_name.text())
+        
                 
         return 
     def run_batch_line(self):

@@ -208,8 +208,7 @@ class GtRose(QtWidgets.QDialog):
         bins[:,-1] = np.sum(bins[:,:-1],axis=1)
         #c is pseudocolor, i+1 is index of length bin sum to i is the bottom position
         bottoms = np.zeros(nsection)
-        n,b , patches = self.hist_ax.hist(np.sum(bins[1:length_sections-1,:],axis=0),\
-                                                            length_sections)
+        n,b , patches = self.hist_ax.hist(data[1,:],length_sections)
         for i, c in enumerate(np.linspace(0,1,length_sections)):
             bars = self.ax.bar(direction, bins[:,i+1],\
             width=width,bottom=bottoms)
