@@ -83,13 +83,13 @@ class GtRose(QtWidgets.QDialog):
         self.strike_combo_box = QgsFieldComboBox()
         #self.dip_combo_box = QgsFieldComboBox()
         self.toolbar = NavigationToolbar(self.canvas, self)
-    
+        self.direction_name = QLabel("Dip Direction") 
         ##self.figure.canvas.mpl_connect('button_press_event',self.onclick)
         ## set the layout
         top_form_layout = QtWidgets.QFormLayout()
         layout = QtWidgets.QVBoxLayout()
         top_form_layout.addRow("Layer:",self.vector_layer_combo_box)
-        top_form_layout.addRow("Dip Direction:",self.strike_combo_box)
+        top_form_layout.addRow(self.direction_name,self.strike_combo_box)
         #top_form_layout.addRow("Dip:",self.dip_combo_box)
         top_form_layout.addRow(self.strike,self.dip_dir)
         top_form_layout.addRow("Selected Features Only:",self.selected_features)
