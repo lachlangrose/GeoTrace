@@ -90,6 +90,10 @@ class GtRose(QtWidgets.QDialog):
         self.length_bins = QSpinBox()
         self.length_bins.setValue(5)
         self.reverse_lines  = QCheckBox()
+        self.alpha_value = QDoubleSpinBox()
+        self.alpha_value.setMaximum(1.0)
+        self.alpha_value.setMinimum(0.0)
+        self.alpha_value.setValue(0.7)
         ##self.figure.canvas.mpl_connect('button_press_event',self.onclick)
         ## set the layout
         top_form_layout = QtWidgets.QFormLayout()
@@ -102,6 +106,7 @@ class GtRose(QtWidgets.QDialog):
         top_form_layout.addRow("Number of rose petals:",self.number_of_petals)
         top_form_layout.addRow("Length bins:",self.length_bins)
         top_form_layout.addRow("Reverse Colouring:",self.reverse_lines)
+        top_form_layout.addRow("Plot Transparency:",self.alpha_value)
         self.vector_layer_combo_box.layerChanged.connect(self.strike_combo_box.setLayer)  # setLayer is a native slot function
         self.vector_layer_combo_box.layerChanged.connect(self.layer_changed)
 
@@ -203,20 +208,23 @@ class GtRose(QtWidgets.QDialog):
         bins[:,-1] = np.sum(bins[:,:-1],axis=1)
         #c is pseudocolor, i+1 is index of length bin sum to i is the bottom position
         bottoms = np.zeros(nsection)
+        n,b , patches = self.hist_ax.hist(np.sum(bins[1:length_sections-1,:],axis=0),\
+                                                            length_sections)
         for i, c in enumerate(np.linspace(0,1,length_sections)):
             bars = self.ax.bar(direction, bins[:,i+1],\
             width=width,bottom=bottoms)
+            patches[i].set_facecolor(plt.cm.Spectral(c))
+            patches[i].set_alpha(self.alpha_value.value())
             #bars = self.ax.bar(direction, bins[:,-1],width=width,bottom=0.0)
             for bar in bars:
                 bar.set_facecolor(plt.cm.Spectral(c))#cmap(c)plt.cm.Greys(.5))
                 bar.set_edgecolor(None)
-                bar.set_alpha(0.5)
+                bar.set_alpha(self.alpha_value.value())
             bottoms +=bins[:,i+1]
         #self.figure.title('Histogram')
         self.ax.set_theta_offset(0.5*np.pi) 
         self.ax.set_theta_direction(-1)
         self.ax.set_rticks([])
-        self.hist_ax.hist(np.sum(bins[1:length_sections-1,:],axis=0),length_sections)
         self.hist_ax.set_title("Length Histogram")
         self.ax.set_title("Rose Diagram")
         self.canvas.draw()
