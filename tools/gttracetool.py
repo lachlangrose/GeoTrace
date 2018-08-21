@@ -476,18 +476,31 @@ class GtBatchTrace(GtTraceBase):
 class CostCalculator():
     def __init__(self,layer):
         self.layer = layer
+        self.bands = self.layer.bandCount()
     def layer_to_numpy(self,layer):
+        #somewhat ram hungry 
         filepath = layer.dataProvider().dataSourceUri()
         ds = gdal.Open(filepath)
         self.transform = ds.GetGeoTransform()
         self.wkt = ds.GetProjection()
         if ds == None:
             return
-        self.arrays = []
+        arrays = []
         for i in range(self.layer.bandCount()):
             array = np.array(ds.GetRasterBand(i+1).ReadAsArray()).astype('int')
             self.arrays.append(np.rot90(array,3))
-        return self.arrays
+        return arrays
+    def layer_band_to_numpy(self,layer,band=0):
+        filepath = layer.dataProvider().dataSourceUri()
+        ds = gdal.Open(filepath)
+        self.transform = ds.GetGeoTransform()
+        self.wkt = ds.GetProjection()
+        if ds == None:
+            return False
+        if band < self.layer.bandCount():
+            array = np.array(ds.GetRasterBand(band+1).ReadAsArray()).astype('int')
+            return np.rot90(array,3)
+        return False 
     def numpy_to_layer(self,array,name):
         array = np.rot90(array)
         sy, sx = array.shape
@@ -536,13 +549,10 @@ class CostCalculator():
             self.numpy_to_layer(array,name) 
             return            
     def calc_darkness(self):
-        self.layer_to_numpy(self.layer)
-        cost=np.array(self.arrays[0],dtype='float')
-        cost.fill(0)
-        for i in range(len(self.arrays)):
-            cost+=self.arrays[i]
-        arr_len = len(self.arrays)
-        cost /= float(arr_len)
+        cost = self.layer_band_to_numpy(self.layer,0)
+        cost += self.layer_band_to_numpy(self.layer,1)
+        cost += self.layer_band_to_numpy(self.layer,2)
+        #cost /= float(arr_len)
         return cost
         ##print cost.shape
  
