@@ -51,7 +51,8 @@ class GtRose(QtWidgets.QDialog):
         self.canvas = canvas
         self.iface = iface
         self.figure = plt.Figure()
-        self.ax = self.figure.add_subplot(1, 1, 1, projection = 'polar')
+        self.ax = self.figure.add_subplot(1, 2, 1, projection = 'polar')
+        self.hist_ax = self.figure.add_subplot(1,2,2)
         self.canvas = FigureCanvas(self.figure)
         self.ax.text(0.75,-0.04, "Rose diagram is \n number weighted",transform = self.ax.transAxes, ha='left', va='center')
 
@@ -84,6 +85,11 @@ class GtRose(QtWidgets.QDialog):
         #self.dip_combo_box = QgsFieldComboBox()
         self.toolbar = NavigationToolbar(self.canvas, self)
         self.direction_name = QLabel("Dip Direction") 
+        self.number_of_petals = QSpinBox()
+        self.number_of_petals.setValue(18)
+        self.length_bins = QSpinBox()
+        self.length_bins.setValue(5)
+        self.reverse_lines  = QCheckBox()
         ##self.figure.canvas.mpl_connect('button_press_event',self.onclick)
         ## set the layout
         top_form_layout = QtWidgets.QFormLayout()
@@ -93,6 +99,9 @@ class GtRose(QtWidgets.QDialog):
         #top_form_layout.addRow("Dip:",self.dip_combo_box)
         top_form_layout.addRow(self.strike,self.dip_dir)
         top_form_layout.addRow("Selected Features Only:",self.selected_features)
+        top_form_layout.addRow("Number of rose petals:",self.number_of_petals)
+        top_form_layout.addRow("Length bins:",self.length_bins)
+        top_form_layout.addRow("Reverse Colouring:",self.reverse_lines)
         self.vector_layer_combo_box.layerChanged.connect(self.strike_combo_box.setLayer)  # setLayer is a native slot function
         self.vector_layer_combo_box.layerChanged.connect(self.layer_changed)
 
@@ -131,67 +140,96 @@ class GtRose(QtWidgets.QDialog):
 
     
     def plot(self):
-        angle = 20
+        if self.strike_combo_box.currentField() is None:
+            return
         n = int(self.vector_layer_combo_box.currentLayer().featureCount())
-        data = np.zeros((n,2))
+        data = np.zeros((2,n))
         i = 0
         strike_name = self.strike_combo_box.currentField()        
         features = self.vector_layer_combo_box.currentLayer().getFeatures()
         if self.selected_features.isChecked() == True:
             features = self.vector_layer_combo_box.currentLayer().selectedFeaturesIterator()
+        #get data from features
+            
         for f in features:
             d = f[strike_name]
             if d == NULL:
                 continue
-            data[i][0] = d
+            data[0,i] = d
             if self.dip_dir.isChecked():
-                data[i][0]+=90.
-            if data[i][0] >= 360:
-                data[i][0] -=360
+                data[0,i]+=90.
+            if data[0,i] >= 360:
+                data[0,i] -=360
+            data[1,i] = f.geometry().length()
             i = i + 1
         weighted = False
-        nsection = 360 / angle
-        nsection = int(round(nsection)) #round to nearest int
-        sectionadd = 180/angle
-        direction = np.linspace(0, 360, nsection, False) / 180 * np.pi
-        frequency = [0] * (nsection)
-        for i in range(len(data)):
+        nsection = self.number_of_petals.value()#360 / angle
+        #nsection = int(round(nsection)) #round to nearest int
+        #update angle 
+        angle = 360. / nsection
+        sectionadd = 180./angle
+        direction = np.linspace(0, 360, nsection, False) / 180. * np.pi
+        #array to store the accumulator
+        length_sections = self.length_bins.value()
+        bins = np.zeros((nsection,length_sections+2))
+        max_length = np.max(data[1,:])
+        l_bin_size = max_length / length_sections
+
+        for i in range(data.shape[1]):
         #column 2 is the angle column number - 1
 
-            tmp = int((data[i][0] - data[i][0] % angle) / angle)
+            tmp = int((data[0,i] - data[0,i] % angle) / angle)
+            ltmp = int((data[1,i] - data[1,i] % l_bin_size ) / l_bin_size)
+            if self.reverse_lines.isChecked() == True:
+            #    #longest lines in the centre of the plot
+                ltmp = length_sections-ltmp
+            #find which bin the line is in for orientation
             if tmp >= sectionadd:
                 tmp2 = tmp - sectionadd
                 tmp2 = int(tmp2)
             if tmp < sectionadd:
                 tmp2 = tmp + sectionadd
                 tmp2 = int(tmp2)
-            #column 3 is the weight column number - 1
-            if weighted:
-                frequency[tmp2] = frequency[tmp2] + 1 * data[i][1]
-                frequency[tmp] = frequency[tmp] + 1 * data[i][1]
             else:
-                frequency[tmp2] = frequency[tmp2] + 1
-                frequency[tmp] = frequency[tmp] + 1 
+                #update accumulator for this feature
+                bins[tmp,ltmp+1] +=1
+                bins[tmp2,ltmp+1] +=1
+               
         width = angle / 180.0 * np.pi * np.ones(nsection)
-        frequency = np.array(frequency) / float(n)
-        bars = self.ax.bar(direction, frequency, width=width, bottom=0.0)
-
-        for r,bar in zip(frequency, bars):
-            bar.set_facecolor(plt.cm.Greys(.5))
-            bar.set_edgecolor('grey')
-            bar.set_alpha(0.8)
+        #if self.normalise_by_feature_number.isChecked():
+        #bins /= float(n)
+        #last column is the frequency for the orientation
+        #eg total petal length
+        bins[:,-1] = np.sum(bins[:,:-1],axis=1)
+        #c is pseudocolor, i+1 is index of length bin sum to i is the bottom position
+        bottoms = np.zeros(nsection)
+        for i, c in enumerate(np.linspace(0,1,length_sections)):
+            bars = self.ax.bar(direction, bins[:,i+1],\
+            width=width,bottom=bottoms)
+            #bars = self.ax.bar(direction, bins[:,-1],width=width,bottom=0.0)
+            for bar in bars:
+                bar.set_facecolor(plt.cm.Spectral(c))#cmap(c)plt.cm.Greys(.5))
+                bar.set_edgecolor(None)
+                bar.set_alpha(0.5)
+            bottoms +=bins[:,i+1]
         #self.figure.title('Histogram')
         self.ax.set_theta_offset(0.5*np.pi) 
         self.ax.set_theta_direction(-1)
+        self.ax.set_rticks([])
+        self.hist_ax.hist(np.sum(bins[1:length_sections-1,:],axis=0),length_sections)
+        self.hist_ax.set_title("Length Histogram")
+        self.ax.set_title("Rose Diagram")
         self.canvas.draw()
         return
     def reset(self):
-        #hack to reset graph, just plot nothing
-        self.ax.hold(False)
-        self.ax.bar([],[], 0, bottom=0.0)
-        self.ax.set_theta_offset(0.5*np.pi) 
-        self.ax.set_theta_direction(-1)
-        self.ax.grid(True)
+        self.ax.clear()
+        self.hist_ax.clear()
+        ##hack to reset graph, just plot nothing
+        #self.ax.hold(False)
+        #self.ax.bar([],[], 0, bottom=0.0)
+        #self.ax.set_theta_offset(0.5*np.pi) 
+        #self.ax.set_theta_direction(-1)
+        ##self.ax.grid(True)
         self.canvas.draw()
 
 
