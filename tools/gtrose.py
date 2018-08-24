@@ -82,6 +82,7 @@ class GtRose(QtWidgets.QDialog):
 
         self.selected_features = QCheckBox()
         self.strike_combo_box = QgsFieldComboBox()
+        self.colour_combo_box = QgsFieldComboBox()
         #self.dip_combo_box = QgsFieldComboBox()
         self.toolbar = NavigationToolbar(self.canvas, self)
         self.direction_name = QLabel("Dip Direction") 
@@ -100,6 +101,7 @@ class GtRose(QtWidgets.QDialog):
         layout = QtWidgets.QVBoxLayout()
         top_form_layout.addRow("Layer:",self.vector_layer_combo_box)
         top_form_layout.addRow(self.direction_name,self.strike_combo_box)
+        top_form_layout.addRow("Colour map field: ", self.colour_combo_box)
         #top_form_layout.addRow("Dip:",self.dip_combo_box)
         top_form_layout.addRow(self.strike,self.dip_dir)
         top_form_layout.addRow("Selected Features Only:",self.selected_features)
@@ -110,6 +112,7 @@ class GtRose(QtWidgets.QDialog):
         self.vector_layer_combo_box.layerChanged.connect(self.strike_combo_box.setLayer)  # setLayer is a native slot function
         self.vector_layer_combo_box.layerChanged.connect(self.layer_changed)
 
+        self.vector_layer_combo_box.layerChanged.connect(self.colour_combo_box.setLayer)  # setLayer is a native slot function
         #self.vector_layer_combo_box.layerChanged.connect(self.dip_combo_box.setLayer)  # setLayer is a native slot function
         layout.addLayout(top_form_layout)
         layout.addWidget(self.canvas)
@@ -137,6 +140,9 @@ class GtRose(QtWidgets.QDialog):
         if self.strike.isChecked():
             self.direction_name.setText("Strike")
             indx = self.strike_combo_box.findText("strike",Qt.MatchContains)
+            if not indx:
+                indx = self.strike_combo_box.findText("azi",Qt.MatchContains)
+
             self.strike_combo_box.setCurrentIndex(indx)
         if not self.strike.isChecked():
             self.direction_name.setText("Dip Direction")
@@ -153,7 +159,7 @@ class GtRose(QtWidgets.QDialog):
         strike_name = self.strike_combo_box.currentField()        
         features = self.vector_layer_combo_box.currentLayer().getFeatures()
         if self.selected_features.isChecked() == True:
-            features = self.vector_layer_combo_box.currentLayer().selectedFeaturesIterator()
+            features = self.vector_layer_combo_box.currentLayer().selectedFeatures()
         #get data from features
             
         for f in features:
