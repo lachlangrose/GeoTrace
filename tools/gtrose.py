@@ -157,13 +157,19 @@ class GtRose(QtWidgets.QDialog):
         data = np.zeros((2,n))
         i = 0
         strike_name = self.strike_combo_box.currentField()        
+        length_name = self.colour_combo_box.currentField()
         features = self.vector_layer_combo_box.currentLayer().getFeatures()
         if self.selected_features.isChecked() == True:
             features = self.vector_layer_combo_box.currentLayer().selectedFeatures()
         #get data from features
             
         for f in features:
-            d = f[strike_name]
+            #d = f.geometry().azimuth()
+            if strike_name:
+               d= f[strike_name]
+            l =  f.geometry().length()
+            if length_name:
+                l =  f[length_name]
             if d == NULL:
                 continue
             data[0,i] = d
@@ -171,11 +177,14 @@ class GtRose(QtWidgets.QDialog):
                 data[0,i]+=90.
             if data[0,i] >= 360:
                 data[0,i] -=360
-            data[1,i] = f.geometry().length()
+            data[1,i] = l#f.geometry().length()
             i = i + 1
         weighted = False
-        nsection = self.number_of_petals.value()#360 / angle
-        #nsection = int(round(nsection)) #round to nearest int
+        
+        angle = self.number_of_petals.value()#360 / angle
+        nsection = 360 / angle
+
+        nsection = int(round(nsection)) #round to nearest int
         #update angle 
         angle = 360. / nsection
         sectionadd = 180./angle
@@ -190,12 +199,13 @@ class GtRose(QtWidgets.QDialog):
         #column 2 is the angle column number - 1
 
             tmp = int((data[0,i] - data[0,i] % angle) / angle)
+
             ltmp = int((data[1,i] - data[1,i] % l_bin_size ) / l_bin_size)
             if self.reverse_lines.isChecked() == True:
             #    #longest lines in the centre of the plot
                 ltmp = length_sections-ltmp
             #find which bin the line is in for orientation
-            if tmp >= sectionadd:
+            if tmp > sectionadd:
                 tmp2 = tmp - sectionadd
                 tmp2 = int(tmp2)
             if tmp < sectionadd:
@@ -208,7 +218,7 @@ class GtRose(QtWidgets.QDialog):
                
         width = angle / 180.0 * np.pi * np.ones(nsection)
         #if self.normalise_by_feature_number.isChecked():
-        #bins /= float(n)
+        bins /= float(n)
         #last column is the frequency for the orientation
         #eg total petal length
         bins[:,-1] = np.sum(bins[:,:-1],axis=1)
@@ -226,6 +236,7 @@ class GtRose(QtWidgets.QDialog):
                 bar.set_edgecolor(None)
                 bar.set_alpha(self.alpha_value.value())
             bottoms +=bins[:,i+1]
+
         #self.figure.title('Histogram')
         self.ax.set_theta_offset(0.5*np.pi) 
         self.ax.set_theta_direction(-1)
