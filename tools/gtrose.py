@@ -181,8 +181,8 @@ class GtRose(QtWidgets.QDialog):
             i = i + 1
         weighted = False
         
-        angle = self.number_of_petals.value()#360 / angle
-        nsection = 360 / angle
+        nsection = self.number_of_petals.value()#360 / angle
+        #nsection = 360 / angle
 
         nsection = int(round(nsection)) #round to nearest int
         #update angle 
@@ -197,9 +197,12 @@ class GtRose(QtWidgets.QDialog):
 
         for i in range(data.shape[1]):
         #column 2 is the angle column number - 1
-
-            tmp = int((data[0,i] - data[0,i] % angle) / angle)
-
+            f_angle = data[0,i]
+            if f_angle > 180.0:
+                f_angle = f_angle- 180.
+            if f_angle < 0.0:
+                f_angle = f_angle+180.
+            tmp = (int(((f_angle)/angle))%nsection)# - data[0,i] % angle) / angle)
             ltmp = int((data[1,i] - data[1,i] % l_bin_size ) / l_bin_size)
             if self.reverse_lines.isChecked() == True:
             #    #longest lines in the centre of the plot
@@ -211,10 +214,9 @@ class GtRose(QtWidgets.QDialog):
             if tmp < sectionadd:
                 tmp2 = tmp + sectionadd
                 tmp2 = int(tmp2)
-            else:
-                #update accumulator for this feature
-                bins[tmp,ltmp+1] +=1
-                bins[tmp2,ltmp+1] +=1
+            #update accumulator for this feature
+            bins[tmp,ltmp+1] +=1
+            bins[tmp2,ltmp+1] +=1
                
         width = angle / 180.0 * np.pi * np.ones(nsection)
         #if self.normalise_by_feature_number.isChecked():
@@ -224,6 +226,7 @@ class GtRose(QtWidgets.QDialog):
         bins[:,-1] = np.sum(bins[:,:-1],axis=1)
         #c is pseudocolor, i+1 is index of length bin sum to i is the bottom position
         bottoms = np.zeros(nsection)
+        direction+=np.deg2rad(angle/2.)
         n,b , patches = self.hist_ax.hist(data[1,:],length_sections)
         for i, c in enumerate(np.linspace(0,1,length_sections)):
             bars = self.ax.bar(direction, bins[:,i+1],\
