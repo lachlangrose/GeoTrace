@@ -106,7 +106,7 @@ class GtRose(QtWidgets.QDialog):
         top_form_layout.addRow(self.strike,self.dip_dir)
         top_form_layout.addRow("Selected Features Only:",self.selected_features)
         top_form_layout.addRow("Number of rose petals:",self.number_of_petals)
-        top_form_layout.addRow("Length bins:",self.length_bins)
+        top_form_layout.addRow("Number of length bins:",self.length_bins)
         top_form_layout.addRow("Reverse Colouring:",self.reverse_lines)
         top_form_layout.addRow("Plot Transparency:",self.alpha_value)
         self.vector_layer_combo_box.layerChanged.connect(self.strike_combo_box.setLayer)  # setLayer is a native slot function
