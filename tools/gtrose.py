@@ -160,9 +160,8 @@ class GtRose(QtWidgets.QDialog):
         length_name = self.colour_combo_box.currentField()
         features = self.vector_layer_combo_box.currentLayer().getFeatures()
         if self.selected_features.isChecked() == True:
-            features = self.vector_layer_combo_box.currentLayer().selectedFeatures()
+            features = self.vector_layer_combo_box.currentLayer().getSelectedFeatures()
         #get data from features
-            
         for f in features:
             #d = f.geometry().azimuth()
             if strike_name:
@@ -179,6 +178,7 @@ class GtRose(QtWidgets.QDialog):
                 data[0,i] -=360
             data[1,i] = l#f.geometry().length()
             i = i + 1
+        data = data[:,:i] #clip to selected features
         weighted = False
         
         nsection = self.number_of_petals.value()#360 / angle
@@ -217,7 +217,6 @@ class GtRose(QtWidgets.QDialog):
             #update accumulator for this feature
             bins[tmp,ltmp+1] +=1
             bins[tmp2,ltmp+1] +=1
-               
         width = angle / 180.0 * np.pi * np.ones(nsection)
         #if self.normalise_by_feature_number.isChecked():
         bins /= float(n)
