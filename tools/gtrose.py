@@ -160,8 +160,9 @@ class GtRose(QtWidgets.QDialog):
         length_name = self.colour_combo_box.currentField()
         features = self.vector_layer_combo_box.currentLayer().getFeatures()
         if self.selected_features.isChecked() == True:
-            features = self.vector_layer_combo_box.currentLayer().getSelectedFeatures()
+            features = self.vector_layer_combo_box.currentLayer().selectedFeatures()
         #get data from features
+            
         for f in features:
             #d = f.geometry().azimuth()
             if strike_name:
@@ -178,23 +179,25 @@ class GtRose(QtWidgets.QDialog):
                 data[0,i] -=360
             data[1,i] = l#f.geometry().length()
             i = i + 1
-        data = data[:,:i] #clip to selected features
         weighted = False
         
         nsection = self.number_of_petals.value()#360 / angle
         #nsection = 360 / angle
 
         nsection = int(round(nsection)) #round to nearest int
+
+        sectadd = nsection
         #update angle 
-        angle = 360. / nsection
-        sectionadd = 180./angle
-        direction = np.linspace(0, 360, nsection, False) / 180. * np.pi
+        angle = 180. / nsection
+        #sectionadd = 180./angle
+        direction = np.linspace(0, 180, nsection, False) / 180. * np.pi
+        direction = np.hstack([direction,(np.linspace(0, 180, nsection, False)+180) / 180. * np.pi])
+        nsection = 2*nsection
         #array to store the accumulator
         length_sections = self.length_bins.value()
         bins = np.zeros((nsection,length_sections+2))
         max_length = np.max(data[1,:])
         l_bin_size = max_length / length_sections
-
         for i in range(data.shape[1]):
         #column 2 is the angle column number - 1
             f_angle = data[0,i]
@@ -204,19 +207,23 @@ class GtRose(QtWidgets.QDialog):
                 f_angle = f_angle+180.
             tmp = (int(((f_angle)/angle))%nsection)# - data[0,i] % angle) / angle)
             ltmp = int((data[1,i] - data[1,i] % l_bin_size ) / l_bin_size)
+            tmp2 = tmp + sectadd 
             if self.reverse_lines.isChecked() == True:
             #    #longest lines in the centre of the plot
                 ltmp = length_sections-ltmp
-            #find which bin the line is in for orientation
-            if tmp > sectionadd:
-                tmp2 = tmp - sectionadd
-                tmp2 = int(tmp2)
-            if tmp < sectionadd:
-                tmp2 = tmp + sectionadd
-                tmp2 = int(tmp2)
+            ##find which bin the line is in for orientation
+            #if tmp > sectionadd:
+            #    tmp2 = tmp - sectionadd
+            #    tmp2 = int(tmp2)
+            #if tmp < sectionadd:
+            #    tmp2 = tmp + sectionadd
+            #    tmp2 = int(tmp2)
             #update accumulator for this feature
             bins[tmp,ltmp+1] +=1
-            bins[tmp2,ltmp+1] +=1
+            if tmp2 < nsection:
+                bins[tmp2,ltmp+1] +=1
+            #print(direction[tmp],direction[tmp2])
+               
         width = angle / 180.0 * np.pi * np.ones(nsection)
         #if self.normalise_by_feature_number.isChecked():
         bins /= float(n)
