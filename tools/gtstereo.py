@@ -59,7 +59,8 @@ class GtStereo(QtWidgets.QDialog):
         self.densitybutton.clicked.connect(self.plotdensity)
         self.resetbutton = QtWidgets.QPushButton('Clear Plot')
         self.resetbutton.clicked.connect(self.reset)
-
+        self.addToPlot= QPushButton('Add to plot')
+        self.addToPlot.clicked.connect(self.add_to_plot)
         self.toolbar = NavigationToolbar(self.canvas, self)
         self.vector_layer_combo_box = QgsMapLayerComboBox()
         self.vector_layer_combo_box.setCurrentIndex(-1)
@@ -68,35 +69,67 @@ class GtStereo(QtWidgets.QDialog):
         self.dip_dir.setChecked(True)
         self.strike = QCheckBox("Strike")
         self.strike.stateChanged.connect(self.strikordirection)
-        self.button_group = QButtonGroup()
-        self.button_group.addButton(self.dip_dir)
-        self.button_group.addButton(self.strike)
         self.selected_features = QCheckBox()
         self.strike_combo_box = QgsFieldComboBox()
         self.dip_combo_box = QgsFieldComboBox()
         top_form_layout = QtWidgets.QFormLayout()
         layout = QtWidgets.QVBoxLayout()
         self.direction_name = QLabel("Dip Direction") 
+        self.feature_type = QComboBox()
+        self.feature_type.addItem('Poles to plane')
+        self.feature_type.addItem('Lineations')
+        self.feature_type.addItem('Poles to plane density')
+        self.feature_type.addItem('Planes')
+        self.feature_type.addItem('Lineation density')
+
         top_form_layout.addRow("Layer:",self.vector_layer_combo_box)
         top_form_layout.addRow(self.direction_name,self.strike_combo_box)
         top_form_layout.addRow(self.strike,self.dip_dir)
         top_form_layout.addRow("Dip:",self.dip_combo_box)
         top_form_layout.addRow("Selected Features Only:",self.selected_features)
+        top_form_layout.addRow("Feature type: ", self.feature_type)
         self.vector_layer_combo_box.layerChanged.connect(self.strike_combo_box.setLayer)  # setLayer is a native slot function
         self.vector_layer_combo_box.layerChanged.connect(self.dip_combo_box.setLayer)  # setLayer is a native slot function
         self.vector_layer_combo_box.layerChanged.connect(self.layer_changed)
         layout.addLayout(top_form_layout)
-        layout.addWidget(self.canvas)
+        plot_object_list = QTableView()
+        self.plot_object_model = QStandardItemModel(1,4)
+        plot_object_list.setModel(self.plot_object_model)
+
+
+        plot_and_table = QHBoxLayout()
+        plot_and_table.addWidget(self.canvas)
+        plot_and_table.addWidget(plot_object_list)
+        plot_and_table_w = QWidget()
+        plot_and_table_w.setLayout(plot_and_table)
+        layout.addWidget(plot_and_table_w)
+        #layout.addWidget(plot_object_list)
         layout.addWidget(self.toolbar)
         #layout.addWidget(self.strike_combo)
         #layout.addWidget(self.dip_combo)
         bottom_form_layout = QtWidgets.QFormLayout()
-        bottom_form_layout.addWidget(self.polesbutton)
-        bottom_form_layout.addWidget(self.circlebutton)
-        bottom_form_layout.addWidget(self.densitybutton)
+        bottom_form_layout.addWidget(self.addToPlot)
+        #bottom_form_layout.addWidget(self.circlebutton)
+        #bottom_form_layout.addWidget(self.densitybutton)
         bottom_form_layout.addWidget(self.resetbutton)
         layout.addLayout(bottom_form_layout)
         self.setLayout(layout)
+    def add_to_plot(self):
+        if self.feature_type.currentText() == 'Poles to plane':
+            self.plotpoles()
+        if self.feature_type.currentText() == 'Lineations':
+            self.plotlineations()
+        if self.feature_type.currentText() =='Poles to plane density':
+            self.plotdensity()
+        if self.feature_type.currentText() ==  'Planes':
+            self.plotcircles()
+        if self.feature_type.currentText() ==  'Lineation density':
+            self.plotlineations()
+        items = []
+        items.append(QStandardItem(self.vector_layer_combo_box.currentLayer().name()))
+        items.append(QStandardItem(self.feature_type.currentText()))
+        #items.append(QStandardItem(str(len(strike))))
+        self.plot_object_model.appendRow(items)
     def layer_changed(self,layer):
         if not self.dip_dir.isChecked():
             indx = self.strike_combo_box.findText("strike",Qt.MatchContains)
@@ -127,6 +160,15 @@ class GtStereo(QtWidgets.QDialog):
         self.ax.pole(strike, dip)
         self.ax.grid(True)
         self.canvas.draw()
+
+    def plotlineations(self):
+        strike, dip = self.get_strike_dip()
+        self.ax.hold(False)
+        self.ax.hold(True)
+        self.ax.line(strike, dip)
+        self.ax.grid(True)
+        self.canvas.draw()
+
     def reset(self):
         #hack to reset graph, just plot nothing
         strike = []
@@ -135,7 +177,7 @@ class GtStereo(QtWidgets.QDialog):
         self.ax.plane(strike, dip)
         self.ax.grid(True)
         self.canvas.draw()
-
+        self.plot_object_model.clear()
     def get_strike_dip(self):
         strike = []
         dip = []
@@ -144,7 +186,7 @@ class GtStereo(QtWidgets.QDialog):
 
         features = self.vector_layer_combo_box.currentLayer().getFeatures()
         if self.selected_features.isChecked() == True:
-            features = self.vector_layer_combo_box.currentLayer().selectedFeaturesIterator()
+            features = self.vector_layer_combo_box.currentLayer().selectedFeatures()
         for f in features:
             if f[dip_name] and f[strike_name]:
                 dip.append(f[dip_name]) #self.dip_combo.currentText()])
