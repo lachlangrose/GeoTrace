@@ -157,15 +157,15 @@ class GtStereo(QtWidgets.QDialog):
         strike, dip = self.get_strike_dip()
         self.ax.hold(False)
         self.ax.hold(True)
-        self.ax.pole(strike, dip)
+        self.ax.pole(strike, dip,marker='o',color='black',markersize=2)
         self.ax.grid(True)
         self.canvas.draw()
 
     def plotlineations(self):
-        strike, dip = self.get_strike_dip()
+        trend, plunge = self.get_strike_dip(True)
         self.ax.hold(False)
         self.ax.hold(True)
-        self.ax.line(strike, dip)
+        self.ax.line(plunge,trend,marker='o',color='black',markersize=2)
         self.ax.grid(True)
         self.canvas.draw()
 
@@ -178,7 +178,7 @@ class GtStereo(QtWidgets.QDialog):
         self.ax.grid(True)
         self.canvas.draw()
         self.plot_object_model.clear()
-    def get_strike_dip(self):
+    def get_strike_dip(self,lineation=False):
         strike = []
         dip = []
         dip_name = self.dip_combo_box.currentField()
@@ -190,7 +190,7 @@ class GtStereo(QtWidgets.QDialog):
         for f in features:
             if f[dip_name] and f[strike_name]:
                 dip.append(f[dip_name]) #self.dip_combo.currentText()])
-                if self.dip_dir.isChecked() == True:
+                if self.dip_dir.isChecked() == True and lineation == False:
                     strike.append(f[strike_name]+90)
                 else:
                     strike.append(f[strike_name])#self.strike_combo.currentText()]) 
