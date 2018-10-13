@@ -182,7 +182,6 @@ class GtRose(QtWidgets.QDialog):
         if self.selected_features.isChecked() == True:
             features = self.vector_layer_combo_box.currentLayer().selectedFeatures()
         #get data from features
-            
         for f in features:
             #d = f.geometry().azimuth()
             if strike_name:
@@ -217,6 +216,13 @@ class GtRose(QtWidgets.QDialog):
         length_sections = self.length_bins.value()
         bins = np.zeros((nsection,length_sections+2))
         max_length = np.max(data[1,:])
+        if self.use_max_length.isChecked():
+            max_length = self.max_length.value()
+        else:
+            self.max_length.setValue(max_length)
+        if max_length <= 0:
+            print("max_length = 0")
+            return
         l_bin_size = max_length / length_sections
         for i in range(data.shape[1]):
         #column 2 is the angle column number - 1
