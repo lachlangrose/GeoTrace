@@ -44,15 +44,21 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
 from matplotlib.projections import register_projection
+import matplotlib.gridspec as gridspec
+
 import random
 class GtRose(QtWidgets.QDialog):
     def __init__(self, canvas, iface, parent=None):
         super(GtRose, self).__init__(parent)
         self.canvas = canvas
         self.iface = iface
-        self.figure = plt.Figure()
-        self.ax = self.figure.add_subplot(1, 2, 1, projection = 'polar')
-        self.hist_ax = self.figure.add_subplot(1,2,2)
+        self.figure = plt.Figure(figsize=(10,10))
+        #use gridspec to try and make the histogram a bit shorter to fit with the rose diagram
+        #basically just adding padding 
+        gs2 = gridspec.GridSpec(6, 3)
+        gs2.update(wspace=0.75,hspace=0.05)
+        self.ax = self.figure.add_subplot(gs2[:, :-1],projection='polar')
+        self.hist_ax = self.figure.add_subplot(gs2[1:-1, -1])
         self.canvas = FigureCanvas(self.figure)
         self.ax.text(0.75,-0.04, "Rose diagram is \n number weighted",transform = self.ax.transAxes, ha='left', va='center')
 
@@ -95,6 +101,11 @@ class GtRose(QtWidgets.QDialog):
         self.alpha_value.setMaximum(1.0)
         self.alpha_value.setMinimum(0.0)
         self.alpha_value.setValue(0.7)
+        self.max_length = QDoubleSpinBox()
+        self.max_length.setMaximum(9999999.0)
+        self.max_length.setMinimum(0.0)
+        self.max_length.setValue(0.)
+        self.use_max_length = QCheckBox()
         ##self.figure.canvas.mpl_connect('button_press_event',self.onclick)
         ## set the layout
         top_form_layout = QtWidgets.QFormLayout()
@@ -109,6 +120,10 @@ class GtRose(QtWidgets.QDialog):
         top_form_layout.addRow("Number of length bins:",self.length_bins)
         top_form_layout.addRow("Reverse Colouring:",self.reverse_lines)
         top_form_layout.addRow("Plot Transparency:",self.alpha_value)
+        top_form_layout.addRow("Use max length:",self.use_max_length)
+        top_form_layout.addRow("Max length:",self.max_length)
+        self.max_length.setEnabled(False)
+        self.use_max_length.stateChanged.connect(self.toggle_use_max_length)
         self.vector_layer_combo_box.layerChanged.connect(self.strike_combo_box.setLayer)  # setLayer is a native slot function
         self.vector_layer_combo_box.layerChanged.connect(self.layer_changed)
 
@@ -129,6 +144,11 @@ class GtRose(QtWidgets.QDialog):
         self.setLayout(layout)
     def onclick(self,event):
         return
+    def toggle_use_max_length(self,*args,**kwargs): #not sure what the arguments it gives are but just catch them using args and kwargs
+        if self.use_max_length.isChecked():
+            self.max_length.setEnabled(True)
+        else:
+            self.max_length.setEnabled(False)
     def layer_changed(self,layer):
         if not self.dip_dir.isChecked():
             indx = self.strike_combo_box.findText("strike",Qt.MatchContains)

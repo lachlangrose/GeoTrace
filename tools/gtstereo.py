@@ -50,7 +50,7 @@ class GtStereo(QtWidgets.QDialog):
         self.iface = iface
         self.figure, self.ax = mplstereonet.subplots()
         self.ax.grid(color='k',linestyle='-',linewidth=0.1)
-        self.ax.text(0.75,-0.04, "lower-hemisphere \"schmitt\" \n(equal area) projection.",transform = self.ax.transAxes, ha='left', va='center')
+        self.ax.text(0.75,-0.04, "lower-hemisphere \n \"schmitt\" \n(equal area) \n projection.",transform = self.ax.transAxes, ha='left', va='center')
         self.canvas = FigureCanvas(self.figure)
         self.polesbutton = QtWidgets.QPushButton('Plot Poles')
         self.polesbutton.clicked.connect(self.plotpoles)
@@ -205,7 +205,8 @@ class GtStereo(QtWidgets.QDialog):
         self.ax.hold(False)
         self.ax.hold(True)
 
-        self.ax.density_contourf(strike,dip,measurement='poles',cmap=plt.cm.Spectral)
+        cax = self.ax.density_contourf(strike,dip,measurement='poles',cmap=plt.cm.Spectral)
+        self.figure.colorbar(cax,ax=self.ax,orientation='horizontal')
         #self.ax.pole(strike, dip)
         self.ax.grid(True)
         # refresh canvas
