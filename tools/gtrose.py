@@ -61,7 +61,6 @@ class GtRose(QtWidgets.QDialog):
         self.hist_ax = self.figure.add_subplot(gs2[1:-1, -1])
         self.canvas = FigureCanvas(self.figure)
         self.ax.text(0.75,-0.04, "Rose diagram is \n number weighted",transform = self.ax.transAxes, ha='left', va='center')
-
         self.ax.set_theta_offset(0.5*np.pi) 
         self.ax.set_theta_direction(-1)
 
@@ -120,8 +119,8 @@ class GtRose(QtWidgets.QDialog):
         top_form_layout.addRow("Number of length bins:",self.length_bins)
         top_form_layout.addRow("Reverse Colouring:",self.reverse_lines)
         top_form_layout.addRow("Plot Transparency:",self.alpha_value)
-        top_form_layout.addRow("Use max length:",self.use_max_length)
-        top_form_layout.addRow("Max length:",self.max_length)
+        top_form_layout.addRow("Use colour map max:",self.use_max_length)
+        top_form_layout.addRow("Colour map max:",self.max_length)
         self.max_length.setEnabled(False)
         self.use_max_length.stateChanged.connect(self.toggle_use_max_length)
         self.vector_layer_combo_box.layerChanged.connect(self.strike_combo_box.setLayer)  # setLayer is a native slot function
@@ -141,6 +140,9 @@ class GtRose(QtWidgets.QDialog):
         #bottom_form_layout.addWidget(self.densitybutton)
         bottom_form_layout.addWidget(self.resetbutton)
         layout.addLayout(bottom_form_layout)
+        #self.ax.set_tick_params(pad=5)
+        self.ax.tick_params(axis='both', which='major', labelsize=7)
+        self.hist_ax.tick_params(axis='both', which='major', labelsize=7)
         self.setLayout(layout)
     def onclick(self,event):
         return
