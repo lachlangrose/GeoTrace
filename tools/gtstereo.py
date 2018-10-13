@@ -49,6 +49,7 @@ class GtStereo(QtWidgets.QDialog):
         self.canvas = canvas
         self.iface = iface
         self.figure, self.ax = mplstereonet.subplots()
+        self.ax.grid(color='k',linestyle='-',linewidth=0.1)
         self.ax.text(0.75,-0.04, "lower-hemisphere \"schmitt\" \n(equal area) projection.",transform = self.ax.transAxes, ha='left', va='center')
         self.canvas = FigureCanvas(self.figure)
         self.polesbutton = QtWidgets.QPushButton('Plot Poles')
@@ -81,6 +82,7 @@ class GtStereo(QtWidgets.QDialog):
         self.feature_type.addItem('Poles to plane density')
         self.feature_type.addItem('Planes')
         self.feature_type.addItem('Lineation density')
+        self.feature_type.addItem('Find fold axis')
 
         top_form_layout.addRow("Layer:",self.vector_layer_combo_box)
         top_form_layout.addRow(self.direction_name,self.strike_combo_box)
@@ -99,7 +101,7 @@ class GtStereo(QtWidgets.QDialog):
 
         plot_and_table = QHBoxLayout()
         plot_and_table.addWidget(self.canvas)
-        plot_and_table.addWidget(plot_object_list)
+        #plot_and_table.addWidget(plot_object_list)
         plot_and_table_w = QWidget()
         plot_and_table_w.setLayout(plot_and_table)
         layout.addWidget(plot_and_table_w)
@@ -125,6 +127,8 @@ class GtStereo(QtWidgets.QDialog):
             self.plotcircles()
         if self.feature_type.currentText() ==  'Lineation density':
             self.plotlineations()
+        if self.feature_type.currentText() == 'Find fold axis':
+            self.fitfold()
         items = []
         items.append(QStandardItem(self.vector_layer_combo_box.currentLayer().name()))
         items.append(QStandardItem(self.feature_type.currentText()))
@@ -201,7 +205,7 @@ class GtStereo(QtWidgets.QDialog):
         self.ax.hold(False)
         self.ax.hold(True)
 
-        self.ax.density_contourf(strike,dip,measurement='poles')
+        self.ax.density_contourf(strike,dip,measurement='poles',cmap=plt.cm.Spectral)
         #self.ax.pole(strike, dip)
         self.ax.grid(True)
         # refresh canvas
