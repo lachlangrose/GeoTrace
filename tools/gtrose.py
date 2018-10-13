@@ -55,12 +55,19 @@ class GtRose(QtWidgets.QDialog):
         self.figure = plt.Figure(figsize=(10,10))
         #use gridspec to try and make the histogram a bit shorter to fit with the rose diagram
         #basically just adding padding 
-        gs2 = gridspec.GridSpec(6, 3)
+        gs2 = gridspec.GridSpec(8, 3,height_ratios=[8,8,8,8,8,8,8,1])
         gs2.update(wspace=0.75,hspace=0.05)
-        self.ax = self.figure.add_subplot(gs2[:, :-1],projection='polar')
-        self.hist_ax = self.figure.add_subplot(gs2[1:-1, -1])
+        self.ax = self.figure.add_subplot(gs2[1:-2, :-1],projection='polar')
+        self.rose_title_ax = self.figure.add_subplot(gs2[0:1, :-1])
+        self.rose_title_ax.axis('off')
+        self.hist_ax = self.figure.add_subplot(gs2[1:-2, -1])
+        #tricking mpl to put the titles level
+        self.hist_title_ax = self.figure.add_subplot(gs2[0:1, -1])
+        self.hist_title_ax.axis('off')
+        self.cax = self.figure.add_subplot(gs2[-1:, :])
+        self.cax.axis('off')
         self.canvas = FigureCanvas(self.figure)
-        self.ax.text(0.75,-0.04, "Rose diagram is \n number weighted",transform = self.ax.transAxes, ha='left', va='center')
+        #self.ax.text(0.75,-0.04, "Rose diagram is \n number weighted",transform = self.ax.transAxes, ha='left', va='center')
         self.ax.set_theta_offset(0.5*np.pi) 
         self.ax.set_theta_direction(-1)
 
@@ -141,8 +148,10 @@ class GtRose(QtWidgets.QDialog):
         bottom_form_layout.addWidget(self.resetbutton)
         layout.addLayout(bottom_form_layout)
         #self.ax.set_tick_params(pad=5)
-        self.ax.tick_params(axis='both', which='major', labelsize=7)
-        self.hist_ax.tick_params(axis='both', which='major', labelsize=7)
+        self.hist_title_ax.set_title("Length Histogram")
+        self.rose_title_ax.set_title("Rose Diagram")
+        self.ax.tick_params(axis='both', which='major', labelsize=6)
+        self.hist_ax.tick_params(axis='both', which='major', labelsize=6)
         self.setLayout(layout)
     def onclick(self,event):
         return
@@ -226,6 +235,12 @@ class GtRose(QtWidgets.QDialog):
             print("max_length = 0")
             return
         l_bin_size = max_length / length_sections
+        #create a fake image for a colorbar
+        Z = [[0,0],[0,0]]
+        levels = np.arange(0,max_length+l_bin_size,l_bin_size)
+        CS3 = plt.contourf(Z, levels, cmap=plt.cm.Spectral)
+        plt.clf()
+        #now do real plotting
         for i in range(data.shape[1]):
         #column 2 is the angle column number - 1
             f_angle = data[0,i]
@@ -278,13 +293,21 @@ class GtRose(QtWidgets.QDialog):
         self.ax.set_theta_offset(0.5*np.pi) 
         self.ax.set_theta_direction(-1)
         self.ax.set_rticks([])
-        self.hist_ax.set_title("Length Histogram")
-        self.ax.set_title("Rose Diagram")
+
+        self.figure.sca(self.ax)
+        self.cb = self.figure.colorbar(CS3,orientation='horizontal',cax=self.cax)
+        self.cax.axis('on')
+        self.cax.tick_params(axis='both', which='major', labelsize=6)
+
         self.canvas.draw()
         return
     def reset(self):
         self.ax.clear()
         self.hist_ax.clear()
+        #self.cb.remove()
+        self.cax.clear()
+        self.cax.axis('off')
+
         ##hack to reset graph, just plot nothing
         #self.ax.hold(False)
         #self.ax.bar([],[], 0, bottom=0.0)
