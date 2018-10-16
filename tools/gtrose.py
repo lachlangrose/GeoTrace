@@ -293,7 +293,7 @@ class GtRose(QtWidgets.QDialog):
         self.ax.set_theta_offset(0.5*np.pi) 
         self.ax.set_theta_direction(-1)
         self.ax.set_rticks([])
-
+        self.hist_ax.set_xlim([0,max_length])
         self.figure.sca(self.ax)
         self.cb = self.figure.colorbar(CS3,orientation='horizontal',cax=self.cax)
         self.cax.axis('on')
