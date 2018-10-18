@@ -205,7 +205,7 @@ class GtStereo(QtWidgets.QDialog):
         self.ax.hold(False)
         self.ax.hold(True)
 
-        cax = self.ax.density_contourf(strike,dip,measurement='poles',cmap=plt.cm.Spectral)
+        cax = self.ax.density_contourf(strike,dip,measurement='poles',cmap=plt.cm.Blues)
         self.figure.colorbar(cax,ax=self.ax,orientation='horizontal')
         #self.ax.pole(strike, dip)
         self.ax.grid(True)

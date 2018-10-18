@@ -238,7 +238,7 @@ class GtRose(QtWidgets.QDialog):
         #create a fake image for a colorbar
         Z = [[0,0],[0,0]]
         levels = np.arange(0,max_length+l_bin_size,l_bin_size)
-        CS3 = plt.contourf(Z, levels, cmap=plt.cm.Spectral)
+        CS3 = plt.contourf(Z, levels, cmap=plt.cm.viridis)
         plt.clf()
         #now do real plotting
         for i in range(data.shape[1]):
@@ -280,11 +280,11 @@ class GtRose(QtWidgets.QDialog):
         for i, c in enumerate(np.linspace(0,1,length_sections)):
             bars = self.ax.bar(direction, bins[:,i+1],\
             width=width,bottom=bottoms)
-            patches[i].set_facecolor(plt.cm.Spectral(c))
+            patches[i].set_facecolor(plt.cm.viridis(c))
             patches[i].set_alpha(self.alpha_value.value())
             #bars = self.ax.bar(direction, bins[:,-1],width=width,bottom=0.0)
             for bar in bars:
-                bar.set_facecolor(plt.cm.Spectral(c))#cmap(c)plt.cm.Greys(.5))
+                bar.set_facecolor(plt.cm.viridis(c))#cmap(c)plt.cm.Greys(.5))
                 bar.set_edgecolor(None)
                 bar.set_alpha(self.alpha_value.value())
             bottoms +=bins[:,i+1]
