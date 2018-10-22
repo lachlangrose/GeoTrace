@@ -40,13 +40,14 @@ class ShortestPath():
         self.c = 0
     def set_image(self,im):
         self.im = im
-        self.im2 = np.zeros(self.im.shape)
         self.path = np.zeros(self.im.shape)
         self.l, self.w = im.shape
-        self.imshape = self.im2.shape
+        self.imshape = self.im.shape
     def remove_control_points(self):
         self.nodes = []
         self.segments = []
+    def remove_image(self):
+        del self.im
     def remove_last_node(self):
         if len(self.nodes) > 0:
             del self.nodes[-1]

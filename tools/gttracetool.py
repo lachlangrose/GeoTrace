@@ -322,6 +322,7 @@ class GtTraceTool(GtTraceBase,GtMapToolEmitPoint):
             self.rubberBandLine.reset(QgsWkbTypes.LineGeometry)
             self.rubberBand.reset(QgsWkbTypes.PointGeometry)
     def delete_control_points(self):
+        #
         if self.rubberBand:
             self.rubberBand.reset(QgsWkbTypes.PointGeometry)
         self.trace.remove_control_points()
@@ -422,7 +423,7 @@ class GtTraceTool(GtTraceBase,GtMapToolEmitPoint):
         #self.deactivatedt.emit()
         #slight bug when this signal is allowed to 
         #emit we get a recursive error TODO debug
-
+        #manage the memory
     #    self.emit(SIGNAL("deactivated()"))
 class GtBatchTrace(GtTraceBase):
     def __init__(self, canvas,target,iface,cost,controlpoints,fieldname):

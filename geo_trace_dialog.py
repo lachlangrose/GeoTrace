@@ -399,6 +399,7 @@ class GeoTraceDialog(QDialog):
         
         if self.traceToolActive == True:
             self.deactivateTrace()
+            del self.tracetool             
             return
         target = self.vector_layer_combo_box.currentLayer()
         cost = self.cost_layer_combo_box.currentLayer() 
