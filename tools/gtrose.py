@@ -91,7 +91,11 @@ class GtRose(QtWidgets.QDialog):
         self.button_group = QButtonGroup()
         self.button_group.addButton(self.dip_dir)
         self.button_group.addButton(self.strike)
-
+        self.advanced_button = QPushButton("Advanced settings")
+        self.advanced_window = QDialog(self)
+        self.advanced_button.clicked.connect(self.advanced_window.open)
+        self.advanced_layout = QFormLayout()
+        self.advanced_window.setLayout(self.advanced_layout)
         self.selected_features = QCheckBox()
         self.strike_combo_box = QgsFieldComboBox()
         self.colour_combo_box = QgsFieldComboBox()
@@ -121,13 +125,22 @@ class GtRose(QtWidgets.QDialog):
         top_form_layout.addRow("Colour map field: ", self.colour_combo_box)
         #top_form_layout.addRow("Dip:",self.dip_combo_box)
         top_form_layout.addRow(self.strike,self.dip_dir)
-        top_form_layout.addRow("Selected Features Only:",self.selected_features)
-        top_form_layout.addRow("Number of rose petals:",self.number_of_petals)
-        top_form_layout.addRow("Number of length bins:",self.length_bins)
-        top_form_layout.addRow("Reverse Colouring:",self.reverse_lines)
-        top_form_layout.addRow("Plot Transparency:",self.alpha_value)
-        top_form_layout.addRow("Use colour map max:",self.use_max_length)
-        top_form_layout.addRow("Colour map max:",self.max_length)
+        self.advanced_layout.addRow("Selected Features Only:",self.selected_features)
+        self.advanced_layout.addRow("Number of rose petals:",self.number_of_petals)
+        self.advanced_layout.addRow("Number of length bins:",self.length_bins)
+        self.advanced_layout.addRow("Reverse Colouring:",self.reverse_lines)
+        self.advanced_layout.addRow("Plot Transparency:",self.alpha_value)
+        self.advanced_layout.addRow("Use colour map max:",self.use_max_length)
+        self.advanced_layout.addRow("Colour map max:",self.max_length)
+        self.color_bar = QComboBox()
+        for c in plt.colormaps():
+            #remove the reverse colormaps
+            if '_r' in c:
+                continue
+            self.color_bar.addItem(c)
+        self.color_bar.setCurrentIndex(self.color_bar.findText('viridis'))
+        self.advanced_layout.addRow("Colour Map",self.color_bar)
+        top_form_layout.addRow(self.advanced_button)
         self.max_length.setEnabled(False)
         self.use_max_length.stateChanged.connect(self.toggle_use_max_length)
         self.vector_layer_combo_box.layerChanged.connect(self.strike_combo_box.setLayer)  # setLayer is a native slot function
@@ -182,6 +195,10 @@ class GtRose(QtWidgets.QDialog):
 
     
     def plot(self):
+        self.reset()
+        colmap = plt.get_cmap(self.color_bar.currentText())
+        if self.reverse_lines.isChecked() == True:
+            colmap = plt.get_cmap(self.color_bar.currentText()+'_r')
         if self.strike_combo_box.currentField() is None:
             return
         n = int(self.vector_layer_combo_box.currentLayer().featureCount())
@@ -238,7 +255,7 @@ class GtRose(QtWidgets.QDialog):
         #create a fake image for a colorbar
         Z = [[0,0],[0,0]]
         levels = np.arange(0,max_length+l_bin_size,l_bin_size)
-        CS3 = plt.contourf(Z, levels, cmap=plt.cm.viridis)
+        CS3 = plt.contourf(Z, levels, cmap=colmap)
         plt.clf()
         #now do real plotting
         for i in range(data.shape[1]):
@@ -251,9 +268,8 @@ class GtRose(QtWidgets.QDialog):
             tmp = (int(((f_angle)/angle))%nsection)# - data[0,i] % angle) / angle)
             ltmp = int((data[1,i] - data[1,i] % l_bin_size ) / l_bin_size)
             tmp2 = tmp + sectadd 
-            if self.reverse_lines.isChecked() == True:
+            #
             #    #longest lines in the centre of the plot
-                ltmp = length_sections-ltmp
             ##find which bin the line is in for orientation
             #if tmp > sectionadd:
             #    tmp2 = tmp - sectionadd
@@ -281,12 +297,13 @@ class GtRose(QtWidgets.QDialog):
         for i, c in enumerate(np.linspace(0,1,length_sections)):
             bars = self.ax.bar(direction, bins[:,i+1],\
             width=width,bottom=bottoms)
-            patches[i].set_facecolor(plt.cm.viridis(c))
+            patches[i].set_facecolor(colmap(c))
             patches[i].set_alpha(self.alpha_value.value())
+            #patches[i].set_edgewidth(0.0)#color(colmap(c))
             #bars = self.ax.bar(direction, bins[:,-1],width=width,bottom=0.0)
             for bar in bars:
-                bar.set_facecolor(plt.cm.viridis(c))#cmap(c)plt.cm.Greys(.5))
-                bar.set_edgecolor(None)
+                bar.set_facecolor(colmap(c))#cmap(c)plt.cm.Greys(.5))
+                bar.set_edgecolor(colmap(c))
                 bar.set_alpha(self.alpha_value.value())
             bottoms +=bins[:,i+1]
 

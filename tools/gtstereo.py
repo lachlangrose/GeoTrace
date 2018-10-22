@@ -84,12 +84,35 @@ class GtStereo(QtWidgets.QDialog):
         self.feature_type.addItem('Lineation density')
         self.feature_type.addItem('Find fold axis')
 
+        self.advanced_button = QPushButton("Advanced settings")
+        self.advanced_window = QDialog(self)
+        self.advanced_button.clicked.connect(self.advanced_window.open)
+        self.advanced_layout = QFormLayout()
+        self.advanced_window.setLayout(self.advanced_layout)
+        self.color_bar = QComboBox()
+        self.contour_method = QComboBox()        
+        self.contour_method.addItem('exponential_kamb')
+        self.contour_method.addItem('linear_kamb')
+        self.contour_method.addItem('kamb')
+        self.contour_method.addItem('schmidt')
+        self.density_sd = QDoubleSpinBox()
+        self.density_sd.setValue(3.0)
+        for c in plt.colormaps():
+            #remove the reverse colormaps
+            if '_r' in c:
+                continue
+            self.color_bar.addItem(c)
+        self.color_bar.setCurrentIndex(self.color_bar.findText('Blues'))
+        self.advanced_layout.addRow("Density colour Map",self.color_bar)
+        self.advanced_layout.addRow("Density method", self.contour_method)
+        self.advanced_layout.addRow("Density SD",self.density_sd)
         top_form_layout.addRow("Layer:",self.vector_layer_combo_box)
         top_form_layout.addRow(self.direction_name,self.strike_combo_box)
         top_form_layout.addRow(self.strike,self.dip_dir)
         top_form_layout.addRow("Dip:",self.dip_combo_box)
         top_form_layout.addRow("Selected Features Only:",self.selected_features)
         top_form_layout.addRow("Feature type: ", self.feature_type)
+        top_form_layout.addRow(self.advanced_button)
         self.vector_layer_combo_box.layerChanged.connect(self.strike_combo_box.setLayer)  # setLayer is a native slot function
         self.vector_layer_combo_box.layerChanged.connect(self.dip_combo_box.setLayer)  # setLayer is a native slot function
         self.vector_layer_combo_box.layerChanged.connect(self.layer_changed)
@@ -126,7 +149,7 @@ class GtStereo(QtWidgets.QDialog):
         if self.feature_type.currentText() ==  'Planes':
             self.plotcircles()
         if self.feature_type.currentText() ==  'Lineation density':
-            self.plotlineations()
+            self.plotlineationdensity()
         if self.feature_type.currentText() == 'Find fold axis':
             self.fitfold()
         items = []
@@ -172,6 +195,21 @@ class GtStereo(QtWidgets.QDialog):
         self.ax.line(plunge,trend,marker='o',color='black',markersize=2)
         self.ax.grid(True)
         self.canvas.draw()
+    def plotlineationdensity(self):
+        
+        trend, plunge = self.get_strike_dip(True)
+        # discards the old graph
+        self.ax.hold(False)
+        self.ax.hold(True)
+        colmap = plt.get_cmap(self.color_bar.currentText())
+        method = self.contour_method.currentText()
+        sd = self.density_sd.value()
+        cax = self.ax.density_contourf(trend,plunge,measurement='lines',cmap=colmap, method=method, sigma=sd)
+        #self.figure.colorbar(cax,ax=self.ax,orientation='horizontal')
+        #self.ax.pole(strike, dip)
+        self.ax.grid(True)
+        # refresh canvas
+        self.canvas.draw()
 
     def reset(self):
         #hack to reset graph, just plot nothing
@@ -204,9 +242,11 @@ class GtStereo(QtWidgets.QDialog):
         # discards the old graph
         self.ax.hold(False)
         self.ax.hold(True)
-
-        cax = self.ax.density_contourf(strike,dip,measurement='poles',cmap=plt.cm.Blues, method='exponential_kamb', sigma=2)
-        self.figure.colorbar(cax,ax=self.ax,orientation='horizontal')
+        colmap = plt.get_cmap(self.color_bar.currentText())
+        method = self.contour_method.currentText()
+        sd = self.density_sd.value()
+        cax = self.ax.density_contourf(strike,dip,measurement='poles',cmap=colmap, method=method, sigma=sd)
+        #self.figure.colorbar(cax,ax=self.ax,orientation='horizontal')
         #self.ax.pole(strike, dip)
         self.ax.grid(True)
         # refresh canvas

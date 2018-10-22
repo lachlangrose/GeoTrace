@@ -151,8 +151,6 @@ class GeoTraceDialog(QDialog):
         stereo_main = gtstereo.GtStereo(self.canvas,self.iface)    
         stereo_widget = QWidget()
         stereo_layout = QVBoxLayout()
-        stereo_group = QGroupBox("GeoTrace Stereonet")
-        stereo_layout.addWidget(stereo_group)
         stereo_layout.addWidget(stereo_main)
         stereo_widget.setLayout(stereo_layout)
         return stereo_widget
@@ -161,8 +159,8 @@ class GeoTraceDialog(QDialog):
         rose_main = gtrose.GtRose(self.canvas,self.iface)
         rose_widget = QWidget()
         rose_layout = QVBoxLayout()
-        rose_group = QGroupBox("GeoTrace Rose Diagram")
-        rose_layout.addWidget(rose_group)
+        #rose_group = QGroupBox("GeoTrace Rose Diagram")
+        #rose_layout.addWidget(rose_group)
         rose_layout.addWidget(rose_main)
         rose_widget.setLayout(rose_layout)
         return rose_widget 
