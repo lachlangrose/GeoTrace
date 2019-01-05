@@ -316,6 +316,7 @@ class GtRose(QtWidgets.QDialog):
         self.hist_ax.set_xlim([0,max_length])
         self.figure.sca(self.ax)
         self.cb = self.figure.colorbar(CS3,orientation='horizontal',cax=self.cax)
+        self.cb.solids.set_alpha(self.alpha_value.value())
         self.cax.axis('on')
         self.cax.tick_params(axis='both', which='major', labelsize=6)
 
