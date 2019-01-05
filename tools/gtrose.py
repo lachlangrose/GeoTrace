@@ -272,7 +272,7 @@ class GtRose(QtWidgets.QDialog):
             #    #longest lines in the centre of the plot
             ##find which bin the line is in for orientation
             #if tmp > sectionadd:
-            #    tmp2 = tmp - sectionadd
+            #    tmp1 = tmp - sectionadd
             #    tmp2 = int(tmp2)
             #if tmp < sectionadd:
             #    tmp2 = tmp + sectionadd
@@ -283,6 +283,7 @@ class GtRose(QtWidgets.QDialog):
                 bins[tmp2,ltmp+1] +=1
             #print(direction[tmp],direction[tmp2])
                
+        print(bins)       
         width = angle / 180.0 * np.pi * np.ones(nsection)
         #if self.normalise_by_feature_number.isChecked():
         bins /= float(n)
@@ -299,12 +300,13 @@ class GtRose(QtWidgets.QDialog):
             width=width,bottom=bottoms)
             patches[i].set_facecolor(colmap(c))
             patches[i].set_alpha(self.alpha_value.value())
-            #patches[i].set_edgewidth(0.0)#color(colmap(c))
+            patches[i].set_linewidth(0)#color(colmap(c))
             #bars = self.ax.bar(direction, bins[:,-1],width=width,bottom=0.0)
             for bar in bars:
                 bar.set_facecolor(colmap(c))#cmap(c)plt.cm.Greys(.5))
                 bar.set_edgecolor(colmap(c))
                 bar.set_alpha(self.alpha_value.value())
+                bar.set_linewidth(0.0)
             bottoms +=bins[:,i+1]
 
         #self.figure.title('Histogram')
