@@ -201,14 +201,17 @@ class GtRose(QtWidgets.QDialog):
             colmap = plt.get_cmap(self.color_bar.currentText()+'_r')
         if self.strike_combo_box.currentField() is None:
             return
-        n = int(self.vector_layer_combo_box.currentLayer().featureCount())
-        data = np.zeros((2,n))
+        
         i = 0
         strike_name = self.strike_combo_box.currentField()        
         length_name = self.colour_combo_box.currentField()
         features = self.vector_layer_combo_box.currentLayer().getFeatures()
+
+        n = int(self.vector_layer_combo_box.currentLayer().featureCount())
         if self.selected_features.isChecked() == True:
             features = self.vector_layer_combo_box.currentLayer().selectedFeatures()
+            n = len(features)
+        data = np.zeros((2,n))
         #get data from features
         for f in features:
             #d = f.geometry().azimuth()
@@ -283,7 +286,6 @@ class GtRose(QtWidgets.QDialog):
                 bins[tmp2,ltmp+1] +=1
             #print(direction[tmp],direction[tmp2])
                
-        print(bins)       
         width = angle / 180.0 * np.pi * np.ones(nsection)
         #if self.normalise_by_feature_number.isChecked():
         bins /= float(n)
