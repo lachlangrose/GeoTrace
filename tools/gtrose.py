@@ -201,14 +201,17 @@ class GtRose(QtWidgets.QDialog):
             colmap = plt.get_cmap(self.color_bar.currentText()+'_r')
         if self.strike_combo_box.currentField() is None:
             return
-        n = int(self.vector_layer_combo_box.currentLayer().featureCount())
-        data = np.zeros((2,n))
+        
         i = 0
         strike_name = self.strike_combo_box.currentField()        
         length_name = self.colour_combo_box.currentField()
         features = self.vector_layer_combo_box.currentLayer().getFeatures()
+
+        n = int(self.vector_layer_combo_box.currentLayer().featureCount())
         if self.selected_features.isChecked() == True:
             features = self.vector_layer_combo_box.currentLayer().selectedFeatures()
+            n = len(features)
+        data = np.zeros((2,n))
         #get data from features
         for f in features:
             #d = f.geometry().azimuth()
@@ -272,7 +275,7 @@ class GtRose(QtWidgets.QDialog):
             #    #longest lines in the centre of the plot
             ##find which bin the line is in for orientation
             #if tmp > sectionadd:
-            #    tmp2 = tmp - sectionadd
+            #    tmp1 = tmp - sectionadd
             #    tmp2 = int(tmp2)
             #if tmp < sectionadd:
             #    tmp2 = tmp + sectionadd
@@ -299,12 +302,13 @@ class GtRose(QtWidgets.QDialog):
             width=width,bottom=bottoms)
             patches[i].set_facecolor(colmap(c))
             patches[i].set_alpha(self.alpha_value.value())
-            #patches[i].set_edgewidth(0.0)#color(colmap(c))
+            patches[i].set_linewidth(0)#color(colmap(c))
             #bars = self.ax.bar(direction, bins[:,-1],width=width,bottom=0.0)
             for bar in bars:
                 bar.set_facecolor(colmap(c))#cmap(c)plt.cm.Greys(.5))
                 bar.set_edgecolor(colmap(c))
                 bar.set_alpha(self.alpha_value.value())
+                bar.set_linewidth(0.0)
             bottoms +=bins[:,i+1]
 
         #self.figure.title('Histogram')
@@ -314,6 +318,7 @@ class GtRose(QtWidgets.QDialog):
         self.hist_ax.set_xlim([0,max_length])
         self.figure.sca(self.ax)
         self.cb = self.figure.colorbar(CS3,orientation='horizontal',cax=self.cax)
+        self.cb.solids.set_alpha(self.alpha_value.value())
         self.cax.axis('on')
         self.cax.tick_params(axis='both', which='major', labelsize=6)
 
