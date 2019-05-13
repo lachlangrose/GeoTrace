@@ -64,19 +64,25 @@ class Installer():
                 
             #try downloading cython and scikit-image binaries from github
             if struct.calcsize("P")*8 == 64: #64-bit OS
-                urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/Cython-0.28.3-cp36-cp36m-win_amd64.whl',
-                'Cython-0.28.3-cp36-cp36m-win_amd64.whl')
-                urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/scikit_image-0.14.0-cp36-cp36m-win_amd64.whl',
-                'scikit_image-0.14.0-cp36-cp36m-win_amd64.whl')
-                
+                if sys.version_info.minor == 6:
+                    urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/Cython-0.28.3-cp36-cp36m-win_amd64.whl',
+                    'cython.whl')
+                    urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/scikit_image-0.14.0-cp36-cp36m-win_amd64.whl',
+                    'scikit_image.whl')
+                if sys.version_info.minor == 7:
+                    urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/Cython-0.28.3-cp36-cp36m-win_amd64.whl',
+                    'cython.whl')
+                    urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/scikit_image-0.14.0-cp36-cp36m-win_amd64.whl',
+                    'scikit_image.whl')
+
                 #install cython
                 if importlib.find_loader('cython') is None:
-                    out = pip_install('Cython-0.28.3-cp36-cp36m-win_amd64.whl')
+                    out = pip_install('cython.whl')
                     assert not importlib.find_loader('cython') is None, "Could not install cython. Pip output is as follows:\n%s" % out
 
                 #install scikit image
                 if importlib.find_loader('skimage') is None:
-                    pip_install('scikit_image-0.14.0-cp36-cp36m-win_amd64.whl')
+                    pip_install('scikit_image.whl')
                     assert not importlib.find_loader('skimage') is None, "Could not install scikit-image. Pip output is as follows:\n%s" % out
                     
                     

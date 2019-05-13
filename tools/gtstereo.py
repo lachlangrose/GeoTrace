@@ -182,16 +182,16 @@ class GtStereo(QtWidgets.QDialog):
         self.canvas.draw()
     def plotpoles(self):
         strike, dip = self.get_strike_dip()
-        self.ax.hold(False)
-        self.ax.hold(True)
+        ##self.ax.hold(False)
+        ##self.ax.hold(True)
         self.ax.pole(strike, dip,marker='o',color='black',markersize=2)
         self.ax.grid(True)
         self.canvas.draw()
 
     def plotlineations(self):
         trend, plunge = self.get_strike_dip(True)
-        self.ax.hold(False)
-        self.ax.hold(True)
+        #self.ax.hold(False)
+        #self.ax.hold(True)
         self.ax.line(plunge,trend,marker='o',color='black',markersize=2)
         self.ax.grid(True)
         self.canvas.draw()
@@ -199,12 +199,12 @@ class GtStereo(QtWidgets.QDialog):
         
         trend, plunge = self.get_strike_dip(True)
         # discards the old graph
-        self.ax.hold(False)
-        self.ax.hold(True)
+        #self.ax.hold(False)
+        #self.ax.hold(True)
         colmap = plt.get_cmap(self.color_bar.currentText())
         method = self.contour_method.currentText()
         sd = self.density_sd.value()
-        cax = self.ax.density_contourf(trend,plunge,measurement='lines',cmap=colmap, method=method, sigma=sd)
+        cax = self.ax.density_contourf(plunge,trend,measurement='lines',cmap=colmap, method=method, sigma=sd)
         #self.figure.colorbar(cax,ax=self.ax,orientation='horizontal')
         #self.ax.pole(strike, dip)
         self.ax.grid(True)
@@ -213,13 +213,9 @@ class GtStereo(QtWidgets.QDialog):
 
     def reset(self):
         #hack to reset graph, just plot nothing
-        strike = []
-        dip = []
-        self.ax.hold(False)
-        self.ax.plane(strike, dip)
-        self.ax.grid(True)
+        #self.ax.hold(False)
+        self.ax.clear()
         self.canvas.draw()
-        self.plot_object_model.clear()
     def get_strike_dip(self,lineation=False):
         strike = []
         dip = []
@@ -240,8 +236,8 @@ class GtStereo(QtWidgets.QDialog):
     def plotdensity(self):
         strike, dip = self.get_strike_dip()
         # discards the old graph
-        self.ax.hold(False)
-        self.ax.hold(True)
+        #self.ax.hold(False)
+        #self.ax.hold(True)
         colmap = plt.get_cmap(self.color_bar.currentText())
         method = self.contour_method.currentText()
         sd = self.density_sd.value()
@@ -254,7 +250,7 @@ class GtStereo(QtWidgets.QDialog):
 
     def plotcircles(self):
         strike, dip = self.get_strike_dip()
-        self.ax.hold(False)
+        #self.ax.hold(False)
         self.ax.plane(strike, dip)
         self.ax.grid()
 
@@ -263,7 +259,7 @@ class GtStereo(QtWidgets.QDialog):
     def fitfold(self):
         strike, dip = self.get_strike_dip()
                 # discards the old graph
-        self.ax.hold(True)
+        #self.ax.hold(True)
         fit_strike,fit_dip = mplstereonet.fit_girdle(strike,dip)
         lon, lat = mplstereonet.pole(fit_strike, fit_dip)
         (plunge,), (bearing,) = mplstereonet.pole2plunge_bearing(fit_strike, fit_dip)       
