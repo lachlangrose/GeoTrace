@@ -2,3 +2,4 @@ syntax: glob
 *.pyc
 help/build/*
 test/testproject*
+.idea

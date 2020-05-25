@@ -53,58 +53,34 @@ class Installer():
         
         #are we running windows (things get difficult here...)
         if platform.system() == 'Windows':
-            #create directory to download installers into
-            if os.path.isdir('windows_installers') == False:
-                os.mkdir('windows_installers')
-            os.chdir('windows_installers') #move into this dir
+            #
+            # #create directory to download installers into
+            # if os.path.isdir('windows_installers') == False:
+            #     os.mkdir('windows_installers')
+            # os.chdir('windows_installers') #move into this dir
 
-            if importlib.find_loader('mplstereonet') is None:
+            if importlib.util.find_spec('mplstereonet') is None:
                 out = pip_install('mplstereonet')
-                assert not importlib.find_loader('mplstereonet') is None, "Could not install mplstereonet. Pip output is as follows:\n%s" % out
-                
-            #try downloading cython and scikit-image binaries from github
-            if struct.calcsize("P")*8 == 64: #64-bit OS
-                if sys.version_info.minor == 6:
-                    urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/Cython-0.28.3-cp36-cp36m-win_amd64.whl',
-                    'cython.whl')
-                    urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/scikit_image-0.14.0-cp36-cp36m-win_amd64.whl',
-                    'scikit_image.whl')
-                if sys.version_info.minor == 7:
-                    urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/Cython-0.28.3-cp36-cp36m-win_amd64.whl',
-                    'cython.whl')
-                    urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/scikit_image-0.14.0-cp36-cp36m-win_amd64.whl',
-                    'scikit_image.whl')
+                assert not importlib.util.find_spec('mplstereonet') is None, "Could not install mplstereonet. Pip output is as follows:\n%s" % out
+            vn = int('3{}'.format(sys.version_info.minor))
+            platform_name = 'win_amd64'
+            if struct.calcsize("P")*8==32:
+                platform_name = 'win32'
+            skimagepackage = "scikit_image-0.17.2-cp{}-cp{}m-{}.whl".format(vn, vn, platform_name)
+            cythonpackage = "Cython-0.29.19-cp{}-cp{}m-{}.whl".format(vn, vn, platform_name)
+            cythonurl = 'https://download.lfd.uci.edu/pythonlibs/s2jqpv5t/' + cythonpackage
+            skimageurl = 'https://download.lfd.uci.edu/pythonlibs/s2jqpv5t/' + skimagepackage
+            if importlib.util.find_spec('cython') is None:
+                urllib.request.urlretrieve(cythonurl,cythonpackage)
+                out = pip_install(cythonpackage)
+                assert not importlib.util.find_spec(
+                    'cython') is None, "Could not install cython. Pip output is as follows:\n{}" .format(out)
+            if importlib.util.find_spec('skimage') is None:
+                urllib.request.urlretrieve(skimageurl,skimagepackage)
+                out = pip_install(skimagepackage)
+                assert not importlib.util.find_spec(
+                    'skimage') is None, "Could not install scikit-image. Pip output is as follows:\n{}" .format(out)
 
-                #install cython
-                if importlib.find_loader('cython') is None:
-                    out = pip_install('cython.whl')
-                    assert not importlib.find_loader('cython') is None, "Could not install cython. Pip output is as follows:\n%s" % out
-
-                #install scikit image
-                if importlib.find_loader('skimage') is None:
-                    pip_install('scikit_image.whl')
-                    assert not importlib.find_loader('skimage') is None, "Could not install scikit-image. Pip output is as follows:\n%s" % out
-                    
-                    
-            if struct.calcsize("P")*8==32: #as above, but 32-bit
-                urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/Cython-0.28.3-cp36-cp36m-win32.whl','Cython-0.28.3-cp36-cp36m-win32.whl')
-                urllib.request.urlretrieve('https://github.com/lachlangrose/GeoTrace/raw/downloads/windows_installers/wheels/scikit_image-0.14.0-cp36-cp36m-win32.whl','scikit_image-0.14.0-cp36-cp36m-win32.whl')
-                
-                #install cython
-                if importlib.find_loader('cython') is None:
-                    out = pip_install('Cython-0.28.3-cp36-cp36m-win32.whl')
-                    assert not importlib.find_loader('cython') is None, "Could not install cython. Pip output is as follows:\n%s" % out
-
-                #install scikit image
-                if importlib.find_loader('skimage') is None:
-                    pip_install('scikit_image-0.14.0-cp36-cp36m-win32.whl')
-                    assert not importlib.find_loader('skimage') is None, "Could not install scikit-image. Pip output is as follows:\n%s" % out
-                    
-            #not sure what this does?
-            #home_folder = os.path.expanduser("~")
-            #user_site_packages_folder = "{}\AppData\\Roaming\\Python\\Python36\\site-packages".format(home_folder)
-            #if user_site_packages_folder not in sys.path:
-            #     sys.path.append(user_site_packages_folder)
                  
         if platform.system() == 'Linux': #linux is easy because it has c compiler
             #install mplstereonet
