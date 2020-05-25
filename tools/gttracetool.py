@@ -486,11 +486,11 @@ class CostCalculator():
         self.wkt = ds.GetProjection()
         if ds == None:
             return
-        arrays = []
+        self.arrays = []
         for i in range(self.layer.bandCount()):
             array = np.array(ds.GetRasterBand(i+1).ReadAsArray()).astype('int')
             self.arrays.append(np.rot90(array,3))
-        return arrays
+        return self.arrays
     def layer_band_to_numpy(self,layer,band=0):
         filepath = layer.dataProvider().dataSourceUri()
         ds = gdal.Open(filepath)
