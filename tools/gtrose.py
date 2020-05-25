@@ -27,57 +27,52 @@
  *                                                                         *
  ***************************************************************************/
 """
-import os.path,  sys
+import matplotlib.gridspec as gridspec
+import matplotlib.pyplot as plt
 import numpy as np
-#currentPath = os.path.dirname( __file__ )
-#sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/../'))
-
-from PyQt5 import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from qgis.core import *
 from qgis.gui import *
 
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-import matplotlib.pyplot as plt
-from matplotlib.projections import register_projection
-import matplotlib.gridspec as gridspec
 
-import random
+# currentPath = os.path.dirname( __file__ )
+# sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/../'))
+
 class GtRose(QtWidgets.QDialog):
     def __init__(self, canvas, iface, parent=None):
         super(GtRose, self).__init__(parent)
         self.canvas = canvas
         self.iface = iface
-        self.figure = plt.Figure(figsize=(10,10))
-        #use gridspec to try and make the histogram a bit shorter to fit with the rose diagram
-        #basically just adding padding 
-        gs2 = gridspec.GridSpec(8, 3,height_ratios=[8,8,8,8,8,8,8,1])
-        gs2.update(wspace=0.75,hspace=0.05)
-        self.ax = self.figure.add_subplot(gs2[1:-2, :-1],projection='polar')
+        self.figure = plt.Figure(figsize=(10, 10))
+        # use gridspec to try and make the histogram a bit shorter to fit with the rose diagram
+        # basically just adding padding
+        gs2 = gridspec.GridSpec(8, 3, height_ratios=[8, 8, 8, 8, 8, 8, 8, 1])
+        gs2.update(wspace=0.75, hspace=0.05)
+        self.ax = self.figure.add_subplot(gs2[1:-2, :-1], projection='polar')
         self.rose_title_ax = self.figure.add_subplot(gs2[0:1, :-1])
         self.rose_title_ax.axis('off')
         self.hist_ax = self.figure.add_subplot(gs2[1:-2, -1])
-        #tricking mpl to put the titles level
+        # tricking mpl to put the titles level
         self.hist_title_ax = self.figure.add_subplot(gs2[0:1, -1])
         self.hist_title_ax.axis('off')
         self.cax = self.figure.add_subplot(gs2[-1:, :])
         self.cax.axis('off')
         self.canvas = FigureCanvas(self.figure)
-        #self.ax.text(0.75,-0.04, "Rose diagram is \n number weighted",transform = self.ax.transAxes, ha='left', va='center')
-        self.ax.set_theta_offset(0.5*np.pi) 
+        # self.ax.text(0.75,-0.04, "Rose diagram is \n number weighted",transform = self.ax.transAxes, ha='left', va='center')
+        self.ax.set_theta_offset(0.5 * np.pi)
         self.ax.set_theta_direction(-1)
 
         # Just some button connected to `plot` method
         self.polesbutton = QtWidgets.QPushButton('Plot')
         self.polesbutton.clicked.connect(self.plot)
-        #self.circlebutton = QtWidgets.QPushButton('Fit Fold')
-        #self.circlebutton.clicked.connect(self.fitfold)
-        #self.densitybutton = QtWidgets.QPushButton('Plot Density')
-        #self.densitybutton.clicked.connect(self.plotdensity)
+        # self.circlebutton = QtWidgets.QPushButton('Fit Fold')
+        # self.circlebutton.clicked.connect(self.fitfold)
+        # self.densitybutton = QtWidgets.QPushButton('Plot Density')
+        # self.densitybutton.clicked.connect(self.plotdensity)
         self.resetbutton = QtWidgets.QPushButton('Clear Plot')
         self.resetbutton.clicked.connect(self.reset)
 
@@ -99,14 +94,14 @@ class GtRose(QtWidgets.QDialog):
         self.selected_features = QCheckBox()
         self.strike_combo_box = QgsFieldComboBox()
         self.colour_combo_box = QgsFieldComboBox()
-        #self.dip_combo_box = QgsFieldComboBox()
+        # self.dip_combo_box = QgsFieldComboBox()
         self.toolbar = NavigationToolbar(self.canvas, self)
-        self.direction_name = QLabel("Dip Direction") 
+        self.direction_name = QLabel("Dip Direction")
         self.number_of_petals = QSpinBox()
         self.number_of_petals.setValue(18)
         self.length_bins = QSpinBox()
         self.length_bins.setValue(5)
-        self.reverse_lines  = QCheckBox()
+        self.reverse_lines = QCheckBox()
         self.alpha_value = QDoubleSpinBox()
         self.alpha_value.setMaximum(1.0)
         self.alpha_value.setMinimum(0.0)
@@ -120,90 +115,96 @@ class GtRose(QtWidgets.QDialog):
         ## set the layout
         top_form_layout = QtWidgets.QFormLayout()
         layout = QtWidgets.QVBoxLayout()
-        top_form_layout.addRow("Layer:",self.vector_layer_combo_box)
-        top_form_layout.addRow(self.direction_name,self.strike_combo_box)
+        top_form_layout.addRow("Layer:", self.vector_layer_combo_box)
+        top_form_layout.addRow(self.direction_name, self.strike_combo_box)
         top_form_layout.addRow("Colour map field: ", self.colour_combo_box)
-        #top_form_layout.addRow("Dip:",self.dip_combo_box)
-        top_form_layout.addRow(self.strike,self.dip_dir)
-        self.advanced_layout.addRow("Selected Features Only:",self.selected_features)
-        self.advanced_layout.addRow("Number of rose petals:",self.number_of_petals)
-        self.advanced_layout.addRow("Number of length bins:",self.length_bins)
-        self.advanced_layout.addRow("Reverse Colouring:",self.reverse_lines)
-        self.advanced_layout.addRow("Plot Transparency:",self.alpha_value)
-        self.advanced_layout.addRow("Use colour map max:",self.use_max_length)
-        self.advanced_layout.addRow("Colour map max:",self.max_length)
+        # top_form_layout.addRow("Dip:",self.dip_combo_box)
+        top_form_layout.addRow(self.strike, self.dip_dir)
+        self.advanced_layout.addRow("Selected Features Only:", self.selected_features)
+        self.advanced_layout.addRow("Number of rose petals:", self.number_of_petals)
+        self.advanced_layout.addRow("Number of length bins:", self.length_bins)
+        self.advanced_layout.addRow("Reverse Colouring:", self.reverse_lines)
+        self.advanced_layout.addRow("Plot Transparency:", self.alpha_value)
+        self.advanced_layout.addRow("Use colour map max:", self.use_max_length)
+        self.advanced_layout.addRow("Colour map max:", self.max_length)
         self.color_bar = QComboBox()
         for c in plt.colormaps():
-            #remove the reverse colormaps
+            # remove the reverse colormaps
             if '_r' in c:
                 continue
             self.color_bar.addItem(c)
         self.color_bar.setCurrentIndex(self.color_bar.findText('viridis'))
-        self.advanced_layout.addRow("Colour Map",self.color_bar)
+        self.advanced_layout.addRow("Colour Map", self.color_bar)
         top_form_layout.addRow(self.advanced_button)
         self.max_length.setEnabled(False)
         self.use_max_length.stateChanged.connect(self.toggle_use_max_length)
-        self.vector_layer_combo_box.layerChanged.connect(self.strike_combo_box.setLayer)  # setLayer is a native slot function
+        self.vector_layer_combo_box.layerChanged.connect(
+            self.strike_combo_box.setLayer)  # setLayer is a native slot function
         self.vector_layer_combo_box.layerChanged.connect(self.layer_changed)
 
-        self.vector_layer_combo_box.layerChanged.connect(self.colour_combo_box.setLayer)  # setLayer is a native slot function
-        #self.vector_layer_combo_box.layerChanged.connect(self.dip_combo_box.setLayer)  # setLayer is a native slot function
+        self.vector_layer_combo_box.layerChanged.connect(
+            self.colour_combo_box.setLayer)  # setLayer is a native slot function
+        # self.vector_layer_combo_box.layerChanged.connect(self.dip_combo_box.setLayer)  # setLayer is a native slot function
         layout.addLayout(top_form_layout)
         layout.addWidget(self.canvas)
         layout.addWidget(self.toolbar)
-        
+
         ##layout.addWidget(self.strike_combo)
         ##layout.addWidget(self.dip_combo)
         bottom_form_layout = QtWidgets.QFormLayout()
         bottom_form_layout.addWidget(self.polesbutton)
-        #bottom_form_layout.addWidget(self.circlebutton)
-        #bottom_form_layout.addWidget(self.densitybutton)
+        # bottom_form_layout.addWidget(self.circlebutton)
+        # bottom_form_layout.addWidget(self.densitybutton)
         bottom_form_layout.addWidget(self.resetbutton)
         layout.addLayout(bottom_form_layout)
-        #self.ax.set_tick_params(pad=5)
+        # self.ax.set_tick_params(pad=5)
         self.hist_title_ax.set_title("Length Histogram")
         self.rose_title_ax.set_title("Rose Diagram")
         self.ax.tick_params(axis='both', which='major', labelsize=6)
         self.hist_ax.tick_params(axis='both', which='major', labelsize=6)
         self.setLayout(layout)
-    def onclick(self,event):
+
+    def onclick(self, event):
         return
-    def toggle_use_max_length(self,*args,**kwargs): #not sure what the arguments it gives are but just catch them using args and kwargs
+
+    def toggle_use_max_length(self, *args,
+                              **kwargs):
         if self.use_max_length.isChecked():
             self.max_length.setEnabled(True)
         else:
             self.max_length.setEnabled(False)
-    def layer_changed(self,layer):
+
+    def layer_changed(self, layer):
         if not self.dip_dir.isChecked():
-            indx = self.strike_combo_box.findText("strike",Qt.MatchContains)
+            indx = self.strike_combo_box.findText("strike", Qt.MatchContains)
             self.strike_combo_box.setCurrentIndex(indx)
         if self.dip_dir.isChecked():
-            indx = self.strike_combo_box.findText("dir",Qt.MatchContains)
+            indx = self.strike_combo_box.findText("dir", Qt.MatchContains)
             self.strike_combo_box.setCurrentIndex(indx)
-    def strikordirection(self,*args,**kwargs):
+
+    def strikordirection(self, *args, **kwargs):
         if self.strike.isChecked():
             self.direction_name.setText("Strike")
-            indx = self.strike_combo_box.findText("strike",Qt.MatchContains)
+            indx = self.strike_combo_box.findText("strike", Qt.MatchContains)
             if not indx:
-                indx = self.strike_combo_box.findText("azi",Qt.MatchContains)
+                indx = self.strike_combo_box.findText("azi", Qt.MatchContains)
 
             self.strike_combo_box.setCurrentIndex(indx)
         if not self.strike.isChecked():
             self.direction_name.setText("Dip Direction")
-            indx = self.strike_combo_box.findText("dir",Qt.MatchContains)
+            indx = self.strike_combo_box.findText("dir", Qt.MatchContains)
             self.strike_combo_box.setCurrentIndex(indx)
 
-    
     def plot(self):
         self.reset()
         colmap = plt.get_cmap(self.color_bar.currentText())
         if self.reverse_lines.isChecked() == True:
-            colmap = plt.get_cmap(self.color_bar.currentText()+'_r')
+            colmap = plt.get_cmap(self.color_bar.currentText() + '_r')
         if self.strike_combo_box.currentField() is None:
             return
-        
+
         i = 0
-        strike_name = self.strike_combo_box.currentField()        
+        strike_name = self.strike_combo_box.currentField()
         length_name = self.colour_combo_box.currentField()
         features = self.vector_layer_combo_box.currentLayer().getFeatures()
 
@@ -211,42 +212,42 @@ class GtRose(QtWidgets.QDialog):
         if self.selected_features.isChecked() == True:
             features = self.vector_layer_combo_box.currentLayer().selectedFeatures()
             n = len(features)
-        data = np.zeros((2,n))
-        #get data from features
+        data = np.zeros((2, n))
+        # get data from features
         for f in features:
-            #d = f.geometry().azimuth()
+            # d = f.geometry().azimuth()
             if strike_name:
-               d= f[strike_name]
-            l =  f.geometry().length()
+                d = f[strike_name]
+            l = f.geometry().length()
             if length_name:
-                l =  f[length_name]
-            if d == NULL:
+                l = f[length_name]
+            if d == None:
                 continue
-            data[0,i] = d
+            data[0, i] = d
             if self.dip_dir.isChecked():
-                data[0,i]+=90.
-            if data[0,i] >= 360:
-                data[0,i] -=360
-            data[1,i] = l#f.geometry().length()
+                data[0, i] += 90.
+            if data[0, i] >= 360:
+                data[0, i] -= 360
+            data[1, i] = l  # f.geometry().length()
             i = i + 1
         weighted = False
-        
-        nsection = self.number_of_petals.value()#360 / angle
-        #nsection = 360 / angle
 
-        nsection = int(round(nsection)) #round to nearest int
+        nsection = self.number_of_petals.value()  # 360 / angle
+        # nsection = 360 / angle
+
+        nsection = int(round(nsection))  # round to nearest int
 
         sectadd = nsection
-        #update angle 
+        # update angle
         angle = 180. / nsection
-        #sectionadd = 180./angle
+        # sectionadd = 180./angle
         direction = np.linspace(0, 180, nsection, False) / 180. * np.pi
-        direction = np.hstack([direction,(np.linspace(0, 180, nsection, False)+180) / 180. * np.pi])
-        nsection = 2*nsection
-        #array to store the accumulator
+        direction = np.hstack([direction, (np.linspace(0, 180, nsection, False) + 180) / 180. * np.pi])
+        nsection = 2 * nsection
+        # array to store the accumulator
         length_sections = self.length_bins.value()
-        bins = np.zeros((nsection,length_sections+2))
-        max_length = np.max(data[1,:])
+        bins = np.zeros((nsection, length_sections + 2))
+        max_length = np.max(data[1, :])
         if self.use_max_length.isChecked():
             max_length = self.max_length.value()
         else:
@@ -255,94 +256,96 @@ class GtRose(QtWidgets.QDialog):
             print("max_length = 0")
             return
         l_bin_size = max_length / length_sections
-        #create a fake image for a colorbar
-        Z = [[0,0],[0,0]]
-        levels = np.arange(0,max_length+l_bin_size,l_bin_size)
+        # create a fake image for a colorbar
+        Z = [[0, 0], [0, 0]]
+        levels = np.arange(0, max_length + l_bin_size, l_bin_size)
         CS3 = plt.contourf(Z, levels, cmap=colmap)
         plt.clf()
-        #now do real plotting
+        # now do real plotting
         for i in range(data.shape[1]):
-        #column 2 is the angle column number - 1
-            f_angle = data[0,i]
+            # column 2 is the angle column number - 1
+            f_angle = data[0, i]
             if f_angle > 180.0:
-                f_angle = f_angle- 180.
+                f_angle = f_angle - 180.
             if f_angle < 0.0:
-                f_angle = f_angle+180.
-            tmp = (int(((f_angle)/angle))%nsection)# - data[0,i] % angle) / angle)
-            ltmp = int((data[1,i] - data[1,i] % l_bin_size ) / l_bin_size)
-            tmp2 = tmp + sectadd 
+                f_angle = f_angle + 180.
+            tmp = (int(((f_angle) / angle)) % nsection)  # - data[0,i] % angle) / angle)
+            ltmp = int((data[1, i] - data[1, i] % l_bin_size) / l_bin_size)
+            tmp2 = tmp + sectadd
             #
             #    #longest lines in the centre of the plot
             ##find which bin the line is in for orientation
-            #if tmp > sectionadd:
+            # if tmp > sectionadd:
             #    tmp1 = tmp - sectionadd
             #    tmp2 = int(tmp2)
-            #if tmp < sectionadd:
+            # if tmp < sectionadd:
             #    tmp2 = tmp + sectionadd
             #    tmp2 = int(tmp2)
-            #update accumulator for this feature
-            bins[tmp,ltmp+1] +=1
+            # update accumulator for this feature
+            bins[tmp, ltmp + 1] += 1
             if tmp2 < nsection:
-                bins[tmp2,ltmp+1] +=1
-            #print(direction[tmp],direction[tmp2])
-               
+                bins[tmp2, ltmp + 1] += 1
+        # print(direction[tmp],direction[tmp2])
+
         width = angle / 180.0 * np.pi * np.ones(nsection)
-        #if self.normalise_by_feature_number.isChecked():
+        # if self.normalise_by_feature_number.isChecked():
         bins /= float(n)
-        #last column is the frequency for the orientation
-        #eg total petal length
-        bins[:,-1] = np.sum(bins[:,:-1],axis=1)
-        #c is pseudocolor, i+1 is index of length bin sum to i is the bottom position
+        # last column is the frequency for the orientation
+        # eg total petal length
+        bins[:, -1] = np.sum(bins[:, :-1], axis=1)
+        # c is pseudocolor, i+1 is index of length bin sum to i is the bottom position
         bottoms = np.zeros(nsection)
-        direction+=np.deg2rad(angle/2.)
-        bin_width= max_length/length_sections
-        n,b , patches = self.hist_ax.hist(data[1,:],bins=np.arange(0,max_length+bin_width,bin_width))
-        for i, c in enumerate(np.linspace(0,1,length_sections)):
-            bars = self.ax.bar(direction, bins[:,i+1],\
-            width=width,bottom=bottoms)
+        direction += np.deg2rad(angle / 2.)
+        bin_width = max_length / length_sections
+        n, b, patches = self.hist_ax.hist(data[1, :], bins=np.arange(0, max_length + bin_width, bin_width))
+        for i, c in enumerate(np.linspace(0, 1, length_sections)):
+            bars = self.ax.bar(direction, bins[:, i + 1], \
+                               width=width, bottom=bottoms)
             patches[i].set_facecolor(colmap(c))
             patches[i].set_alpha(self.alpha_value.value())
-            patches[i].set_linewidth(0)#color(colmap(c))
-            #bars = self.ax.bar(direction, bins[:,-1],width=width,bottom=0.0)
+            patches[i].set_linewidth(0)  # color(colmap(c))
+            # bars = self.ax.bar(direction, bins[:,-1],width=width,bottom=0.0)
             for bar in bars:
-                bar.set_facecolor(colmap(c))#cmap(c)plt.cm.Greys(.5))
+                bar.set_facecolor(colmap(c))  # cmap(c)plt.cm.Greys(.5))
                 bar.set_edgecolor(colmap(c))
                 bar.set_alpha(self.alpha_value.value())
                 bar.set_linewidth(0.0)
-            bottoms +=bins[:,i+1]
+            bottoms += bins[:, i + 1]
 
-        #self.figure.title('Histogram')
-        self.ax.set_theta_offset(0.5*np.pi) 
+        # self.figure.title('Histogram')
+        self.ax.set_theta_offset(0.5 * np.pi)
         self.ax.set_theta_direction(-1)
         self.ax.set_rticks([])
-        self.hist_ax.set_xlim([0,max_length])
+        self.hist_ax.set_xlim([0, max_length])
         self.figure.sca(self.ax)
-        self.cb = self.figure.colorbar(CS3,orientation='horizontal',cax=self.cax)
+        self.cb = self.figure.colorbar(CS3, orientation='horizontal', cax=self.cax)
         self.cb.solids.set_alpha(self.alpha_value.value())
         self.cax.axis('on')
         self.cax.tick_params(axis='both', which='major', labelsize=6)
 
         self.canvas.draw()
         return
+
     def reset(self):
         self.ax.clear()
         self.hist_ax.clear()
-        #self.cb.remove()
+        # self.cb.remove()
         self.cax.clear()
         self.cax.axis('off')
 
         ##hack to reset graph, just plot nothing
-        #self.ax.hold(False)
-        #self.ax.bar([],[], 0, bottom=0.0)
-        #self.ax.set_theta_offset(0.5*np.pi) 
-        #self.ax.set_theta_direction(-1)
+        # self.ax.hold(False)
+        # self.ax.bar([],[], 0, bottom=0.0)
+        # self.ax.set_theta_offset(0.5*np.pi)
+        # self.ax.set_theta_direction(-1)
         ##self.ax.grid(True)
         self.canvas.draw()
 
-
     def plotdensity(self):
         return
+
     def plotcircles(self):
         return
+
     def fitfold(self):
         return
