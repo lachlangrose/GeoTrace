@@ -107,7 +107,7 @@ class GeoTraceDialog(QDialog):
         install_button.clicked.connect(lambda: self.install_deps())  # lambda: install.install())
         error_widget.setLayout(main_layout)
         return error_widget
-    
+
     def install_deps(self):
         import install_dependencies as installer
         install = installer.Installer()
