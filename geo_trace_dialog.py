@@ -240,8 +240,10 @@ class GeoTraceDialog(QDialog):
         self.addCost('_prewitt', 'Prewitt Transform')
         self.addCost('_scharr', 'Scharr transform')
         self.addCost('_phase', 'Phase Congruency')
-        if importlib.find_loader('phasepack') is None:
-            self.costs[-1][1].setEnabled(False)
+        try:
+            import phasepack
+        except ImportError:
+            self.costs[-1][1].setEnabled(False)         
         self.cost_name = QLineEdit()
         self.cost_calc_layout.addRow("Cost Layer Name", self.cost_name)
         cost_calculator_run = QPushButton("Run")
