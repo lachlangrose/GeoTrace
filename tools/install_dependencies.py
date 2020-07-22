@@ -51,47 +51,14 @@ class Installer():
         os.chdir('../')
         success = True
         
-        #are we running windows (things get difficult here...)
-        if platform.system() == 'Windows':
-            #
-            # #create directory to download installers into
-            # if os.path.isdir('windows_installers') == False:
-            #     os.mkdir('windows_installers')
-            # os.chdir('windows_installers') #move into this dir
+        if importlib.find_loader('mplstereonet') is None:
+            out = pip_install('mplstereonet==0.6')
+            assert not importlib.find_loader('mplstereonet') is None, "Could not install mplstereonet. Pip output is as follows:\n%s" % out
 
-            if importlib.util.find_spec('mplstereonet') is None:
-                out = pip_install('mplstereonet')
-                assert not importlib.util.find_spec('mplstereonet') is None, "Could not install mplstereonet. Pip output is as follows:\n%s" % out
-            vn = int('3{}'.format(sys.version_info.minor))
-            platform_name = 'win_amd64'
-            if struct.calcsize("P")*8==32:
-                platform_name = 'win32'
-            skimagepackage = "scikit_image-0.17.2-cp{}-cp{}m-{}.whl".format(vn, vn, platform_name)
-            cythonpackage = "Cython-0.29.19-cp{}-cp{}m-{}.whl".format(vn, vn, platform_name)
-            cythonurl = 'https://download.lfd.uci.edu/pythonlibs/s2jqpv5t/' + cythonpackage
-            skimageurl = 'https://download.lfd.uci.edu/pythonlibs/s2jqpv5t/' + skimagepackage
-            if importlib.util.find_spec('cython') is None:
-                urllib.request.urlretrieve(cythonurl,cythonpackage)
-                out = pip_install(cythonpackage)
-                assert not importlib.util.find_spec(
-                    'cython') is None, "Could not install cython. Pip output is as follows:\n{}" .format(out)
-            if importlib.util.find_spec('skimage') is None:
-                urllib.request.urlretrieve(skimageurl,skimagepackage)
-                out = pip_install(skimagepackage)
-                assert not importlib.util.find_spec(
-                    'skimage') is None, "Could not install scikit-image. Pip output is as follows:\n{}" .format(out)
-
-                 
-        if platform.system() == 'Linux': #linux is easy because it has c compiler
-            #install mplstereonet
-            if importlib.find_loader('mplstereonet') is None:
-                out = pip_install('mplstereonet')
-                assert not importlib.find_loader('mplstereonet') is None, "Could not install mplstereonet. Pip output is as follows:\n%s" % out
-
-            #install scikit image
-            if importlib.find_loader('skimage') is None:
-                pip_install('scikit_image')
-                assert not importlib.find_loader('skimage') is None, "Could not install scikit-image. Pip output is as follows:\n%s" % out
+        #install scikit image
+        if importlib.find_loader('skimage') is None:
+            pip_install('scikit_image')
+            assert not importlib.find_loader('skimage') is None, "Could not install scikit-image. Pip output is as follows:\n%s" % out
 
         #finally, check that import works for gttracetool
         try:
