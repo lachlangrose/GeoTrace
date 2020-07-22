@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QDialog, QCheckBox, QPushButton, QSpinBox, QDialog, QComboBox, QDoubleSpinBox, QLabel, QButtonGroup, QVBoxLayout, QFormLayout
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from qgis.core import *
@@ -42,7 +42,7 @@ from qgis.gui import *
 # currentPath = os.path.dirname( __file__ )
 # sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/../'))
 
-class GtRose(QtWidgets.QDialog):
+class GtRose(QDialog):
     def __init__(self, canvas, iface, parent=None):
         super(GtRose, self).__init__(parent)
         self.canvas = canvas
@@ -67,13 +67,13 @@ class GtRose(QtWidgets.QDialog):
         self.ax.set_theta_direction(-1)
 
         # Just some button connected to `plot` method
-        self.polesbutton = QtWidgets.QPushButton('Plot')
+        self.polesbutton = QPushButton('Plot')
         self.polesbutton.clicked.connect(self.plot)
         # self.circlebutton = QtWidgets.QPushButton('Fit Fold')
         # self.circlebutton.clicked.connect(self.fitfold)
         # self.densitybutton = QtWidgets.QPushButton('Plot Density')
         # self.densitybutton.clicked.connect(self.plotdensity)
-        self.resetbutton = QtWidgets.QPushButton('Clear Plot')
+        self.resetbutton = QPushButton('Clear Plot')
         self.resetbutton.clicked.connect(self.reset)
 
         self.vector_layer_combo_box = QgsMapLayerComboBox()
@@ -113,8 +113,8 @@ class GtRose(QtWidgets.QDialog):
         self.use_max_length = QCheckBox()
         ##self.figure.canvas.mpl_connect('button_press_event',self.onclick)
         ## set the layout
-        top_form_layout = QtWidgets.QFormLayout()
-        layout = QtWidgets.QVBoxLayout()
+        top_form_layout = QFormLayout()
+        layout = QVBoxLayout()
         top_form_layout.addRow("Layer:", self.vector_layer_combo_box)
         top_form_layout.addRow(self.direction_name, self.strike_combo_box)
         top_form_layout.addRow("Colour map field: ", self.colour_combo_box)
@@ -151,7 +151,7 @@ class GtRose(QtWidgets.QDialog):
 
         ##layout.addWidget(self.strike_combo)
         ##layout.addWidget(self.dip_combo)
-        bottom_form_layout = QtWidgets.QFormLayout()
+        bottom_form_layout = QFormLayout()
         bottom_form_layout.addWidget(self.polesbutton)
         # bottom_form_layout.addWidget(self.circlebutton)
         # bottom_form_layout.addWidget(self.densitybutton)
