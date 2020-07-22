@@ -38,6 +38,15 @@ try:
     import gttracetool
 except ImportError:
     trace_imported = False
+
+## force updating of mplstereonet to 0.6
+try:
+    import mplstereonet
+    if mplstereonet == '0.5':
+        trace_import = False
+except:
+    trace_imported = False
+
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
