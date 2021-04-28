@@ -489,7 +489,7 @@ class CostCalculator():
         arrays = []
         for i in range(self.layer.bandCount()):
             array = np.array(ds.GetRasterBand(i+1).ReadAsArray()).astype('int')
-            self.arrays.append(np.rot90(array,3))
+            arrays.append(np.rot90(array,3))
         return arrays
     def layer_band_to_numpy(self,layer,band=0):
         filepath = layer.dataProvider().dataSourceUri()
