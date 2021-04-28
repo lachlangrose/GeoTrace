@@ -436,7 +436,7 @@ class GtBatchTrace(GtTraceBase):
         self.iface = iface
     def runBatchTrace(self):
         points = []
-        idx = self.controlpoints.fieldNameIndex(self.fieldname)
+        idx = self.controlpoints.fields().indexFromName(self.fieldname)
         values = self.controlpoints.uniqueValues(idx)
         self.addField(self.fieldname,QVariant.String,self.target)
         for f in self.controlpoints.getFeatures():
@@ -473,7 +473,7 @@ class GtBatchTrace(GtTraceBase):
             self.addLine(v)
             self.trace.remove_control_points()
 
-        return true
+        return True
 class CostCalculator():
     def __init__(self,layer):
         self.layer = layer
