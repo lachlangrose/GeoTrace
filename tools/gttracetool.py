@@ -33,8 +33,13 @@ from PyQt5.QtGui import *
 from qgis.core import *
 from qgis.gui import *
 #import osgeo 
-import gdal
-import gdalnumeric
+try:
+    from osgeo import gdal
+    from osgeo import gdalnumeric
+except ImportError:
+    import gdal
+    import gdalnumeric
+    
 import numpy as np
 import time
 import gttrace as trace
